@@ -1,6 +1,6 @@
 # CLAUDE.md — Haemilsia AI operations
 
-**버전**: v4.0 | **업데이트**: 2026-04-05
+**버전**: v4.1 | **업데이트**: 2026-04-08
 **적용 대상**: Claude.ai (웹) + Claude Code (터미널) 통합
 
 ---
@@ -10,11 +10,12 @@
 ### 지침 읽기 체계
 | 도구 | 지침 읽는 곳 |
 |------|------------|
-| Claude.ai | Notion → Claude 운영 지침 v4.0 페이지 (`3317f0809621816688feef408023224b`) |
-| Claude Code | `~/.claude/CLAUDE.md` |
-| Cowork | `~/.claude/CLAUDE.md` |
+| Claude Code | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
+| Cowork | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
+| Claude.ai | Notion 열람본 (`3317f0809621816688feef408023224b`) — Git에서 동기화된 사본 |
 
-> **원본**: Notion이 원본. 수정 시 → Notion 먼저 수정 → `system-docs-sync` 스킬로 `~/.claude/CLAUDE.md` 동기화
+> **원본**: Git 리포지토리(`~/.claude/`)가 원본. 수정 시 → Git 파일 먼저 수정 → `system-docs-sync` 스킬로 Notion에 백업 동기화 (PostToolUse 훅이 자동 리마인더)
+> **Notion 직접 수정 금지**: Claude.ai에서 Notion 운영 지침을 직접 수정하지 않는다. 수정이 필요하면 Claude Code에서 Git 파일을 수정 → Notion 동기화.
 
 ### 사람 역할
 | 누가 | 하는 것 | 안 하는 것 |
@@ -31,7 +32,6 @@
 | Claude Code | 마스터 | 코드 작성/수정, 배포, Git push, 터미널 실행, 스킬 관리, 자율 실행. 기본값 |
 | Claude.ai | 보조 | Notion·Slack·Figma MCP 연동, 시각화, 문서 생성, 웹 검색. **업무 기획 + 계획 수립 전담** |
 | Cowork | 보조 | MCP 없는 사이트 직접 클릭, 모니터링, 로컬 파일 편집 |
-| Antigravity | 백업 | GUI 코드 확인, 백업 배포 |
 
 ### 도구 선택 규칙
 
@@ -67,10 +67,11 @@
 | "기획", "아이디어", "만들자" | `agent.md` + MODE 1 | 기획 모드 진입 |
 | "진행해", "실행", "OK" | MODE 2 워크플로우 | 실행 모드 진입 |
 | "테스트", "확인", "리뷰" | MODE 3 워크플로우 | 검증 모드 진입 |
+| "업무하자" | MODE 1~4 선택 질문 | 모드 선택 후 진입 |
 | "quick", "빠르게", "간단히" | /gsd:quick | 간소화 모드 |
 | 항상 (기본) | `CLAUDE.md` | 이 지침의 로컬 버전 |
 
-> **동기화 체계**: Notion(원본) 수정 → `system-docs-sync` 스킬 → `~/.claude/` 파일 반영
+> **동기화 체계**: `~/.claude/` Git 파일(원본) 수정 → `system-docs-sync` 스킬 → Notion 열람본 백업 반영
 
 ---
 
@@ -101,7 +102,7 @@
 간단한 실행: /gsd:quick "작업 내용"
 
 ### MODE 3: 검증 모드 (Quality)
-트리거: 배포 후 자동, "확인해봐", "테스트해줘", "리뷰해줘"
+트리거: 배포 후 자동, "확인해봐", "테스트해줘", "리뷰해줘", "검증해줘"
 워크플로우:
 1. /qa — 자동 QA 테스트
 2. /review — 코드 리뷰
@@ -117,6 +118,7 @@
 - 세션 종료 → /gsd:pause-work + 인수인계 자동 생성 + Notion 기록
 
 ### 모드 전환 규칙
+- "업무하자": MODE 1~4 중 어떤 모드로 진행할지 질문 → 대표님 선택 후 해당 모드 진입
 - 기획 → 실행: 대표님 "OK!" 또는 90% 검증 통과
 - 실행 → 검증: 작업 완료 또는 배포 후 자동
 - 어디서든 → 기획: 대표님 "계획 세워보자" 트리거
@@ -128,4 +130,4 @@
 
 ---
 
-*Haemilsia AI operations | 2026.04.05 | v4.0*
+*Haemilsia AI operations | 2026.04.08 | v4.1 — Git 원본 전환*
