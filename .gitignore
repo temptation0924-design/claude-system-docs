@@ -1,0 +1,40 @@
+# === Ignore everything by default ===
+*
+
+# === Whitelist: system docs ===
+!.gitignore
+!README.md
+!CLAUDE.md
+!rules.md
+!session.md
+!checklist.md
+!env-info.md
+!skill-guide.md
+!agent.md
+!GSTACK.md
+
+# === Whitelist: folders ===
+!rules/
+!rules/**
+!skills/
+!skills/**
+!agents/
+!agents/**
+!hooks/
+!hooks/**
+
+# === Exclude: project code & embedded git repos ===
+skills/CODE/**
+skills/ai-marketing-claude/**
+skills/claude-ads/**
+skills/gstack/**
+skills/gstack-upgrade/**
+skills/Skill/**
+
+# === Sensitive files ===
+*.env
+*.secret
+*.key
+*.token
+*.credentials
+.DS_Store
