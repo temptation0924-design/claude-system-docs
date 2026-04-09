@@ -32,6 +32,7 @@
 - GSD: v1.32.0 (npx 글로벌 설치, 60개 스킬)
 - Gstack: browse 포함 44개 스킬 설치됨
 - Hook Pack v1: 방어 6종 + 공격 4종 (settings.json + ~/.claude/hooks/)
+- Slack 세션 알림: `CLAUDE_CODE_SLACK_TOKEN` 환경변수 사용 (Claude Code Agent 앱, #general-mode 전용)
 
 ### Windows 노트북 (보조)
 - 모델: ASUS TUF Gaming A15
@@ -68,6 +69,19 @@ research7
 | 프로젝트 현황 DB | `91fd98db80304dafa5fb6fe795e16905` |
 | 자료조사 에이전트 시스템 | `3337f080-9621-81c7-8b84-ec68a1ebd31f` |
 | 규칙 위반 기록 DB | `27c13aa7-9e91-49d3-bb30-0e81b38189e4` |
+
+### 해밀시아 임대 DB
+
+| 대상 | ID |
+|------|-----|
+| 1️⃣ 임차인마스터 | `46cebf77c88f4d80a19db4ecabac56fb` |
+| 2️⃣ 미납리스크 | `e8707fc4dd684c449b433684e9bc36b7` |
+| 3️⃣ 이사예정관리 | `f0ce036515f94b9fa3c598a012aef405` |
+| 4️⃣ 공실검증 | `74edd4ff20544eeabafa333b37ec499d` |
+| 6️⃣ 아이리스공실 | `e2b7b3112da0450bb9d2958d35663c8e` |
+| 7️⃣ 퇴거정산서 | `30f7f080962180f99a1bf3e674c19a37` |
+| 0️⃣ 점검보고서 | `a74d6ce07341401c88ff57e68063d6bf` |
+| 📚 임대관리 스킬(Notion) | `3267f080962181a2824cf28bb493fcf9` |
 
 ---
 

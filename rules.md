@@ -1,13 +1,13 @@
 # rules.md — 하위원칙 + 자주 실수 패턴
 
 > **원본 위치**: `~/.claude/rules.md` | **GitHub**: `temptation0924-design/claude-system-docs`
-> **마지막 동기화**: 2026-04-04
+> **마지막 동기화**: 2026-04-08
 
 ---
 
 ## A. 하위원칙
 
-핵심 원칙 6개(운영 지침 v3.0 섹션 2)의 세부 실행 규칙.
+핵심 원칙 7개(운영 지침 v4.1 섹션 2)의 세부 실행 규칙.
 
 ### A1. 파일명 규칙
 - **모든 파일에 버전 포함**: `파일명_v1.md`, `haemilsia_v3.html`
@@ -38,7 +38,7 @@
   2. 에러로그 기록 (에러 있을 때)
   3. 규칙 위반 기록 (위반 있을 때)
   4. 세션 인수인계 `.md` 파일 생성 → `/mnt/user-data/outputs/`
-  5. Slack 알림 (C0AEM5EJ0ES)
+  5. Slack 알림 (Claude Code Agent → #general-mode C0AEM5EJ0ES)
 
 ### A5. 도구 추천 규칙
 - **매 업무 시작 시 필수**: 기본값은 Claude Code

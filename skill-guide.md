@@ -59,6 +59,7 @@
 | 스킬 | 출처 | 트리거 |
 |------|------|--------|
 | system-docs-sync | Haemilsia | 시스템 문서 수정 시 |
+| haemilsia-rental-inspection | Haemilsia | "임대점검", "일일점검", "DB점검", "점검보고서" |
 | skill-manager | Haemilsia | "스킬 목록", "어떤 스킬 써야해?" |
 | gsd-pause-work | GSD | 세션 종료 시 자동 |
 | gsd-resume-work | GSD | 세션 시작 시 이전 컨텍스트 복원 |

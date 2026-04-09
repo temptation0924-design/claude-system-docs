@@ -38,3 +38,4 @@ skills/Skill/**
 *.token
 *.credentials
 .DS_Store
+.gstack/

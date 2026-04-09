@@ -57,7 +57,7 @@
 - [x] **CLAUDE.md v4.0 업데이트** — 모드 시스템 + 1% 룰 반영 완료
 - [x] ~~skill-index.md GitHub 저장~~ — 제외. v4.0 안정화 후 시스템 문서 전체 GitHub 전환 계획. 나중에 할 일
 - [x] skill-manager 스킬 Claude Code 설치 — 이미 설치 확인 (`~/.claude/skills/skill-manager/SKILL.md`)
-- [x] **세션 종료 시 Slack 알림 발송** — Hook Pack v1에 포함되어 설치 완료
+- [x] **세션 종료 시 Slack 알림 발송** — Claude Code Agent 앱 토큰으로 전환 완료 (2026-04-09)
 - [x] **Paperclip 공부** — 리서치 완료. 지금은 도입 시기 아님 → 3~6개월 후 검토 (나중에 할 일)
 - [ ] **스케줄 기능 공부** — Claude Code 스케줄링 기능 리서치 + 활용 방안 검토
 - [x] **Haemilsia Hook Pack v1 설치** — 규칙위반 자동방지(10건 전부) + 생산성 자동화 (설치 완료)

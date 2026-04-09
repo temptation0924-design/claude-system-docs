@@ -156,4 +156,4 @@ HTML 리포트: ~/research_reports/{파일명}
 ## Notion DB 정보
 - 자료조사 DB: 01bef8b196e84e57ac85cebe81735e33
 - 조사규칙 DB: b24c9539d506487c9094c6a21a25d7bf
-- Slack 채널: C0AEM5EJ0ES
+- Slack 채널: C0AEM5EJ0ES (#general-mode, Claude Code Agent 앱 전용)

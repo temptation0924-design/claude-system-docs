@@ -1,6 +1,6 @@
 # session.md — 세션 루틴 + 기록 규칙
 
-업데이트: 2026-04-07 | v4.0 반영
+업데이트: 2026-04-08 | v4.1 반영 — Git 원본 전환
 
 ---
 
@@ -23,7 +23,7 @@
 5. 세션 인수인계 자동 생성:
    - Claude Code: /gsd:pause-work → HANDOFF.json 자동 생성 → .md 변환
    - Claude.ai: 수동으로 세션인수인계_YYYYMMDD_N차_v1.md 생성
-6. Slack 알림 발송 (Hook 8 자동)
+6. Slack 알림 발송 (Claude Code Agent 앱 → #general-mode 자동)
 
 ---
 
