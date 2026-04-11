@@ -107,7 +107,52 @@ cmd_add() {
 
   util_log "✅ add complete: $name"
 }
-cmd_list()         { util_die "cmd_list not yet implemented (Task 7)"; }
+cmd_list() {
+  local keys
+  keys=$(kc_list)
+  if [[ -z "$keys" ]]; then
+    printf '등록된 키 없음 (네임스페이스: %s)\n' "$KC_SERVICE"
+    return 0
+  fi
+
+  local count
+  count=$(printf '%s\n' "$keys" | wc -l | tr -d ' ')
+  printf '\n🔐 API 키 관리 — 등록된 키 %d개 (값은 절대 출력 안 함)\n' "$count"
+  printf '%s\n' "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # 노션 메타데이터 병합 시도 (옵션)
+  local db
+  db=$(state_get .notion_db_id)
+  local have_meta=0
+  local meta_file=""
+  if [[ -n "$db" && -n "${NOTION_API_TOKEN:-}" ]]; then
+    meta_file=$(mktemp)
+    if notion_list_active_keys "$db" > "$meta_file" 2>/dev/null; then
+      have_meta=1
+    fi
+  fi
+
+  printf '%-28s %-20s %s\n' "이름" "프로젝트" "용도"
+  printf '%-28s %-20s %s\n' "────" "──────" "──"
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local proj="-" usage="(노션 장부 없음)"
+    if [[ $have_meta -eq 1 ]]; then
+      local row
+      row=$(jq -r --arg n "$name" 'select(.name == $n)' "$meta_file" 2>/dev/null || true)
+      if [[ -n "$row" ]]; then
+        proj=$(printf '%s' "$row" | jq -r '.project // "-"')
+        usage=$(printf '%s' "$row" | jq -r '.usage // "-"')
+      fi
+    fi
+    printf '%-28s %-20s %s\n' "$name" "$proj" "$usage"
+  done <<< "$keys"
+
+  printf '%s\n' "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  [[ $have_meta -eq 1 ]] && printf '📋 상세: 노션 장부 (DB ID: %s)\n' "$db"
+
+  [[ -n "$meta_file" ]] && rm -f "$meta_file"
+}
 cmd_rotate()       { util_die "cmd_rotate not yet implemented (Task 8)"; }
 cmd_delete()       { util_die "cmd_delete not yet implemented (Task 9)"; }
 cmd_railway_sync() { util_die "cmd_railway_sync not yet implemented (Task 10)"; }
