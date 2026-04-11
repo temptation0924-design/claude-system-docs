@@ -328,7 +328,63 @@ cmd_railway_sync() {
   util_log "✅ railway-sync complete: $ok OK / $fail FAIL"
   [[ $fail -eq 0 ]]
 }
-cmd_health_check() { util_die "cmd_health_check not yet implemented (Task 11)"; }
+cmd_health_check() {
+  local today
+  today=$(date '+%Y-%m-%d')
+  local last
+  last=$(state_get .last_health_check_date)
+  # 하루 1회 원칙: 이미 오늘 돌았으면 간략 출력
+  if [[ "$last" == "$today" ]]; then
+    printf '🔐 API 키 상태: (오늘 이미 체크됨, 스킵)\n'
+    return 0
+  fi
+
+  local warnings=()
+  local kc_keys
+  kc_keys=$(kc_list)
+  local kc_count
+  kc_count=$(printf '%s\n' "$kc_keys" | grep -c '.' || true)
+
+  # 1. Keychain ↔ .zshrc 블록 일관성
+  if [[ -f "$ZSHRC_FILE" ]] && zshrc_block_has "$ZSHRC_FILE"; then
+    local zshrc_count
+    zshrc_count=$(grep -c '^_load_key ' "$ZSHRC_FILE" || true)
+    if [[ "$zshrc_count" != "$kc_count" ]]; then
+      warnings+=("⚠️ .zshrc 블록에 $zshrc_count 개 / Keychain 에 $kc_count 개 (drift)")
+    fi
+  else
+    warnings+=("⚠️ .zshrc 블록 없음 — 셸 시작 시 환경변수 로딩 안 됨")
+  fi
+
+  # 2. 노션 장부 ↔ Keychain 개수
+  local db
+  db=$(state_get .notion_db_id)
+  if [[ -n "$db" && -n "${NOTION_API_TOKEN:-}" ]]; then
+    local meta_file
+    meta_file=$(mktemp)
+    if notion_list_active_keys "$db" > "$meta_file" 2>/dev/null; then
+      local notion_count
+      notion_count=$(wc -l < "$meta_file" | tr -d ' ')
+      if [[ "$notion_count" != "$kc_count" ]]; then
+        warnings+=("⚠️ 노션 장부 $notion_count 개 / Keychain $kc_count 개 (drift)")
+      fi
+    else
+      warnings+=("⚠️ 노션 장부 조회 실패 (API 오류)")
+    fi
+    rm -f "$meta_file"
+  fi
+
+  # 3. 출력
+  if [[ ${#warnings[@]} -eq 0 ]]; then
+    printf '🔐 API 키 상태: ✅ %d개 정상 (건강 체크 통과)\n' "$kc_count"
+  else
+    printf '🔐 API 키 상태: ⚠️ 주의사항 %d건\n' "${#warnings[@]}"
+    for w in "${warnings[@]}"; do printf '  • %s\n' "$w"; done
+    printf '  👉 "키 상태 자세히" 또는 "api-key-manager list" 로 확인\n'
+  fi
+
+  state_set .last_health_check_date "\"$today\""
+}
 
 case "$SUBCOMMAND" in
   add)          cmd_add "$@" ;;
