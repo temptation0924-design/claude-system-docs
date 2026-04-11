@@ -214,7 +214,50 @@ cmd_rotate() {
   util_log ""
   util_log "💡 Railway 동기화 필요 시: 'railway-sync <project>' 실행"
 }
-cmd_delete()       { util_die "cmd_delete not yet implemented (Task 9)"; }
+cmd_delete() {
+  local name="${1:-}"
+  [[ -z "$name" ]] && { util_err "delete: usage: delete <NAME>"; return 1; }
+
+  if ! kc_exists "$name"; then
+    util_err "delete: key '$name' not found"
+    return 1
+  fi
+
+  util_log "delete: $name"
+
+  # 1. Keychain 휴지통으로 (7일 복구 가능)
+  kc_delete "$name"
+  util_log "  ✅ Keychain: 휴지통 이동 (7일 복구 가능)"
+
+  # 2. .zshrc 블록 재생성 (해당 _load_key 줄 제거)
+  local keys
+  keys=$(kc_list)
+  local new_block
+  if [[ -z "$keys" ]]; then
+    new_block="$ZSHRC_BLOCK_START"$'\n# (no managed keys)\n'"$ZSHRC_BLOCK_END"
+  else
+    # shellcheck disable=SC2086
+    new_block=$(zshrc_block_render $keys)
+  fi
+  zshrc_block_replace "$ZSHRC_FILE" "$new_block"
+  util_log "  ✅ .zshrc block regenerated"
+
+  # 3. 노션 archived
+  local db
+  db=$(state_get .notion_db_id)
+  if [[ -n "$db" && -n "${NOTION_API_TOKEN:-}" ]]; then
+    local page
+    page=$(notion_query_db_by_name "$db" "$name")
+    if [[ -n "$page" ]]; then
+      notion_archive_row "$page"
+      util_log "  ✅ Notion: archived (히스토리 보존)"
+    fi
+  fi
+
+  state_set .managed_count "$(kc_list | wc -l | tr -d ' ')"
+  state_touch_sync
+  util_log "✅ delete complete: $name"
+}
 cmd_railway_sync() { util_die "cmd_railway_sync not yet implemented (Task 10)"; }
 cmd_health_check() { util_die "cmd_health_check not yet implemented (Task 11)"; }
 
