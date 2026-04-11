@@ -258,7 +258,76 @@ cmd_delete() {
   state_touch_sync
   util_log "✅ delete complete: $name"
 }
-cmd_railway_sync() { util_die "cmd_railway_sync not yet implemented (Task 10)"; }
+cmd_railway_sync() {
+  local project="${1:-}"
+  [[ -z "$project" ]] && { util_err "railway-sync: usage: railway-sync <PROJECT>"; return 1; }
+
+  if ! command -v railway >/dev/null 2>&1; then
+    util_err "Railway CLI 미설치."
+    util_log "  👉 설치: brew install railway"
+    util_log "  설치 후 다시 실행하세요."
+    return 1
+  fi
+
+  local db
+  db=$(state_get .notion_db_id)
+  if [[ -z "$db" || -z "${NOTION_API_TOKEN:-}" ]]; then
+    util_err "railway-sync: 노션 장부 접근 불가 — 어느 키가 이 프로젝트 소속인지 알 수 없음"
+    return 1
+  fi
+
+  util_log "railway-sync: project=$project"
+
+  # 노션에서 railway = $project 태그 달린 키 추출
+  local meta_file
+  meta_file=$(mktemp)
+  notion_list_active_keys "$db" > "$meta_file"
+
+  # 간이 필터: project CSV 에 "$project" 포함
+  local targets
+  targets=$(jq -r --arg p "$project" '
+    select(.project | split(",") | index($p)) | .name
+  ' "$meta_file")
+
+  if [[ -z "$targets" ]]; then
+    util_log "  ⏭️  $project 에 연결된 키 없음"
+    rm -f "$meta_file"
+    return 0
+  fi
+
+  util_log "  대상 키:"
+  printf '%s\n' "$targets" | sed 's/^/    - /'
+
+  # railway link 확인
+  railway status >/dev/null 2>&1 || {
+    util_err "Railway 프로젝트 연결 안 됨. 'railway link' 로 연결하세요."
+    rm -f "$meta_file"
+    return 1
+  }
+
+  local ok=0 fail=0
+  while IFS= read -r name; do
+    [[ -z "$name" ]] && continue
+    local val
+    if ! val=$(kc_get "$name" 2>/dev/null); then
+      util_err "  ❌ $name: Keychain 에 없음"
+      fail=$((fail+1))
+      continue
+    fi
+    # Railway set
+    if railway variables set "$name=$val" >/dev/null 2>&1; then
+      util_log "  ✅ $name synced"
+      ok=$((ok+1))
+    else
+      util_err "  ❌ $name: railway variables set 실패"
+      fail=$((fail+1))
+    fi
+  done <<< "$targets"
+
+  rm -f "$meta_file"
+  util_log "✅ railway-sync complete: $ok OK / $fail FAIL"
+  [[ $fail -eq 0 ]]
+}
 cmd_health_check() { util_die "cmd_health_check not yet implemented (Task 11)"; }
 
 case "$SUBCOMMAND" in
