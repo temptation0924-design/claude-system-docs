@@ -189,8 +189,8 @@ cmd_rotate() {
     local existing_page
     existing_page=$(notion_query_db_by_name "$db" "$name")
     if [[ -n "$existing_page" ]]; then
-      local headers
-      mapfile -t headers < <(notion_headers)
+      local headers=()
+      while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
       local today
       today=$(date '+%Y-%m-%d')
       local payload
