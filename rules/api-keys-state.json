@@ -1,0 +1,13 @@
+{
+  "version": "1.0",
+  "last_sync_at": null,
+  "last_migration_at": null,
+  "managed_count": 0,
+  "keychain_namespace": "haemilsia-api-keys",
+  "notion_db_id": null,
+  "railway_cli_installed": false,
+  "windows_last_export_at": null,
+  "iCloud_sync_enabled": true,
+  "zshrc_block_marker": "claude api-key-manager",
+  "last_health_check_date": null
+}

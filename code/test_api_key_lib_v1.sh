@@ -130,6 +130,35 @@ echo "$legacy" | grep -q "FIGMA_ACCESS_TOKEN=" && pass "extract_legacy finds FIG
 echo "$legacy" | grep -q "HAEMILSIA_SLACK_WEBHOOK=" && pass "extract_legacy finds WEBHOOK" || fail "extract_legacy missed WEBHOOK"
 echo "$legacy" | grep -q "^PATH=" && fail "extract_legacy leaked PATH" || pass "extract_legacy excludes PATH"
 
+printf '\n=== Task 4: state 함수 테스트 ===\n'
+rm -f "$HAEMILSIA_STATE_FILE"
+
+# 1. state_ensure (파일 생성)
+state_ensure
+[[ -f "$HAEMILSIA_STATE_FILE" ]] && pass "state_ensure creates file" || fail "state_ensure missing file"
+
+# 2. 기본값 확인
+assert_eq "1.0" "$(state_get .version)" "state_get .version"
+assert_eq "haemilsia-api-keys" "$(state_get .keychain_namespace)" "state_get .keychain_namespace"
+
+# 3. state_set (string)
+state_set .notion_db_id '"test-db-id-123"'
+assert_eq "test-db-id-123" "$(state_get .notion_db_id)" "state_set string"
+
+# 4. state_set (number)
+state_set .managed_count 7
+assert_eq "7" "$(state_get .managed_count)" "state_set number"
+
+# 5. state_set (boolean)
+state_set .railway_cli_installed true
+assert_eq "true" "$(state_get .railway_cli_installed)" "state_set boolean"
+
+# 6. state_touch_sync
+before=$(state_get .last_sync_at)
+state_touch_sync
+after=$(state_get .last_sync_at)
+[[ "$before" != "$after" && -n "$after" ]] && pass "state_touch_sync updates timestamp" || fail "state_touch_sync failed"
+
 printf '\n=== 결과 ===\n'
 printf '  PASS: %d\n' "$PASS"
 printf '  FAIL: %d\n' "$FAIL"

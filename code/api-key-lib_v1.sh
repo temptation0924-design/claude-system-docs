@@ -364,3 +364,51 @@ notion_list_active_keys() {
       status: (.properties["상태"].select.name // "")
     }'
 }
+
+# ===== state.json 함수 =====
+state_ensure() {
+  if [[ ! -f "$STATE_FILE" ]]; then
+    mkdir -p "$(dirname "$STATE_FILE")"
+    cat > "$STATE_FILE" <<'EOF'
+{
+  "version": "1.0",
+  "last_sync_at": null,
+  "last_migration_at": null,
+  "managed_count": 0,
+  "keychain_namespace": "haemilsia-api-keys",
+  "notion_db_id": null,
+  "railway_cli_installed": false,
+  "windows_last_export_at": null,
+  "iCloud_sync_enabled": true,
+  "zshrc_block_marker": "claude api-key-manager",
+  "last_health_check_date": null
+}
+EOF
+  fi
+}
+
+# state_get <json_path>  (예: .notion_db_id)
+state_get() {
+  state_ensure
+  jq -r "$1 // empty" "$STATE_FILE"
+}
+
+# state_set <json_path> <value>  (value는 JSON 리터럴로 처리 — 문자열이면 따옴표 포함해서 전달)
+# 예: state_set .notion_db_id '"abc123"'
+#     state_set .managed_count 7
+#     state_set .iCloud_sync_enabled true
+state_set() {
+  state_ensure
+  local path="$1" value="$2"
+  local tmp
+  tmp=$(mktemp)
+  jq "$path = $value" "$STATE_FILE" > "$tmp"
+  mv "$tmp" "$STATE_FILE"
+}
+
+# state_touch_sync  →  last_sync_at 에 현재 시각 기록
+state_touch_sync() {
+  local now
+  now=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+  state_set .last_sync_at "\"$now\""
+}
