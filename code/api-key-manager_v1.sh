@@ -46,7 +46,67 @@ EOF
 cmd_help() { usage; }
 
 # 서브커맨드 디스패처 (빈 구현 — 이후 태스크에서 채움)
-cmd_add()          { util_die "cmd_add not yet implemented (Task 6)"; }
+cmd_add() {
+  local name="${1:-}" value="${2:-}"
+  [[ -z "$name" || -z "$value" ]] && { util_err "add: usage: add <NAME> <VALUE> [flags]"; return 1; }
+  shift 2 || true
+
+  local usage="managed by api-key-manager"
+  local project_csv="전역"
+  local provider="기타"
+  local railway_project=""
+
+  for arg in "$@"; do
+    case "$arg" in
+      --usage=*)    usage="${arg#*=}" ;;
+      --project=*)  project_csv="${arg#*=}" ;;
+      --provider=*) provider="${arg#*=}" ;;
+      --railway=*)  railway_project="${arg#*=}" ;;
+      *) util_err "add: unknown flag: $arg"; return 1 ;;
+    esac
+  done
+
+  util_log "add: $name (value=$(util_mask_secret "$value"))"
+
+  # 1. Keychain
+  kc_add "$name" "$value" "$usage"
+  util_log "  ✅ Keychain ($KC_SERVICE)"
+
+  # 2. .zshrc 블록 재생성 (현재 관리 키 + 이 키)
+  local keys
+  keys=$(kc_list)
+  # shellcheck disable=SC2086
+  local new_block
+  new_block=$(zshrc_block_render $keys)
+  zshrc_block_replace "$ZSHRC_FILE" "$new_block"
+  util_log "  ✅ .zshrc block updated"
+
+  # 3. 노션 장부 (NOTION_API_TOKEN + notion_db_id 있을 때만)
+  local db
+  db=$(state_get .notion_db_id)
+  if [[ -n "$db" && -n "${NOTION_API_TOKEN:-}" ]]; then
+    local page
+    page=$(notion_upsert_row "$db" "$name" "$usage" "$project_csv" "$provider" "active")
+    util_log "  ✅ Notion row: $page"
+  else
+    util_log "  ⏭️  Notion skipped (db_id or token missing)"
+  fi
+
+  # 4. Railway (조건부 — railway_project 지정 시)
+  if [[ -n "$railway_project" ]]; then
+    if command -v railway >/dev/null 2>&1; then
+      util_log "  ⚠️ Railway sync requested but cmd_add delegates to railway-sync subcommand"
+    else
+      util_log "  ⏭️  Railway CLI 미설치 — 'railway-sync' 서브커맨드로 별도 실행 필요"
+    fi
+  fi
+
+  # 5. state 업데이트
+  state_set .managed_count "$(kc_list | wc -l | tr -d ' ')"
+  state_touch_sync
+
+  util_log "✅ add complete: $name"
+}
 cmd_list()         { util_die "cmd_list not yet implemented (Task 7)"; }
 cmd_rotate()       { util_die "cmd_rotate not yet implemented (Task 8)"; }
 cmd_delete()       { util_die "cmd_delete not yet implemented (Task 9)"; }
