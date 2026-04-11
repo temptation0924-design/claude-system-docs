@@ -227,8 +227,8 @@ notion_create_db() {
         "마지막 확인": { date: {} }
       }
     }')
-  local headers
-  mapfile -t headers < <(notion_headers)
+  local headers=()
+  while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
   curl -sS -X POST "$NOTION_API_BASE/databases" \
     "${headers[@]}" \
     --data "$payload" \
@@ -243,8 +243,8 @@ notion_query_db_by_name() {
     filter: { property: "이름", title: { equals: $n } },
     page_size: 1
   }')
-  local headers
-  mapfile -t headers < <(notion_headers)
+  local headers=()
+  while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
   curl -sS -X POST "$NOTION_API_BASE/databases/$db/query" \
     "${headers[@]}" \
     --data "$payload" \
@@ -287,8 +287,8 @@ notion_upsert_row() {
           "마지막 확인": { date: { start: $today } }
         }
       }')
-    local headers
-    mapfile -t headers < <(notion_headers)
+    local headers=()
+    while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
     curl -sS -X PATCH "$NOTION_API_BASE/pages/$existing" \
       "${headers[@]}" \
       --data "$payload" \
@@ -318,8 +318,8 @@ notion_upsert_row() {
           "마지막 확인": { date: { start: $today } }
         }
       }')
-    local headers
-    mapfile -t headers < <(notion_headers)
+    local headers=()
+    while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
     curl -sS -X POST "$NOTION_API_BASE/pages" \
       "${headers[@]}" \
       --data "$payload" \
@@ -336,8 +336,8 @@ notion_archive_row() {
       "상태": { select: { name: "archived" } }
     }
   }')
-  local headers
-  mapfile -t headers < <(notion_headers)
+  local headers=()
+  while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
   curl -sS -X PATCH "$NOTION_API_BASE/pages/$page" \
     "${headers[@]}" \
     --data "$payload" >/dev/null
@@ -351,8 +351,8 @@ notion_list_active_keys() {
     filter: { property: "상태", select: { equals: "active" } },
     page_size: 100
   }')
-  local headers
-  mapfile -t headers < <(notion_headers)
+  local headers=()
+  while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
   curl -sS -X POST "$NOTION_API_BASE/databases/$db/query" \
     "${headers[@]}" \
     --data "$payload" \

@@ -23,8 +23,9 @@ for arg in "$@"; do
   esac
 done
 
-# 메인 대시보드 부모 페이지 ID (env-info.md 기준)
-readonly NOTION_PARENT_PAGE="32d7f080-9621-8124-83c7-df64b6aa08ce"
+# 자료조사 에이전트 시스템 페이지 ID (NOTION_API_TOKEN 통합이 접근 가능한 페이지)
+# 원래 계획: 메인 대시보드 (32d7f080-9621-8124-83c7-df64b6aa08ce) — 통합 권한 없음
+readonly NOTION_PARENT_PAGE="3337f080-9621-81c7-8b84-ec68a1ebd31f"
 
 # 키 메타데이터 룩업 함수 — bash 3.2 호환 (associative array 미지원으로 case 방식 사용)
 key_usage()    { case "$1" in

@@ -1,13 +1,13 @@
 {
   "version": "1.0",
-  "last_sync_at": null,
-  "last_migration_at": null,
-  "managed_count": 0,
+  "last_sync_at": "2026-04-11T16:21:02Z",
+  "last_migration_at": "2026-04-11T16:21:02Z",
+  "managed_count": 7,
   "keychain_namespace": "haemilsia-api-keys",
-  "notion_db_id": null,
+  "notion_db_id": "33f7f080-9621-8131-8bca-e6f16628ea9c",
   "railway_cli_installed": false,
   "windows_last_export_at": null,
   "iCloud_sync_enabled": true,
   "zshrc_block_marker": "claude api-key-manager",
-  "last_health_check_date": null
+  "last_health_check_date": "2026-04-12"
 }
