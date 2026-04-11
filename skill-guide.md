@@ -1,6 +1,6 @@
 # skill-guide.md — 모드 기반 스킬 가이드 v3.0
 
-**업데이트**: 2026-04-05
+**업데이트**: 2026-04-11
 **카테고리**: 10개 (업무 영역 기준) + 모드별 핵심 스킬
 **등록 스킬**: 73개 (Haemilsia/Gstack) + 60개 (GSD) + Superpowers
 
@@ -11,7 +11,9 @@
 1. 작업 시작 전 이 파일 읽기
 2. **모드 확인** → 현재 작업이 어떤 모드인지 판별
 3. 키워드 매칭 → 해당 스킬 SKILL.md 읽기
-4. **1% 룰** → 관련 스킬 1%라도 해당되면 invoke
+4. **1% 룰 (Superpowers 원칙)** → 관련 스킬이 1%라도 해당되면 invoke하여 읽는다.
+   - "아마 안 맞을 것 같다"는 건너뛰는 이유가 **아니다**.
+   - 스킬이 실제로 불필요하다고 확인된 후에만 스킵 가능.
 5. 스킬 2개 이상 해당 시 모두 읽기
 6. 새 스킬 생성 시 이 파일에 등록
 
@@ -59,11 +61,59 @@
 | 스킬 | 출처 | 트리거 |
 |------|------|--------|
 | system-docs-sync | Haemilsia | 시스템 문서 수정 시 |
-| haemilsia-rental-inspection | Haemilsia | "임대점검", "일일점검", "DB점검", "점검보고서" |
+| haemilsia-rental-inspection | Haemilsia | "임대점검", "일일점검", "간편점검", "빡센점검", "DB점검", "점검보고서", "검증해줘" |
 | skill-manager | Haemilsia | "스킬 목록", "어떤 스킬 써야해?" |
 | gsd-pause-work | GSD | 세션 종료 시 자동 |
 | gsd-resume-work | GSD | 세션 시작 시 이전 컨텍스트 복원 |
 | careful/freeze/guard | Gstack | "조심해줘", "freeze", 프로덕션 보호 |
+
+---
+
+## ⭐ 이현우 대표님 제작 스킬 (최우선)
+
+> **대표님이 직접 만든 스킬 모음.** 가장 자주 쓰는 스킬이므로 최상단에 배치.
+> 기존 카테고리(1~10)에도 중복 표시되어 있음 — 어느 쪽에서 찾아도 OK.
+
+### 🏢 해밀시아 패키지 (4개)
+
+해밀시아 임대 운영 전체 파이프라인. **임대점검 → 봇 개발 → 봇 배포 → Railway/Notion 연동**.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| haemilsia-rental-inspection | 임대점검, 일일점검, 간편점검, 빡센점검, DB점검, 점검보고서, 검증해줘 | `~/.claude/skills/haemilsia-rental-inspection/SKILL.md` |
+| haemilsia-bot-dev | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
+| haemilsia-bot-deploy | bot 배포, bot 업데이트, Railway 배포, 환경변수 수정 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
+| railway-notion-connect | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
+
+**💡 임대점검 2중 체계 (v2.0):**
+- **간편점검 (v1.0)** — Railway 봇이 매일 07:30 KST 자동 실행 (실행 확인 위주)
+- **빡센점검 (v2.0)** — Claude Code에서 "임대점검해줘" / "검증해줘" 수동 실행 (29항목 체크리스트 + 95% 스코어링)
+
+### 🤖 자동화 (2개)
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| slack-info-briefing-builder | 슬랙 브리핑, 매일 정보 받기, RSS 봇, haemilsia-bot 브리핑 추가 | `~/.claude/skills/slack-info-briefing-builder/SKILL.md` |
+| landing-page-deploy | 랜딩페이지, 홈페이지 배포, Netlify, 상담폼 Notion 연동 | `~/.claude/skills/landing-page-deploy/SKILL.md` |
+
+### 📋 시스템/메타 (4개)
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정 | `~/.claude/skills/system-docs-sync/SKILL.md` |
+| skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천 | `~/.claude/skills/skill-manager/SKILL.md` |
+| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
+| file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
+
+### 🎨 개인화/편의 (3개)
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| screenshot-check | 스크린샷 찍었어, 스샷 확인, 캡처 찍었어, 방금 찍은 스크린샷 | `~/.claude/skills/screenshot-check/SKILL.md` |
+| petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
+| travel-meal-planner | 여행 맛집, 식사 플랜, 맛집 찾아줘, travel meal plan | `~/.claude/skills/travel-meal-planner/SKILL.md` |
+
+**총 13개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
 
 ---
 
@@ -128,6 +178,7 @@ UI, 이미지, 브랜드, 가상인테리어 관련 작업.
 |--------|-------------|------|
 | landing-page-deploy | 랜딩페이지, 홈페이지 배포, Netlify, 상담폼 Notion 연동 | `~/.claude/skills/landing-page-deploy/SKILL.md` |
 | haemilsia-bot-deploy | bot 배포, bot 업데이트 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
+| haemilsia-bot-dev | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
 | railway-notion-connect | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
 | ship | ship, deploy, push to main, PR 만들어줘, merge and push | `~/.claude/skills/ship/SKILL.md` |
 | land-and-deploy | merge, land, 프로덕션 배포, ship it, 배포 후 확인 | `~/.claude/skills/land-and-deploy/SKILL.md` |
@@ -189,6 +240,7 @@ UI, 이미지, 브랜드, 가상인테리어 관련 작업.
 | guard | guard mode, full safety, 최대 안전, lock it down | `~/.claude/skills/guard/SKILL.md` |
 | claude-api | Claude API, Anthropic SDK, Agent SDK, API 빌드 | 빌트인 슬래시 커맨드 |
 | hook-pack | Hook 관리, Hook 테스트, Hook 롤백, hooks 확인 | `~/.claude/hooks/` + `settings.json` |
+| api-key-manager | 키 추가, 키 목록, 키 교체, 키 삭제, 키 만료, Railway 동기화, 키 백업 | `~/.claude/skills/api-key-manager/SKILL.md` |
 
 ---
 
@@ -237,4 +289,4 @@ UI, 이미지, 브랜드, 가상인테리어 관련 작업.
 
 ---
 
-*Haemilsia AI operations | 2026.04.05 | skill-guide v3.0 — 모드 기반 통합*
+*Haemilsia AI operations | 2026.04.11 | skill-guide v3.0 — 모드 기반 통합 (local→Notion 양방향 동기화 정상화)*
