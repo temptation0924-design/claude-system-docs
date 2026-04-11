@@ -22,6 +22,8 @@
 !agents/**
 !hooks/
 !hooks/**
+!code/
+!code/**
 
 # === Exclude: project code & embedded git repos ===
 skills/CODE/**
