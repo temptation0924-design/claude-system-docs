@@ -153,7 +153,67 @@ cmd_list() {
 
   [[ -n "$meta_file" ]] && rm -f "$meta_file"
 }
-cmd_rotate()       { util_die "cmd_rotate not yet implemented (Task 8)"; }
+cmd_rotate() {
+  local name="${1:-}" new_value="${2:-}"
+  [[ -z "$name" || -z "$new_value" ]] && { util_err "rotate: usage: rotate <NAME> <NEW_VALUE>"; return 1; }
+
+  if ! kc_exists "$name"; then
+    util_err "rotate: key '$name' not found in Keychain"
+    util_log "  💡 새 키는 'add' 서브커맨드로 등록하세요"
+    return 1
+  fi
+
+  local old_value
+  old_value=$(kc_get "$name")
+  util_log "rotate: $name ($(util_mask_secret "$old_value") → $(util_mask_secret "$new_value"))"
+
+  # 1. Keychain 덮어쓰기
+  kc_add "$name" "$new_value" "rotated $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  util_log "  ✅ Keychain updated"
+
+  # 2. .zshrc 블록 — 키 목록 변화 없으니 타임스탬프만 갱신
+  local keys
+  keys=$(kc_list)
+  # shellcheck disable=SC2086
+  local new_block
+  new_block=$(zshrc_block_render $keys)
+  zshrc_block_replace "$ZSHRC_FILE" "$new_block"
+  util_log "  ✅ .zshrc block re-rendered (timestamp)"
+
+  # 3. 노션 장부 — 교체일 업데이트
+  local db
+  db=$(state_get .notion_db_id)
+  if [[ -n "$db" && -n "${NOTION_API_TOKEN:-}" ]]; then
+    # upsert 로 처리 — 기존 메타는 보존되고 교체일만 갱신됨
+    # usage/provider/project는 기존 값 유지 원칙 → 쿼리해서 읽어옴
+    local existing_page
+    existing_page=$(notion_query_db_by_name "$db" "$name")
+    if [[ -n "$existing_page" ]]; then
+      local headers
+      mapfile -t headers < <(notion_headers)
+      local today
+      today=$(date '+%Y-%m-%d')
+      local payload
+      payload=$(jq -n --arg t "$today" '{
+        properties: {
+          "마지막 교체일": { date: { start: $t } },
+          "마지막 확인": { date: { start: $t } }
+        }
+      }')
+      curl -sS -X PATCH "$NOTION_API_BASE/pages/$existing_page" \
+        "${headers[@]}" \
+        --data "$payload" >/dev/null
+      util_log "  ✅ Notion: 교체일 갱신"
+    else
+      util_log "  ⚠️  Notion 장부에 $name 없음 — 수동 추가 필요"
+    fi
+  fi
+
+  state_touch_sync
+  util_log "✅ rotate complete: $name"
+  util_log ""
+  util_log "💡 Railway 동기화 필요 시: 'railway-sync <project>' 실행"
+}
 cmd_delete()       { util_die "cmd_delete not yet implemented (Task 9)"; }
 cmd_railway_sync() { util_die "cmd_railway_sync not yet implemented (Task 10)"; }
 cmd_health_check() { util_die "cmd_health_check not yet implemented (Task 11)"; }
