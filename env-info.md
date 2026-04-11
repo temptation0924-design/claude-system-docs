@@ -1,6 +1,6 @@
 # env-info.md — 환경/MCP/ID 정보
 
-업데이트: 2026-04-05 | v4.0 반영
+업데이트: 2026-04-11 | v4.2.2 반영 — 슬랙 채널 매핑 테이블 추가
 
 ---
 
@@ -32,7 +32,8 @@
 - GSD: v1.32.0 (npx 글로벌 설치, 60개 스킬)
 - Gstack: browse 포함 44개 스킬 설치됨
 - Hook Pack v1: 방어 6종 + 공격 4종 (settings.json + ~/.claude/hooks/)
-- Slack 세션 알림: `CLAUDE_CODE_SLACK_TOKEN` 환경변수 사용 (Claude Code Agent 앱, #general-mode 전용)
+- Slack 알림: `CLAUDE_CODE_SLACK_TOKEN` 환경변수 사용 (Claude Code Agent 앱, 아래 채널 매핑 참조)
+- SessionStart 훅: 세션 시작 시각 자동 기록 → `~/.claude/.session_start` (epoch + human time)
 
 ### Windows 노트북 (보조)
 - 모델: ASUS TUF Gaming A15
@@ -56,6 +57,17 @@ claude
 # 자료조사 에이전트 실행
 research7
 ```
+
+---
+
+## 주요 Slack 채널 ID
+
+| 채널 | ID | 타입 | 용도 |
+|------|-----|-----|------|
+| `#general-mode` | `C0AEM5EJ0ES` | private_channel | 작업일지 — 작업 완료/Notion 저장/에러 해결/세션 종료 알림 (상세 작업일지 포맷) |
+| `#claude-study` | `C0AEM59BCKY` | public_channel | 복습 카드 — 대표님 학습용. MODE 1+2 사이클/시스템 변경/에러 해결/새 개념 도입 시 자동 출력 |
+
+**분리 원칙**: 작업 기록과 학습 기록을 별도 채널로 관리 → 나중에 `#claude-study`만 스크롤해서 복습 가능
 
 ---
 
@@ -95,6 +107,8 @@ research7
 | env-info.md | `~/.claude/env-info.md` | 이 파일 |
 | skill-guide.md | `~/.claude/skill-guide.md` | 전체 스킬 인덱스 |
 | rules.md | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
+| rules/task-routine.md | `~/.claude/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (자동 로드) |
+| rules/notion-logging.md | `~/.claude/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
 | 환경변수 | `~/.zshrc` | API 키, alias 등 |
 
 ---
@@ -127,6 +141,28 @@ research7
 ```
 
 **파일명 규칙**: `[프로젝트]_[설명]_v[버전].확장자`
+
+---
+
+## 🔐 API 키 관리 (api-key-manager)
+
+| 항목 | 값 |
+|------|-----|
+| Keychain 네임스페이스 | `haemilsia-api-keys` |
+| 상태 파일 | `~/.claude/rules/api-keys-state.json` |
+| 노션 장부 DB | 마이그레이션 후 `state.json` 의 `notion_db_id` 필드 참조 |
+| 노션 장부 부모 페이지 | 메인 대시보드 (`32d7f080-9621-8124-83c7-df64b6aa08ce`) |
+| `.zshrc` 블록 마커 | `# >>> claude api-key-manager >>>` / `# <<< claude api-key-manager <<<` |
+| 관리 대상 키 (Phase 1) | 7개 — `NOTION_API_TOKEN`, `REF_NOTION_TOKEN`, `CLAUDE_CODE_SLACK_TOKEN`, `FIGMA_ACCESS_TOKEN`, `GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `HAEMILSIA_SLACK_WEBHOOK` |
+| 엔트리 스크립트 | `~/.claude/code/api-key-manager_v1.sh` |
+| 라이브러리 | `~/.claude/code/api-key-lib_v1.sh` |
+| 마이그레이션 | `~/.claude/code/api-key-migrate_v1.sh` (`--execute` 플래그로 실제 실행) |
+| 롤백 | `~/.claude/code/api-key-rollback_v1.sh` |
+| SessionStart 훅 | `~/.claude/hooks/api-key-health-check.sh` (하루 1회) |
+| 스킬 정의 | `~/.claude/skills/api-key-manager/SKILL.md` |
+| 설계 스펙 | `~/.claude/plans/api-key-manager-design_v1.md` |
+
+**원칙**: 키 값은 Keychain 에만 저장. `.zshrc` 는 Keychain 에서 실시간 로딩하는 얇은 블록만. 노션 장부는 메타데이터(이름/용도/프로젝트/만료일)만 — 키 값 절대 저장 금지.
 
 ---
 
