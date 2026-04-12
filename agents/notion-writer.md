@@ -58,7 +58,7 @@ mcp__claude_ai_Notion__notion-create-pages, mcp__claude_ai_Notion__notion-update
 | frontmatter | Notion 필드 | 비고 |
 |---|---|---|
 | session | 작업제목 | title |
-| projects (join with ", ") | 관련프로젝트 | text |
+| projects → 프로젝트 매칭 | 관련프로젝트 | select (🏠 해밀시아 임대/🤖 해밀시아봇/🖥️ 클로드 시스템/🌐 쁘띠린/📊 아이리스/🔐 API 키 관리/📝 기타) |
 | work_type[0] | 작업유형 | select |
 | date | 날짜 | date |
 | status=="완료" → true | 완료여부 | checkbox |
