@@ -1,0 +1,79 @@
+{
+  "version": "1.0",
+  "phase": 1,
+  "rules": [
+    {
+      "code": "B1",
+      "name": "파일명 버전 누락",
+      "event": "PreToolUse:Write",
+      "detector": {
+        "type": "script",
+        "path": "~/.claude/hooks/check_filename_version.py",
+        "args": ["--mode=B1"]
+      },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B1",
+      "notion_page_id": "33f7f080962181dca42be485d8910bf4"
+    },
+    {
+      "code": "B2",
+      "name": "세션 인수인계 미생성",
+      "event": "Stop",
+      "detector": {
+        "type": "script",
+        "path": "~/.claude/hooks/session-end-check.sh"
+      },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B2",
+      "notion_page_id": "33f7f080962181a5a034c62fdaaae3ae",
+      "recovery": "~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md 생성"
+    },
+    {
+      "code": "B5",
+      "name": "스킬 설치 패턴/경로 오류",
+      "event": "PreToolUse:Write",
+      "detector": {
+        "type": "script",
+        "path": "~/.claude/hooks/check_skill_path.py"
+      },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B5",
+      "notion_page_id": "33f7f080962181fb9098f774a8f53ae7"
+    },
+    {
+      "code": "B7",
+      "name": "다운로드 파일명 패턴 미준수",
+      "event": "PreToolUse:Write",
+      "detector": {
+        "type": "script",
+        "path": "~/.claude/hooks/check_filename_version.py",
+        "args": ["--mode=B7"]
+      },
+      "severity": "soft_warn",
+      "enabled": false,
+      "notion_page_id": "33f7f080962181478062dc0b996eb883",
+      "note": "Phase 2 초입 활성화 대상 (반복횟수 2회, 가장 아픈 것 기준 미달)"
+    },
+    {
+      "code": "B8",
+      "name": "Git→Notion 백업 동기화 시 통합본 누락",
+      "event": "Stop",
+      "detector": {
+        "type": "tracker_check",
+        "tracker_field": "pending_sync"
+      },
+      "severity": "soft_warn",
+      "enabled": true,
+      "notion_page_id": "33f7f0809621813da4c9e1408a9f6b0e",
+      "recovery": "session-end-check.sh가 B2 검사와 함께 pending_sync 배열 확인 후 system-docs-sync 실행"
+    },
+    { "code": "B3", "enabled": false, "note": "AI 판단 필요 — Phase 3" },
+    { "code": "B4", "enabled": false, "note": "AI 판단 필요 — Phase 3" },
+    { "code": "B6", "enabled": false, "note": "AI 판단 필요 — Phase 3" },
+    { "code": "B9", "enabled": false, "note": "Phase 2 — 스킬 디렉토리 diff 추적" },
+    { "code": "B10", "enabled": false, "note": "Phase 2 — MEMORY.md diff 체크" }
+  ]
+}

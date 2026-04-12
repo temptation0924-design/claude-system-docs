@@ -1,0 +1,12 @@
+/Users/ihyeon-u/Library/Python/3.9/lib/python/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+2026-04-01 14:07:41,653 [INFO] === 세션 시작: 6790070d ===
+2026-04-01 14:07:41,653 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_140741.log
+
+🔍 자료조사 팀에이전트  v2.0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_140741.log
+🌐 웹(Claude) + 🎬 유튜브(Gemini) + 📓 NotebookLM + 📌 Notion
+✨ Python 전환 + 체크포인트 + 진행 바
+
+Q0. 조사 주제: 

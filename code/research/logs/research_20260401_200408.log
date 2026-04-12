@@ -1,0 +1,14 @@
+2026-04-01 20:04:08,465 [INFO] === 세션 시작: 9cc00291 ===
+2026-04-01 20:04:08,465 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_200408.log
+2026-04-01 20:04:36,994 [INFO] 주제: 아이온2 4월2일 업데이트 관련 조사해줘 | NLM: True
+2026-04-01 20:04:43,899 [INFO] Step 1 완료: 카테고리=게임, 키워드=['아이온2 4월2일 업데이트', '아이온2 패치노트', '아이온2 4월 패치', '아이온2 업데이트 내용', '아이온2 2025 업데이트']
+2026-04-01 20:06:20,792 [INFO] Step 2 완료: 웹 조사 12건
+2026-04-01 20:06:20,792 [INFO]   웹[1]: 아이온2 공식 업데이트 목록 - NCSOFT 공식 홈페이지 | https://aion2.plaync.com/ko-kr/board/update/list
+2026-04-01 20:06:20,792 [INFO]   웹[2]: 시즌3는 4/8(수)부터! 아이온2 3/31(화) 라이브 요약 - 인벤 뉴스 | https://www.inven.co.kr/webzine/news/?news=314926
+2026-04-01 20:06:20,792 [INFO]   웹[3]: 아이온2 시즌3 임박, 밸런스 전쟁 본격화 - 게임뷰 | https://www.gamevu.co.kr/news/articleView.html?idxno=56914
+2026-04-01 20:06:54,103 [INFO] Step 3 완료: 유튜브 조사 3건
+2026-04-01 20:06:54,112 [INFO] Step 4 완료: 검증 15건 통과, HTML → /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_아이온2_4월2일_업데이트_관련_조사해줘.html
+2026-04-01 20:10:19,957 [INFO] === 세션 완료: 9cc00291 ===
+2026-04-01 20:10:19,957 [INFO] 웹: 12건 | 유튜브: 3건 | 검증통과: 15건
+2026-04-01 20:10:19,957 [INFO] HTML: /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_아이온2_4월2일_업데이트_관련_조사해줘.html
+2026-04-01 20:10:19,957 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_200408.log

@@ -1,0 +1,24 @@
+{
+  "step": 3,
+  "timestamp": "2026-04-01T11:25:48.618097",
+  "session_id": "1762f6bd",
+  "data": {
+    "topic": "아이온2 궁성 PVE 세팅",
+    "nlm_save": false,
+    "interview": {
+      "topic": "아이온2 궁성 PVE 세팅",
+      "category": "기타",
+      "priority": "균형",
+      "purpose": "직접활용",
+      "depth": "보통",
+      "source_hint": "",
+      "exclude_condition": "",
+      "special_notes": "",
+      "search_keywords": [],
+      "follow_up_questions": []
+    },
+    "session_id": "1762f6bd",
+    "web_results": [],
+    "yt_results": []
+  }
+}

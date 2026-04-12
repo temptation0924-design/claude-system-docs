@@ -1,0 +1,11 @@
+2026-04-01 14:04:23,352 [INFO] === 세션 시작: 25d6676f ===
+2026-04-01 14:04:23,352 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_140423.log
+2026-04-01 14:04:52,965 [INFO] 주제: 동탄석우동맛집 추천해줘 | NLM: True
+2026-04-01 14:04:57,400 [INFO] Step 1 완료: 카테고리=맛집·장소, 키워드=['동탄 석우동 맛집', '석우동 음식점', '석우동 맛집 추천', '동탄 석우동 맛집 2024', '석우동 맛집 블로그']
+2026-04-01 14:05:22,284 [INFO] Step 2 완료: 웹 조사 0건
+2026-04-01 14:05:43,186 [INFO] Step 3 완료: 유튜브 조사 5건
+2026-04-01 14:05:43,201 [INFO] Step 4 완료: 검증 5건 통과, HTML → /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_동탄석우동맛집_추천해줘.html
+2026-04-01 14:06:09,083 [INFO] === 세션 완료: 25d6676f ===
+2026-04-01 14:06:09,083 [INFO] 웹: 0건 | 유튜브: 5건 | 검증통과: 5건
+2026-04-01 14:06:09,083 [INFO] HTML: /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_동탄석우동맛집_추천해줘.html
+2026-04-01 14:06:09,083 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_140423.log
