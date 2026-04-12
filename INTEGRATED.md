@@ -3,7 +3,7 @@
 > **이 파일은 7개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-12 20:20 KST
+> 마지막 빌드: 2026-04-12 21:09 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -93,9 +93,7 @@
 2. `superpowers:brainstorming` — 설계 정제 + 스펙 문서 작성
 3. `/plan-ceo-review` — 전략적 관점 리뷰
 4. `/plan-eng-review` — 아키텍처 관점 리뷰
-5. `superpowers:writing-plans` — micro-task 분해 (2~5분 단위)
-   - **예시 먼저**: 전체 분해 전 첫 1개 task를 예시로 보여주고 대표님 승인 → 방향 OK면 나머지 자동 분해
-   - 예외: 대표님 "끝까지 해줘" → 묻지 말고 전부 분해
+5. `superpowers:writing-plans` — micro-task 분해 (2~5분 단위, 묻지 말고 전부 분해)
 6. **Preflight Gate** (자동) — 5번 완료 후 자동 실행, 대표님 트리거 불필요
    - 3 Agent 사전검증 → 90% 이상 PASS → 7번으로
    - 90% 미만 FAIL → 자동 수정 → 재검증 반복 (PASS까지)
@@ -118,9 +116,7 @@
 
 **워크플로우**:
 1. fresh context 확보 (GSD 원칙 — 긴 작업 시 task별 새 context)
-2. `superpowers:subagent-driven-development` — task별 별도 에이전트
-   - **예시 먼저**: 반복작업(파일 10개 정리, 유사 컴포넌트 여러 개 등)은 첫 1개 실행 → 승인 → 나머지 자동 실행
-   - 예외: 대표님 "끝까지 해줘" → 묻지 말고 전부 실행
+2. `superpowers:subagent-driven-development` — task별 별도 에이전트 (묻지 말고 전부 실행)
 3. `superpowers:test-driven-development` — 코드 작업 시 TDD 강제
 4. 2단계 코드리뷰 — spec 준수 + 코드 품질
 5. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
@@ -347,33 +343,40 @@
 
 ## B. 자주 실수 패턴 (Notion DB 이관 완료)
 
-**이관일**: 2026-04-11 v1.4 → **최종 업데이트**: 2026-04-12 v1.6
+**이관일**: 2026-04-11 v1.4 → **최종 업데이트**: 2026-04-12 v2.0
 **위치**: Notion DB [`⚠️ 규칙 위반 기록`](https://www.notion.so/6bb0c6c2ed9444baba4180ab70b35fb9) (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`)
-**범위**: **B1~B13** (2026-04-12 B13 추가 — C+ 에이전트 관련)
+**범위**: **B1~B17** (2026-04-12 REF v2.0 — Phase 2+3 통합 활성화 + C+ 에이전트 시스템 규칙)
 
-| B13 | 에이전트 dispatch 없이 매니저 직접 실행 | 3회 이상 같은 툴 순차 반복 시 "병렬화 가능" 자동 제안 |
 **구조**: `위반코드` SELECT 필드 + `반복횟수` (수동 +1) + `재발방지` 개별 기록
 
 **조회 방법**
 - 세션 시작 TOP 5: `해결여부=false` + `반복횟수 DESC` + `limit 5` 쿼리
 - 신규 위반 발생 시: 해당 `위반코드` row의 `반복횟수 +1` (A4 종료 루틴 7번에서 실행)
-- 신규 패턴: Select 옵션에 `B13+` 추가 후 신규 row 생성
+- 신규 패턴: Select 옵션에 추가 후 신규 row 생성
 
-**REF Framework 자동 집행 훅 현황** (Phase 1 — 2026-04-11 구축)
+**REF v2.0 자동 집행 훅 현황** (2026-04-12 전체 활성화)
 
-| 코드 | 이름 | 상태 | 훅 위치 |
-|------|------|------|---------|
-| B1 | 파일명 버전 누락 | ✅ 자동 차단 | `~/.claude/hooks/check_filename_version.py` |
-| B2 | 세션 인수인계 미생성 | ✅ 자동 차단 | `~/.claude/hooks/session-end-check.sh` |
-| B5 | 스킬 설치 패턴/경로 오류 | ✅ 자동 차단 | `~/.claude/hooks/check_skill_path.py` |
-| B8 | Git→Notion 통합본 누락 | ⚠️ 경고만 | `session-end-check.sh` (tracker_check) |
-| B7 | 다운로드 파일명 패턴 | ⏸️ Phase 2 대기 | - |
-| B9 | 스킬 설치 후 skill-guide 미등록 | ⏸️ Phase 2 대기 | - |
-| B10 | 메모리 상태 반영 누락 | ⏸️ Phase 2 대기 | - |
-| B3, B4, B6 | AI 판단 필요 영역 | ❌ Phase 3 | - |
-| B11, B12 | 2026-04-11 신규 추가 | ❌ 미구축 | - |
+| 코드 | 이름 | 감지 시점 | 강도 | 훅 |
+|------|------|----------|------|-----|
+| B1 | 파일명 버전 누락 | PreToolUse:Write | hard_block | `check_filename_version.py` |
+| B2 | 세션 인수인계 미생성 | Stop | hard_block | `session-end-check.sh` |
+| B3 | 세션 시작 루틴 미실시 | Stop | hard_block | tracker: `top5_queried` |
+| B4 | 도구 추천 누락 | Stop | soft_warn | tracker: `tool_recommended` |
+| B5 | 스킬 설치 경로 오류 | PreToolUse:Write | hard_block | `check_skill_path.py` |
+| B6 | Notion 임의 저장 | Stop | soft_warn | tracker: `notion_unauthorized` |
+| B7 | 다운로드 파일명 패턴 | PreToolUse:Write | soft_warn | `check_filename_version.py --mode=B7` |
+| B8 | INTEGRATED.md 재빌드 누락 | Stop | hard_block | tracker: `pending_sync` |
+| B9 | 스킬 설치 후 skill-guide 미등록 | Stop | hard_block | tracker: `skills_dir + skill_guide` |
+| B10 | 메모리 상태 반영 누락 | Stop | hard_block | tracker: `memory_updated` |
+| B11 | 환경변수 토큰 채팅 노출 | — | 수동 | (stdout 패턴 감지 Phase 3) |
+| B12 | 복습카드 미생성 | Stop | hard_block | tracker: `review_card_sent` |
+| B13 | 에이전트 미dispatch | Stop | soft_warn | tracker: `agent_dispatched` |
+| B14 | Preflight Gate 미실시 | Stop | hard_block | tracker: `preflight_executed` (MODE 1 시) |
+| B15 | CEO/ENG 리뷰 미실시 | Stop | hard_block | tracker: `ceo_eng_review_executed` (MODE 1 시) |
+| B16 | 세션 시작 에이전트 미dispatch | Stop | soft_warn | tracker: `session_start_agents` |
+| B17 | 세션 종료 에이전트 미dispatch | Stop | hard_block | tracker: `session_end_agents` |
 
-**우회 방법**: 대표님 메시지에 `--force-B1`, `--force-B2`, `--force-B5` 형식으로 명시 → 훅이 우회 카운터 증가 (같은 코드 3회 이상 우회 시 Slack 알림 발송)
+**우회 방법**: 대표님 메시지에 `--force-B1` ~ `--force-B17` 형식으로 명시 → 훅이 우회 카운터 증가 (같은 코드 3회 이상 우회 시 Slack 알림 발송)
 
 **원칙**: 개별 정의는 Notion DB가 단일 원본. rules.md 내 하드코딩 목록 삭제 (중복 관리 방지).
 
@@ -1165,4 +1168,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 20:20 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 21:09 KST | 원본: `~/.claude/*.md` (Git)*
