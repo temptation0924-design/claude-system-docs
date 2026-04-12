@@ -1,0 +1,8 @@
+{
+  "step": 1,
+  "timestamp": "2026-04-01T14:30:11.846625",
+  "session_id": "test_v2",
+  "data": {
+    "topic": "test"
+  }
+}

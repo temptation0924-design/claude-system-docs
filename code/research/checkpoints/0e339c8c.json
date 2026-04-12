@@ -1,0 +1,27 @@
+{
+  "step": 1,
+  "timestamp": "2026-04-01T14:03:56.165561",
+  "session_id": "0e339c8c",
+  "data": {
+    "topic": "천해줘",
+    "nlm_save": false,
+    "interview": {
+      "topic": "천",
+      "category": "기타",
+      "priority": "균형",
+      "purpose": "직접활용",
+      "depth": "얕게",
+      "source_hint": "",
+      "exclude_condition": "",
+      "special_notes": "입력이 불완전하거나 오타 가능성 있음",
+      "search_keywords": [
+        "천"
+      ],
+      "follow_up_questions": [
+        "어떤 '천'을 말씀하시나요? (원단/강/지명/기타)",
+        "더 구체적으로 입력해 주실 수 있나요? (예: 천 구매, 천안 맛집, 천문학 등)"
+      ]
+    },
+    "session_id": "0e339c8c"
+  }
+}

@@ -1,0 +1,14 @@
+2026-04-01 15:35:41,502 [INFO] === 세션 시작: cdc85250 ===
+2026-04-01 15:35:41,502 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_153541.log
+2026-04-01 15:36:03,091 [INFO] 주제: 026년 IFS 프렌차이즈 창업박람회 정보 찾아줘!4월2일 코엑스에서 하는거! 방문예정이야. | NLM: True
+2026-04-01 15:36:10,227 [INFO] Step 1 완료: 카테고리=기타, 키워드=['IFS 프랜차이즈 창업박람회 2026', 'IFS 박람회 코엑스 4월', '2026 프랜차이즈 박람회 사전등록', '창업박람회 코엑스 2026 4월', 'IFS franchise show 2026']
+2026-04-01 15:38:11,335 [INFO] Step 2 완료: 웹 조사 15건
+2026-04-01 15:38:11,335 [INFO]   웹[1]: IFS 프랜차이즈 창업·산업 박람회 공식 홈페이지 (박람회 안내) | https://www.ifskorea.co.kr/ko-kr/IFS.html
+2026-04-01 15:38:11,336 [INFO]   웹[2]: IFS 공식 홈페이지 – 참관 등록 안내 | https://www.ifskorea.co.kr/ko-kr/Visitor/Pre-registration.html
+2026-04-01 15:38:11,336 [INFO]   웹[3]: IFS 공식 홈페이지 – 영문 박람회 소개 (About IFS Seoul) | https://www.ifskorea.co.kr/en-gb/about/about-ifs.html
+2026-04-01 15:38:19,691 [INFO] Step 3 완료: 유튜브 조사 0건
+2026-04-01 15:38:19,702 [INFO] Step 4 완료: 검증 15건 통과, HTML → /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_026년_IFS_프렌차이즈_창업박람회_정보_찾아줘4월2일_코엑스에서_하는거_방문예정이야..html
+2026-04-01 15:40:43,625 [INFO] === 세션 완료: cdc85250 ===
+2026-04-01 15:40:43,625 [INFO] 웹: 15건 | 유튜브: 0건 | 검증통과: 15건
+2026-04-01 15:40:43,626 [INFO] HTML: /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_026년_IFS_프렌차이즈_창업박람회_정보_찾아줘4월2일_코엑스에서_하는거_방문예정이야..html
+2026-04-01 15:40:43,626 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_153541.log

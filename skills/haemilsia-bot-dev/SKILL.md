@@ -159,6 +159,12 @@ if "XXX" in message:
 
 # 4. keywords 리스트에 추가
 keywords = [..., "XXX현황", "XXX"]
+
+# 5. ⚠️ CRITICAL — rental_query 위임 regex 업데이트
+#    rental_query/__init__.py:83 의 위임 regex에 새 명령어 추가
+#    누락 시 "혹시 이 기능을 찾으시나요?" fallback 버그 발생 (2026-04-10 VIO 참조)
+# Before: r"...|공실\s*현황|공실|빈방|미납\s*현황|미납"
+# After:  r"...|공실\s*현황|공실|빈방|미납\s*현황|미납|XXX\s*현황"
 ```
 
 #### 패턴 B: 호실 조회 응답 개선 (rental_query)
@@ -272,6 +278,7 @@ git push origin main
 - [ ] 건물명 정규화 호환 (FLAT→FLAT#, 영문→한글)?
 - [ ] prefix가 `건물_호수` 형태로 `_parse_building` 호환?
 - [ ] 도움말 3곳 동시 업데이트했는가?
+- [ ] **rental_query 위임 regex 업데이트했는가?** (`rental_query/__init__.py:83`) ⚠️ 필수
 - [ ] 로딩 메시지 적용했는가?
 - [ ] 전체현황(`run()`)에도 새 DB 포함했는가?
 - [ ] 전체현황에서는 오류/문제 건만 표시하는가?
@@ -305,6 +312,7 @@ git push origin main
 |------|--------|
 | 전체현황에 새 DB 안 넣음 | `run()` + `_build_summary_blocks` + `_build_categories` 3곳 수정 |
 | 도움말 1곳만 수정 | 3곳 동시 업데이트 (grep "해밀봇 기능 안내") |
+| **rental_query 위임 regex 누락 → "혹시 이 기능을 찾으시나요?" fallback** | `rental_query/__init__.py:83` regex에 새 명령어 추가 (2026-04-10 VIO) |
 | FLAT1로 prefix 만들어서 그룹핑 안 됨 | FLAT→FLAT# 정규화 필수 |
 | 전체현황에서 전체 데이터 표시 | 전체현황=점검 목적 → 오류/미납/납부예정만 |
 | 아이콘 불일치 | 구현 전 기존 아이콘 매핑 확인 |

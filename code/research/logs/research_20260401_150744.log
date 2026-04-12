@@ -1,0 +1,15 @@
+2026-04-01 15:07:45,025 [INFO] === 세션 시작: af95212b ===
+2026-04-01 15:07:45,025 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_150744.log
+2026-04-01 15:08:03,055 [INFO] 주제: 2026년 IFS 프렌차이즈 창업박람회 정보 찾아줘!4월2일 코엑스에서 하는거! 방문예정이야. | NLM: True
+2026-04-01 15:08:10,910 [INFO] Step 1 완료: 카테고리=기타, 키워드=['2026 IFS 프랜차이즈 창업박람회', 'IFS 박람회 코엑스', '프랜차이즈 창업박람회 2026 4월', 'IFS 사전등록', '코엑스 창업박람회 2026']
+2026-04-01 15:08:31,982 [INFO] 추가 질문 건너뜀
+2026-04-01 15:09:28,253 [INFO] Step 2 완료: 웹 조사 13건
+2026-04-01 15:09:28,254 [INFO]   웹[1]: IFS 박람회 공식 홈페이지 - 행사 안내 | https://www.ifskorea.co.kr/ko-kr/IFS.html
+2026-04-01 15:09:28,254 [INFO]   웹[2]: 뷰어스 - 프랜차이즈협회, IFS 창업·산업 박람회 4월 개막…300개 브랜드 참여 | https://theviewers.co.kr/View.aspx?No=3996343
+2026-04-01 15:09:28,254 [INFO]   웹[3]: 신아일보 - 코엑스서 4월 IFS 프랜차이즈 창업 박람회 개최…300개 브랜드 참여 | https://www.shinailbo.co.kr/news/articleView.html?idxno=5003310
+2026-04-01 15:09:41,025 [INFO] Step 3 완료: 유튜브 조사 3건
+2026-04-01 15:09:41,034 [INFO] Step 4 완료: 검증 16건 통과, HTML → /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_2026년_IFS_프렌차이즈_창업박람회_정보_찾아줘4월2일_코엑스에서_하는거_방문예정이야..html
+2026-04-01 15:12:36,526 [INFO] === 세션 완료: af95212b ===
+2026-04-01 15:12:36,526 [INFO] 웹: 13건 | 유튜브: 3건 | 검증통과: 16건
+2026-04-01 15:12:36,526 [INFO] HTML: /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_2026년_IFS_프렌차이즈_창업박람회_정보_찾아줘4월2일_코엑스에서_하는거_방문예정이야..html
+2026-04-01 15:12:36,527 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_150744.log

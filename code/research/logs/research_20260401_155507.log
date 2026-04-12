@@ -1,0 +1,14 @@
+2026-04-01 15:55:07,344 [INFO] === 세션 시작: f4b66d00 ===
+2026-04-01 15:55:07,344 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_155507.log
+2026-04-01 15:55:48,228 [INFO] 주제: 동탄 맛집 추천 | NLM: False
+2026-04-01 15:55:51,064 [INFO] Step 1 완료: 카테고리=맛집·장소, 키워드=['동탄 맛집', '동탄 맛집 추천', '동탄2 맛집', '동탄 음식점', '동탄 핫플']
+2026-04-01 15:56:58,779 [INFO] Step 2 완료: 웹 조사 15건
+2026-04-01 15:56:58,779 [INFO]   웹[1]: 동탄 베스트 맛집 현지 후기 바탕 추천 TOP 7 | 식신 | https://www.siksinhot.com/theme/magazine/6889
+2026-04-01 15:56:58,779 [INFO]   웹[2]: 동탄 가성비 맛집 지도 현지 리뷰로 고른 TOP 6 | 식신 | https://www.siksinhot.com/theme/magazine/6890
+2026-04-01 15:56:58,781 [INFO]   웹[3]: 동탄 광장 베스트 맛집 믿고 가는 TOP 4 | 식신 | https://www.siksinhot.com/theme/magazine/7118
+2026-04-01 15:57:40,631 [INFO] Step 3 완료: 유튜브 조사 10건
+2026-04-01 15:57:40,640 [INFO] Step 4 완료: 검증 25건 통과, HTML → /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_동탄_맛집_추천.html
+2026-04-01 15:57:45,554 [INFO] === 세션 완료: f4b66d00 ===
+2026-04-01 15:57:45,554 [INFO] 웹: 15건 | 유튜브: 10건 | 검증통과: 25건
+2026-04-01 15:57:45,554 [INFO] HTML: /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_동탄_맛집_추천.html
+2026-04-01 15:57:45,555 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_155507.log

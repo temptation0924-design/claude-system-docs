@@ -1,0 +1,8 @@
+{
+  "step": 1,
+  "timestamp": "2026-04-01T13:27:29.317085",
+  "session_id": "unittest-001",
+  "data": {
+    "test": true
+  }
+}

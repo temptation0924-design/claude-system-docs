@@ -1,0 +1,14 @@
+2026-04-01 14:13:31,877 [INFO] === 세션 시작: 78fd75b1 ===
+2026-04-01 14:13:31,877 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_141331.log
+2026-04-01 14:13:47,444 [INFO] 주제: 맛집추천해줘 | NLM: True
+2026-04-01 14:13:52,340 [INFO] Step 1 완료: 카테고리=맛집·장소, 키워드=['맛집 추천', '맛집', '음식점 추천', '핫플 맛집']
+2026-04-01 14:16:28,989 [INFO] Step 2 완료: 웹 조사 15건
+2026-04-01 14:16:28,989 [INFO]   웹[1]: 2025 서울 맛집 리스트 총정리 | 명동부터 성수동까지 현지인이 추천하는 서울 맛집 18곳 | https://kr.trip.com/blog/seoul-foods/
+2026-04-01 14:16:28,989 [INFO]   웹[2]: 미쉐린 가이드 서울 2025 : 새로 추가된 서울 레스토랑 | https://guide.michelin.com/kr/ko/article/dining-out/best-new-restaurants-in-kore
+2026-04-01 14:16:28,989 [INFO]   웹[3]: 서울미식주간 2025 - 서울미식 100선 | https://tasteofseoul.visitseoul.net/restaurants/list
+2026-04-01 14:16:53,384 [INFO] Step 3 완료: 유튜브 조사 10건
+2026-04-01 14:16:53,394 [INFO] Step 4 완료: 검증 25건 통과, HTML → /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_맛집추천해줘.html
+2026-04-01 14:20:07,947 [INFO] === 세션 완료: 78fd75b1 ===
+2026-04-01 14:20:07,948 [INFO] 웹: 15건 | 유튜브: 10건 | 검증통과: 25건
+2026-04-01 14:20:07,948 [INFO] HTML: /Users/ihyeon-u/Documents/Claude/research/reports/2026-04-01_맛집추천해줘.html
+2026-04-01 14:20:07,949 [INFO] 로그 파일: /Users/ihyeon-u/Documents/Claude/research/logs/research_20260401_141331.log

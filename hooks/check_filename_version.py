@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
-"""Hook 1: 파일명 버전 체크 — 버전 없는 결과물 파일 차단"""
+"""Hook 1: 파일명 버전 체크 — 버전 없는 결과물 파일 차단
+
+REF Phase 1 대응:
+- --mode=B1 (기본): 기존 B1 동작 유지
+- --mode=B7: Phase 2 활성화 대상 (현재는 B1과 동일 동작)
+"""
 import sys, json, os
+
+# === MODE 파싱 (REF Phase 1) — json.load 이전에 수행 ===
+MODE = "B1"  # 기본 모드
+for arg in sys.argv[1:]:
+    if arg.startswith("--mode="):
+        MODE = arg.split("=", 1)[1]
+
+# B1 / B7만 지원 (나머지는 통과)
+if MODE not in ("B1", "B7"):
+    sys.exit(0)
 
 data = json.load(sys.stdin)
 tool_input = data.get("tool_input", {})
@@ -15,7 +30,11 @@ SYSTEM_FILES = {
     "SKILL.md", ".env", "settings.json", "settings.local.json",
     "package.json", "package-lock.json", "README.md", "CHANGELOG.md",
     ".gitignore", "Dockerfile", "Procfile", "requirements.txt",
-    "tsconfig.json", "docker-compose.yml"
+    "tsconfig.json", "docker-compose.yml",
+    # REF Phase 1 실전 발견 (2026-04-11 5차 세션)
+    "MEMORY.md",      # Claude Code 내장 메모리 시스템 인덱스 (경로 하드코딩)
+    "TODOS.md",       # gstack 규약 — 버전 안 붙는 고정 파일명
+    "HANDOFF.json",   # gsd 규약 — 버전 안 붙는 고정 파일명
 }
 
 # 코드 확장자 (버전 불필요)
@@ -36,7 +55,9 @@ if filename.startswith("."):
     sys.exit(0)
 
 # 3. 특정 디렉토리 내 파일 통과
-EXEMPT_DIRS = ["/node_modules/", "/.git/", "/hooks/", "/__pycache__/", "/skills/", "/agents/", "/archive/", "/queue/", "/tests/", "/benchmarks/", "/cache/"]
+EXEMPT_DIRS = ["/node_modules/", "/.git/", "/hooks/", "/__pycache__/", "/skills/",
+               "/agents/", "/archive/", "/queue/", "/tests/", "/benchmarks/", "/cache/",
+               "/memory/", "/handoffs/", "/.claude/rules/", "/.claude/docs/"]
 if any(d in file_path for d in EXEMPT_DIRS):
     sys.exit(0)
 
