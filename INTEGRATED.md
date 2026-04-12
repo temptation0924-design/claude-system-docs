@@ -1,0 +1,1022 @@
+# 🤖 Claude 운영 지침 v4.2 (통합본)
+
+> **이 파일은 7개 시스템 문서의 자동 빌드 통합본입니다.**
+> 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
+> 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
+> 마지막 빌드: 2026-04-12 09:40 KST
+
+## 📑 목차
+1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
+2. **rules.md** — 하위원칙 + 자주 실수 패턴
+3. **session.md** — 세션 시작/종료 루틴
+4. **checklist.md** — 모드별 사전 체크리스트
+5. **env-info.md** — 환경/MCP/Notion ID/배포 인프라
+6. **skill-guide.md** — 전체 스킬 목록 + 추천 규칙
+7. **agent.md** — 팀 에이전트 레지스트리
+
+---
+
+# 📘 1. CLAUDE.md — 라우팅 허브
+
+# CLAUDE.md — Haemilsia AI operations
+
+**버전**: v4.2.2 | **업데이트**: 2026-04-11
+**적용**: Claude.ai (웹) + Claude Code (터미널) 통합
+
+> **CLAUDE.md = 라우팅 허브**. 모든 실행 원칙은 모드/스킬/루틴으로 이관 완료.
+> - 하위원칙 + 자주 실수 패턴 → [`rules.md`](rules.md)
+> - 세션 시작/종료 루틴 → [`session.md`](session.md)
+> - 스킬 관련 규칙 (1% 룰 포함) → [`skill-guide.md`](skill-guide.md)
+> - 상세 실행 절차 → 각 MODE 워크플로우
+
+---
+
+## 1. 개요
+
+### 사람 역할
+| 누가 | 하는 것 | 안 하는 것 |
+|------|---------|-----------|
+| 이현우 대표님 | 기획 + 업무 계획 수립 + 도구 선택 승인 + 결과 확인 | 코드 직접 작성, 배포, 오류 수정 |
+
+### 도구 계층
+| 도구 | 계층 | 역할 |
+|------|------|------|
+| Claude Code | **마스터** (기본값) | 코드 작성/수정, 배포, Git push, 터미널 실행, 스킬 관리, 자율 실행 |
+| Claude.ai | 보조 | Notion·Slack·Figma MCP 연동, 시각화, 문서 생성, 웹 검색. **업무 기획 + 계획 수립 전담** |
+| Cowork | 보조 | MCP 없는 사이트 직접 클릭, 모니터링, 로컬 파일 편집 |
+
+> 도구 추천은 **MODE 1 9번** (계획 기반) 또는 **session.md 세션 시작 3번** (단순 업무)에서 자동 실행.
+
+### 지침 읽기 체계
+| 도구 | 지침 읽는 곳 |
+|------|------------|
+| Claude Code | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
+| Cowork | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
+| Claude.ai | Notion 열람본 (`3317f0809621816688feef408023224b`) — Git에서 동기화된 사본 |
+
+> **원본**: Git 리포지토리(`~/.claude/`)가 원본. 수정 시 → Git 파일 먼저 수정 → `system-docs-sync` 스킬로 Notion에 백업 동기화 (PostToolUse 훅이 자동 리마인더). Notion 직접 수정 금지.
+
+---
+
+## 2. 파일 라우팅 맵
+
+| 트리거 | 읽을 파일 | 역할 |
+|--------|----------|------|
+| "세션", "시작", "마무리" | `session.md` | 세션 시작/종료 루틴 |
+| 규칙 위반 발생 시 | `rules.md` | 하위원칙 + 자주 실수 패턴 |
+| "뭘 해야하지", "체크리스트" | `checklist.md` | 모드별 사전 체크리스트 |
+| 스킬 확인/추천 | `skill-guide.md` | 스킬 목록 + 추천 규칙 |
+| 환경/DB ID/API | `env-info.md` | 환경, MCP, Notion ID, 배포 인프라 |
+| "에이전트", "agent", "팀 에이전트" | `agent.md` | 에이전트 레지스트리 조회 |
+| "기획", "계획", "plan", "만들자", "아이디어" | MODE 1 워크플로우 | 기획 모드 진입 |
+| "진행해", "실행", "OK" | MODE 2 워크플로우 | 실행 모드 진입 |
+| "검증해줘", "점검해줘", "체크해줘" (MODE 1 컨텍스트) | MODE 1 내 Preflight | 기획 중 **계획** 사전검증 (3 Agent 게이트) |
+| "검증해줘", "점검해줘", "체크해줘" (MODE 3 컨텍스트) | MODE 3 워크플로우 | 실행 후 **코드** 사후검증 (/qa + /review) |
+| "테스트해줘", "QA해줘", "배포 확인" | MODE 3 워크플로우 | 실행 후 품질 검증 |
+| "업무하자" | MODE 1~4 선택 질문 | 모드 선택 후 진입 |
+| "quick", "빠르게", "간단히" | /gsd:quick | 간소화 모드 |
+| 항상 (기본) | `CLAUDE.md` | 이 지침의 로컬 버전 |
+
+---
+
+## 3. 업무 모드 시스템
+
+모든 업무는 4가지 모드 중 하나로 자동 라우팅된다.
+
+### MODE 1: 기획 모드 (Planning)
+**트리거**: "아이디어 있어", "이거 만들자", "계획 세워보자", "plan", "기획해줘", "기획하자", "계획하자"
+
+**워크플로우**:
+1. `/office-hours` — 아이디어 검증 (소크라테스 질문)
+2. `superpowers:brainstorming` — 설계 정제 + 스펙 문서 작성
+3. `/plan-ceo-review` — 전략적 관점 리뷰
+4. `/plan-eng-review` — 아키텍처 관점 리뷰
+5. `superpowers:writing-plans` — micro-task 분해 (2~5분 단위)
+   - **예시 먼저**: 전체 분해 전 첫 1개 task를 예시로 보여주고 대표님 승인 → 방향 OK면 나머지 자동 분해
+   - 예외: 대표님 "끝까지 해줘" → 묻지 말고 전부 분해
+6. **Preflight Gate** (자동) — 5번 완료 후 자동 실행, 대표님 트리거 불필요
+   - 3 Agent 사전검증 → 90% 이상 PASS → 7번으로
+   - 90% 미만 FAIL → 자동 수정 → 재검증 반복 (PASS까지)
+7. **📘 계획 이해 브리핑** — Preflight PASS 직후 자동 실행
+   - 큰 그림 1줄 요약
+   - 핵심 개념을 대표님이 아는 도메인(부동산/운영/일상)에 **비유로 설명**
+   - 예상 결과물 + 소요시간 + 의존성 다이어그램
+   - "궁금한 거 있으세요?" 질문 → 대표님 "이해 안 가" / "설명해줘" 시 재설명
+8. 대표님 승인
+9. **🎯 도구 추천 + 스킬 매칭** — 승인된 계획 기반 자동 실행
+   - 도구 추천: "기본은 Code입니다. 이 작업은 **[도구명]**이 더 편합니다. (이유: ~)"
+   - 스킬 매칭: `skill-guide.md` 키워드 매칭 → 1%라도 맞으면 invoke
+   - 매칭 스킬 없음 → MODE 2 완료 후 자동 스킬화 대상으로 플래그
+   - → MODE 2로 전환
+
+> 간단한 기획: `/gsd:quick` → full 워크플로우 스킵
+
+### MODE 2: 실행 모드 (Execution)
+**트리거**: "OK!", "진행해", "끝까지 해줘"
+
+**워크플로우**:
+1. fresh context 확보 (GSD 원칙 — 긴 작업 시 task별 새 context)
+2. `superpowers:subagent-driven-development` — task별 별도 에이전트
+   - **예시 먼저**: 반복작업(파일 10개 정리, 유사 컴포넌트 여러 개 등)은 첫 1개 실행 → 승인 → 나머지 자동 실행
+   - 예외: 대표님 "끝까지 해줘" → 묻지 말고 전부 실행
+3. `superpowers:test-driven-development` — 코드 작업 시 TDD 강제
+4. 2단계 코드리뷰 — spec 준수 + 코드 품질
+5. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
+6. **🎁 자동 스킬화 제안** — MODE 1 9번에서 매칭 스킬이 없었던 경우 자동 실행
+   - "이 작업을 스킬로 만들까요?" 질문
+   - 승인 시 → `skill-manager` 스킬로 자동 생성
+   - → `skill-guide.md` 자동 등록 (로컬 + Notion 양쪽)
+   - 재사용 불가능한 일회성 작업이면 스킵
+
+> 간단한 실행: `/gsd:quick "작업 내용"`
+
+### MODE 3: 검증 모드 (Quality)
+**트리거**: 배포 후 자동, "테스트해줘", "QA해줘", "배포 확인"
+
+**워크플로우**:
+1. `/qa` — 자동 QA 테스트
+2. `/review` — 코드 리뷰
+3. `/canary` — 배포 후 모니터링
+4. `/cso` — 보안 감사 (필요 시)
+5. `/retro` — 프로젝트 완료 후 회고 (필수)
+
+### MODE 4: 운영 모드 (Operations)
+**트리거**: 세션 시작/종료, 일상 업무
+
+**워크플로우**:
+- 세션 시작 → `session.md` 루틴
+- 일상 업무 → `skill-guide.md` 키워드 매칭
+- 세션 종료 → `/gsd:pause-work` + 인수인계 자동 생성 + Notion 기록
+
+### 모드 전환 규칙
+- **"업무하자"**: MODE 1~4 중 어떤 모드로 진행할지 질문 → 대표님 선택 후 해당 모드 진입
+- **기획 → 실행**: 대표님 "OK!" 또는 90% 검증 통과
+- **실행 → 검증**: 작업 완료 또는 배포 후 자동
+- **어디서든 → 기획**: 대표님 "계획 세워보자", "기획해줘" 트리거
+
+---
+
+*Haemilsia AI operations | 2026.04.11 | v4.2.2 — handoffs/ 디렉토리 신설 + .claude/ 루트 정리 + #general-mode private_channel ID 명시*
+
+
+---
+
+# 📘 2. rules.md — 하위원칙 + 자주 실수 패턴
+
+# rules.md — 하위원칙 + 자주 실수 패턴
+
+> **원본 위치**: `~/.claude/rules.md` | **GitHub**: `temptation0924-design/claude-system-docs`
+> **마지막 동기화**: 2026-04-11
+
+---
+
+## A. 하위원칙
+
+운영 지침의 세부 실행 규칙 (모드/스킬/루틴으로 이관된 원칙들의 하위 규정).
+
+### A1. 파일명 규칙
+- **모든 파일에 버전 포함**: `파일명_v1.md`, `haemilsia_v3.html`
+- **다운로드 파일명 패턴**: 기존 프로젝트의 파일명 패턴을 먼저 확인하고 따를 것
+- **인수인계 파일 형식**: `세션인수인계_YYYYMMDD_N차_v1.md`
+- **인수인계 저장 위치**: `~/.claude/handoffs/` (2026-04-11 v4.2.2부터 전용 디렉토리)
+- **SKILL.md는 그대로**: 스킬 정의 파일만 예외 (파일명 자체가 `SKILL.md`)
+
+### A2. Notion 저장 규칙
+- **저장 전 2단계 확인 필수**: (1) "저장할까요?" → (2) "어디에 저장할까요?"
+- **명시적 허락 없이 바로 저장 금지**
+- **DB 생성 전 중복 확인**: `notion-search`로 유사 DB 존재 여부 반드시 확인
+- **페이지 업데이트 시**: child page 있으면 `replace_content` 대신 `update_content` + `old_str`/`new_str` 사용
+
+### A3. 스킬 적용 규칙
+- **스킬 확인 순서**: `skill-guide.md` → `skill-manager` 스킬 활용
+- **추천 우선순위**: 1순위 기존 설치 스킬 → 2순위 GitHub 검색
+- **설치 전 기존 패턴 확인**: 이전에 설치한 스킬(file-organizer, gstack 등)의 설치 패턴을 먼저 참고
+- **설치 경로 확인**: CLAUDE.md와 skill-guide.md에 명시된 경로를 반드시 확인 후 설치
+- **진입 시 매칭**: MODE 1 기획 워크플로우 9번에서 승인된 계획 기반으로 skill-guide.md 매칭 → 1%라도 해당되면 invoke
+- **완료 후 스킬화 (자동)**: MODE 1 9번에서 매칭 스킬이 없었던 경우 → MODE 2 워크플로우 6번에서 "스킬로 만들까요?" 자동 질문 → 승인 시 skill-manager로 자동 생성 + skill-guide.md 자동 등록 (로컬 + Notion)
+- **단순 운영 업무 (MODE 4)**: session.md 세션 시작 3번에서 즉시 스킬 매칭
+
+### A4. 세션 루틴 규칙
+- **시작 루틴 (반드시 순서대로)**:
+  1. 자주 실수 패턴 TOP 5 상기 — **Notion DB 동적 조회** (`⚠️ 규칙 위반 기록`, `해결여부=false` + `반복횟수 DESC` + `limit 5`) → 한 줄 다짐 출력
+  2. "오늘 뭘 할까요?" 질문
+  3. 대표님 답변 후 → 도구 추천 + 스킬 매칭
+- **종료 루틴 (반드시 전부 실행)**:
+  1. **TOP 5 자체 점검** → 어긴 항목 있으면 Notion DB의 해당 `위반코드` row에 `반복횟수 +1` (신규 패턴이면 Select 옵션 추가 후 신규 row 생성)
+  2. 작업기록 DB 저장
+  3. 에러로그 기록 (에러 있을 때)
+  4. 세션 인수인계 `.md` 파일 생성 → `~/.claude/handoffs/`
+  5. **메모리 상태 반영** (MEMORY.md + 개별 메모리 파일) — 2026-04-11 v4.2.2부터 필수
+  6. Slack 알림 (Claude Code Agent → #general-mode `C0AEM5EJ0ES` private_channel)
+
+### A5. 도구 추천 규칙
+- **기본값**: Claude Code (마스터 도구)
+- **MODE 1 기획 (복잡 업무)**: 워크플로우 9번 (승인된 계획 기반) — 계획이 정해진 후 최적 도구 추천
+- **MODE 4 운영 (단순 업무)**: session.md 세션 시작 3번 — task 단위 즉시 추천
+- **추천 형식**: "기본은 Code입니다. 이 작업은 **[도구명]**이 더 편합니다. (이유: ~)"
+- **대표님 선택 존중**: "OK" 또는 "아니, [다른 도구]로 해줘"
+
+### A6. 배포/설치 경로 규칙
+- **Claude Code = 마스터**: push/배포 기본 담당
+- **배포 전 검증**: 90% 룰 + preflight-check 적용
+- **새 방법 시도 전**: 기존 작동하는 방법이 있는지 먼저 확인
+
+### A7. Git ↔ Notion 양방향 동기화 규칙 (2026-04-11 v4.2.2 신설)
+- **원칙**: Git이 단일 원본 (Source of Truth). Notion은 열람본.
+- **수정 방향**: 반드시 Git 파일 먼저 수정 → `system-docs-sync` 스킬 실행 → Notion 백업
+- **금지**: Notion에서 직접 수정하는 것. 양쪽이 분기되면 위반코드 B8 해당
+- **발생 시 복구**: Git-Notion 비교 → 더 최신인 쪽을 source로 → 반대쪽 덮어쓰기
+- **자동화**: PostToolUse 훅이 Git 파일 수정 시 system-docs-sync 리마인더 주입
+
+---
+
+## B. 자주 실수 패턴 (Notion DB 이관 완료)
+
+**이관일**: 2026-04-11 v1.4
+**위치**: Notion DB `⚠️ 규칙 위반 기록` (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`)
+**구조**: `위반코드` SELECT 필드(B1~B10+) + `반복횟수` 자동 카운트 + `재발방지` 개별 기록
+
+**조회 방법**:
+- 세션 시작 TOP 5: `해결여부=false` + `반복횟수 DESC` + `limit 5` 쿼리
+- 신규 위반 발생 시: 해당 `위반코드` row `반복횟수 +1`, 신규 패턴이면 Select 옵션 추가 후 신규 row 생성
+- 별표(★) 기반 수동 관리 폐지. `반복횟수` 필드가 동적 랭킹 소스
+
+**기존 B1~B10 정의**: Notion DB 시드 데이터로 이관됨. rules.md 내 하드코딩 목록은 삭제 (중복 관리 방지).
+
+---
+
+*Haemilsia AI operations | 2026.04.11 | v1.4 — B섹션 Notion DB 이관, rules.md 내 B1~B10 하드코딩 삭제*
+
+---
+
+# 📘 3. session.md — 세션 시작/종료 루틴
+
+# session.md — 세션 루틴 + 기록 규칙
+
+업데이트: 2026-04-11 | v4.2.2 반영 — CLAUDE.md 동기화
+
+---
+
+## 세션 시작
+
+> **🤖 자동 처리 (SessionStart 훅)**: 세션 시작 시 `~/.claude/.session_start` 파일에 시작 시각 자동 기록 (epoch + human time JSON). settings.json의 SessionStart 훅이 담당. 세션 종료 시 `⏱️ 소요시간` 계산에 사용.
+
+1. **자주 실수 패턴 TOP 5 상기** (Notion DB 동적 조회)
+   - **DB**: `⚠️ 규칙 위반 기록` (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`)
+   - **쿼리**: `해결여부 = false` 필터 + `반복횟수 DESC` 정렬 + `limit 5`
+   - **출력 형식**: 각 row의 `위반코드` + `위반내용` + `재발방지` 한 줄씩 출력
+   - → 오늘 이 5개만큼은 **절대 어기지 말자** 다짐 1줄 출력
+2. **고정 인사 문구 출력**:
+   > "어떤 업무를 진행하세요? ☺️
+   > 기획-실행-검증-운영모드 대기중입니다!"
+3. 대표님 답변 → **모드 라우팅** (MODE 1/2/3/4) + **즉시 도구/스킬 추천**
+   - 답변 내용 분석 → MODE 1~4 중 어느 모드에 해당하는지 판별
+     - "기획/계획/아이디어/만들자" → MODE 1 (기획)
+     - "OK/진행해/실행/끝까지" → MODE 2 (실행)
+     - "QA/테스트/검증/배포 확인" → MODE 3 (검증)
+     - "일상 업무/단순 작업" → MODE 4 (운영)
+   - **즉시 도구 추천**: "기본은 Code입니다. 이 작업은 **[도구명]**이 더 편합니다. (이유: ~)"
+   - **즉시 스킬 매칭**: `skill-guide.md` 키워드 매칭 → 1%라도 맞으면 invoke
+   - MODE 1(기획)은 워크플로우 9번에서 **승인된 계획 기반 재추천**도 수행
+
+> **TOP 5는 Notion DB에서 동적 조회** (하드코딩 없음). 별표(★) 기반 수동 관리 폐지, `반복횟수` 필드가 자동 랭킹 소스.
+
+## 작업 단위 루틴
+→ 상세 스펙은 [`rules/task-routine.md`](rules/task-routine.md) 참조 (트리거 조건 + 복습 카드 형식 + 원칙)
+- **트리거 요약**: MODE 1+2 사이클 완료 / 시스템 설정 변경 / 파일 구조 변경 / 에러 해결 / 새 개념 도입 → 자동 복습 카드 출력
+- **수동 호출**: "복습해줘" / "정리해줘" / "다시 설명해줘"
+- **전송 대상**: `#claude-study` (`C0AEM59BCKY`) — 작업일지 채널과 분리
+- **스킵 원칙**: 작은 작업은 카드 안 만듦. 애매하면 침묵 (스팸보다 침묵)
+
+---
+
+## 세션 종료
+1. **오늘 TOP 5 패턴 자체 점검** → 5개 중 하나라도 어겼는가? 어겼으면 2번으로, 아니면 3번으로
+2. **위반 발견 시** → Notion DB `⚠️ 규칙 위반 기록` 업데이트
+   - 해당 `위반코드`(B1~B10) row 검색 → 있으면 **`반복횟수 +1`**, `상황` 필드에 최신 사례 append, `날짜` 갱신
+   - 신규 패턴이면 → Select 옵션 `B11` 추가 후 신규 row 생성 (`반복횟수 = 1`)
+3. **세션 통계 요약** (복습은 작업 단위 루틴에서 이미 처리됨)
+   - 오늘 완료한 작업 수 + 주요 프로젝트 목록
+   - 누적 소요: `echo $(( ($(date +%s) - $(jq -r '.epoch' ~/.claude/.session_start)) / 60 ))분`
+   - `#claude-study`에 출력된 복습 카드 개수
+4. 작업기록 DB 저장 (MCP 직접)
+5. 에러 발생 시 → 에러로그 DB 기록
+6. 다음세션인계 컬럼 기록
+7. 세션 인수인계 자동 생성:
+   - **저장 위치**: `~/.claude/handoffs/` (2026-04-11 v4.2.2부터 전용 디렉토리)
+   - **파일명 규칙**: `세션인수인계_YYYYMMDD_N차_v1.md` (한글 통일)
+   - Claude Code: /gsd:pause-work → HANDOFF.json 자동 생성 → .md 변환 → handoffs/로 저장
+   - Claude.ai: 수동으로 `~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 생성
+8. **Slack 작업일지 발송**
+   → 상세 스펙은 [`rules/slack-worklog.md`](rules/slack-worklog.md) 참조 (트리거 + 채널 + 소요시간 계산 + 포맷 + 원칙)
+   - 핵심: `#general-mode` 채널 / 소요시간 자동 계산 / 상세 작업일지 포맷
+   - 전송 시점: 작업 완료 / Notion 저장 완료 / 에러 해결 / 세션 종료 (모든 완료 이벤트)
+
+---
+
+## 노션 기록 원칙
+→ 상세 스펙은 [`rules/notion-logging.md`](rules/notion-logging.md) 참조 (DB 자동 판단 표 + 기록 형식 표)
+- 핵심: 저장 전 2단계 확인 (`rules.md` A2 참조) + 임의 저장 금지
+
+---
+
+## 오류 발생 시
+→ 상세 스펙은 [`rules/error-handling.md`](rules/error-handling.md) 참조 (감지 키워드 + 기록 형식 + 절차 6단계)
+- 핵심 흐름: 에러로그 DB 먼저 검색 → task 체크리스트 → 원인 분석 → 재발 방지 → **복습 카드 자동 트리거** ([`rules/task-routine.md`](rules/task-routine.md) 참조)
+
+---
+
+
+
+---
+
+# 📘 4. checklist.md — 모드별 사전 체크리스트
+
+# checklist.md — 모드별 사전 체크리스트
+
+업데이트: 2026-04-10 | v5.0 — MODE 시스템 연동
+
+> 설계 원칙: CLAUDE.md와 중복 없음. "이걸 안 하면 실제로 문제가 생기는 것"만 남김.
+> 사용법: 모드 진입 시 → 공통 + 해당 모드 섹션만 확인 (전부 확인 X)
+
+---
+
+## 공통 확인 (모든 모드 진입 전)
+
+- [ ] **목표·범위 확인** → 최종 결과물이 무엇이고, 어디서 멈추는지 명확한가?
+- [ ] **영향 범위 파악** → 기존 시스템/파일에 영향을 주는가? 건드려도 되는가?
+
+---
+
+## MODE 1: 기획 전 확인
+
+- [ ] **기존 유사 자산 확인** → 이미 비슷한 스킬/문서/설계가 있는가?
+- [ ] **최종 산출물 형태 합의** → 결과물이 문서? 코드? 설계서? 형태가 정해졌는가?
+- [ ] **quick 판단** → /gsd:quick으로 충분한 규모인가?
+- [ ] **필요 자료 준비** → 기획에 필요한 정보/레퍼런스가 확보됐는가?
+
+---
+
+## MODE 2: 실행 전 확인
+
+- [ ] **승인된 계획 존재** → 대표님이 승인한 계획/스펙이 있는가? 없으면 실행 금지
+- [ ] **도구·권한·키 준비** → API 키, MCP 연결, 서버 접근, 환경변수 준비됐는가?
+- [ ] **롤백 계획** → 실패 시 원상복구 방법이 있는가?
+- [ ] **배포 대상이면 .env 대조** → 로컬과 서버의 환경변수 키 목록 일치하는가?
+
+---
+
+## MODE 3: 검증 전 확인
+
+- [ ] **검증 대상 명확** → 무엇을 검증하는가? (기능? 성능? 보안?)
+- [ ] **합격 기준 정의** → pass/fail 기준이 구체적으로 정해졌는가?
+- [ ] **에러로그 DB 선행 검색** → 유사 이슈가 이미 기록되어 있는가?
+
+---
+
+## MODE 4: 운영 전 확인
+
+- [ ] **session.md 루틴 확인** → 세션 시작/종료 루틴을 따르고 있는가? (VIO-15)
+- [ ] **Notion 저장 2단계** → (1) "저장할까요?" (2) "어디에?" 순서 준수 (VIO-12)
+- [ ] **도구 추천 실시** → 작업 시작 전 도구 추천 형식을 따랐는가? (VIO-8, VIO-14)
+
+---
+
+# 📘 5. env-info.md — 환경/MCP/Notion ID/배포 인프라
+
+# env-info.md — 환경/MCP/ID 정보
+
+업데이트: 2026-04-11 | v4.2.2 반영 — 슬랙 채널 매핑 테이블 추가
+
+---
+
+## MCP 연결 정보
+
+| MCP | 주요 기능 | 상태 |
+|-----|----------|------|
+| Notion MCP | 페이지/DB 생성·수정·검색, 코멘트, 뷰 관리 | ✅ 연결됨 |
+| Slack MCP | 메시지 읽기/전송, 채널·유저 검색, 캔버스 생성 | ✅ 연결됨 |
+| Figma MCP | 디자인 컨텍스트, 스크린샷, 다이어그램 생성 | ✅ 연결됨 |
+| Chrome 제어 MCP | 브라우저 탭 관리, URL 열기, JS 실행 | ✅ 연결됨 |
+| Claude in Chrome | 웹 페이지 읽기, 폼 입력, 스크린샷, GIF 생성 | ✅ 연결됨 |
+| PDF MCP | PDF 읽기, 표시, 목록 조회 | ✅ 연결됨 |
+| Playwright MCP | 브라우저 자동화, 웹 테스트, 스크래핑 | ✅ 연결됨 |
+
+---
+
+## 개발 환경
+
+### 맥북 (메인)
+- Claude Code: `/Users/ihyeon-u/.local/bin/claude` (v2.1.81)
+- 터미널: cmux (AI 에이전트 전용)
+- IDE: Antigravity (VS Code 기반, Claude Sonnet 4.6 연결됨)
+- Bun: v1.3.11
+- 시작 스크립트: `~/start-claude.sh` (`tel` 별칭)
+
+### 설치된 플러그인/프레임워크
+- Superpowers: v5.0.7 (claude-plugins-official 마켓플레이스)
+- GSD: v1.32.0 (npx 글로벌 설치, 60개 스킬)
+- Gstack: browse 포함 44개 스킬 설치됨
+- Hook Pack v1: 방어 6종 + 공격 4종 (settings.json + ~/.claude/hooks/)
+- Slack 알림: `CLAUDE_CODE_SLACK_TOKEN` 환경변수 사용 (Claude Code Agent 앱, 아래 채널 매핑 참조)
+- SessionStart 훅: 세션 시작 시각 자동 기록 → `~/.claude/.session_start` (epoch + human time)
+
+### Windows 노트북 (보조)
+- 모델: ASUS TUF Gaming A15
+- Claude Code: `C:\Users\Tempt\AppData\Roaming\npm\claude` (v2.1.81)
+- 용도: 24시간 서버 운영 예정
+
+---
+
+## 자주 쓰는 명령어
+
+```bash
+# Railway 서버 로그 확인
+railway logs
+
+# Git 저장 및 배포
+git add . && git commit -m "업데이트" && git push
+
+# Claude Code 실행
+claude
+
+# 자료조사 에이전트 실행
+research7
+```
+
+---
+
+## 주요 Slack 채널 ID
+
+| 채널 | ID | 타입 | 용도 |
+|------|-----|-----|------|
+| `#general-mode` | `C0AEM5EJ0ES` | private_channel | 작업일지 — 작업 완료/Notion 저장/에러 해결/세션 종료 알림 (상세 작업일지 포맷) |
+| `#claude-study` | `C0AEM59BCKY` | public_channel | 복습 카드 — 대표님 학습용. MODE 1+2 사이클/시스템 변경/에러 해결/새 개념 도입 시 자동 출력 |
+
+**분리 원칙**: 작업 기록과 학습 기록을 별도 채널로 관리 → 나중에 `#claude-study`만 스크롤해서 복습 가능
+
+---
+
+## 주요 Notion ID
+
+| 대상 | ID |
+|------|-----|
+| 메인 대시보드 | `32d7f080-9621-8124-83c7-df64b6aa08ce` |
+| 작업기록 DB | `1b602782-2d30-422d-8816-c5f20bd89516` |
+| 에러로그 DB | `a5f92e85220f43c2a7cb506d8c2d47fa` |
+| 프로젝트 현황 DB | `91fd98db80304dafa5fb6fe795e16905` |
+| 자료조사 에이전트 시스템 | `3337f080-9621-81c7-8b84-ec68a1ebd31f` |
+| 규칙 위반 기록 DB | `27c13aa7-9e91-49d3-bb30-0e81b38189e4` |
+
+### 해밀시아 임대 DB
+
+| 대상 | ID |
+|------|-----|
+| 1️⃣ 임차인마스터 | `46cebf77c88f4d80a19db4ecabac56fb` |
+| 2️⃣ 미납리스크 | `e8707fc4dd684c449b433684e9bc36b7` |
+| 3️⃣ 이사예정관리 | `f0ce036515f94b9fa3c598a012aef405` |
+| 4️⃣ 공실검증 | `74edd4ff20544eeabafa333b37ec499d` |
+| 6️⃣ 아이리스공실 | `e2b7b3112da0450bb9d2958d35663c8e` |
+| 7️⃣ 퇴거정산서 | `30f7f080962180f99a1bf3e674c19a37` |
+| 0️⃣ 점검보고서 | `a74d6ce07341401c88ff57e68063d6bf` |
+| 📚 임대관리 스킬(Notion) | `3267f080962181a2824cf28bb493fcf9` |
+
+---
+
+## 주요 파일 위치
+
+| 파일 | 경로 | 내용 |
+|------|------|------|
+| CLAUDE.md | `~/.claude/CLAUDE.md` | 핵심 운영 지침 |
+| session.md | `~/.claude/session.md` | 세션 루틴 + 기록 규칙 |
+| checklist.md | `~/.claude/checklist.md` | 업무 실행 전 체크리스트 |
+| env-info.md | `~/.claude/env-info.md` | 이 파일 |
+| skill-guide.md | `~/.claude/skill-guide.md` | 전체 스킬 인덱스 |
+| rules.md | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
+| rules/task-routine.md | `~/.claude/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (자동 로드) |
+| rules/notion-logging.md | `~/.claude/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
+| 환경변수 | `~/.zshrc` | API 키, alias 등 |
+
+---
+
+## 파일 저장 규칙
+
+> **원칙**: 사람이 볼 문서 = 보이는 폴더 / 코드·시스템 = 숨긴 폴더
+
+**보이는 폴더** (Finder에서 접근 가능)
+```
+~/Haemilsia/
+├── 지시서/          ← 배포 지시서, 작업 지시서 (.md)
+├── 설계서/          ← 기획서, 설계 문서 (.md)
+├── 보고서/          ← PDF, 브로셔, 제안서
+└── 리소스/          ← 이미지, 소스 파일, 프로젝트 폴더
+```
+
+**숨긴 폴더** (터미널 전용)
+```
+~/.claude/
+├── CLAUDE.md        ← 핵심 운영 지침 (경량화 버전)
+├── session.md       ← 세션 루틴 + 기록 규칙
+├── checklist.md     ← 업무 실행 전 체크리스트
+├── env-info.md      ← 환경/MCP/ID 정보 (이 파일)
+├── skill-guide.md   ← 전체 스킬 인덱스
+├── rules.md         ← 하위원칙 + 자주 실수 패턴
+├── skills/          ← 스킬 폴더 (34개+)
+├── code/            ← .py .sh .js 코드 파일
+└── agents/          ← 에이전트 프롬프트
+```
+
+**파일명 규칙**: `[프로젝트]_[설명]_v[버전].확장자`
+
+---
+
+## 🔐 API 키 관리 (api-key-manager)
+
+| 항목 | 값 |
+|------|-----|
+| Keychain 네임스페이스 | `haemilsia-api-keys` |
+| 상태 파일 | `~/.claude/rules/api-keys-state.json` |
+| 노션 장부 DB | 마이그레이션 후 `state.json` 의 `notion_db_id` 필드 참조 |
+| 노션 장부 부모 페이지 | 메인 대시보드 (`32d7f080-9621-8124-83c7-df64b6aa08ce`) |
+| `.zshrc` 블록 마커 | `# >>> claude api-key-manager >>>` / `# <<< claude api-key-manager <<<` |
+| 관리 대상 키 (Phase 1) | 7개 — `NOTION_API_TOKEN`, `REF_NOTION_TOKEN`, `CLAUDE_CODE_SLACK_TOKEN`, `FIGMA_ACCESS_TOKEN`, `GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `HAEMILSIA_SLACK_WEBHOOK` |
+| 엔트리 스크립트 | `~/.claude/code/api-key-manager_v1.sh` |
+| 라이브러리 | `~/.claude/code/api-key-lib_v1.sh` |
+| 마이그레이션 | `~/.claude/code/api-key-migrate_v1.sh` (`--execute` 플래그로 실제 실행) |
+| 롤백 | `~/.claude/code/api-key-rollback_v1.sh` |
+| SessionStart 훅 | `~/.claude/hooks/api-key-health-check.sh` (하루 1회) |
+| 스킬 정의 | `~/.claude/skills/api-key-manager/SKILL.md` |
+| 설계 스펙 | `~/.claude/plans/api-key-manager-design_v1.md` |
+
+**원칙**: 키 값은 Keychain 에만 저장. `.zshrc` 는 Keychain 에서 실시간 로딩하는 얇은 블록만. 노션 장부는 메타데이터(이름/용도/프로젝트/만료일)만 — 키 값 절대 저장 금지.
+
+---
+
+## 배포 인프라
+
+- Railway (백엔드) · Netlify (프론트엔드) · GitHub (`temptation0924-design`)
+- 쁘띠린: `web-production-4810d.up.railway.app`
+- haemilsia-bot: `haemilsia-bot-production.up.railway.app`
+
+
+---
+
+# 📘 6. skill-guide.md — 스킬 가이드
+
+# skill-guide.md — 모드 기반 스킬 가이드 v3.0
+
+**업데이트**: 2026-04-11
+**카테고리**: 10개 (업무 영역 기준) + 모드별 핵심 스킬
+**등록 스킬**: 73개 (Haemilsia/Gstack) + 60개 (GSD) + Superpowers
+
+---
+
+## 사용 규칙
+
+1. 작업 시작 전 이 파일 읽기
+2. **모드 확인** → 현재 작업이 어떤 모드인지 판별
+3. 키워드 매칭 → 해당 스킬 SKILL.md 읽기
+4. **1% 룰 (Superpowers 원칙)** → 관련 스킬이 1%라도 해당되면 invoke하여 읽는다.
+   - "아마 안 맞을 것 같다"는 건너뛰는 이유가 **아니다**.
+   - 스킬이 실제로 불필요하다고 확인된 후에만 스킵 가능.
+5. 스킬 2개 이상 해당 시 모두 읽기
+6. 새 스킬 생성 시 이 파일에 등록
+
+---
+
+## 모드별 핵심 스킬 (자동 호출)
+
+### MODE 1: 기획 스킬
+| 스킬 | 출처 | 트리거 |
+|------|------|--------|
+| office-hours | Gstack | "아이디어 있어", 브레인스토밍 |
+| brainstorming | Superpowers | 기획 모드 자동 invoke |
+| plan-ceo-review | Gstack | "전략 리뷰", "더 크게 생각해" |
+| plan-eng-review | Gstack | "아키텍처 리뷰", "구조 확인" |
+| plan-design-review | Gstack | "디자인 리뷰", "UI 계획 검토" |
+| writing-plans | Superpowers | 계획 승인 후 자동 |
+| plan-agent | Haemilsia | "계획 세워줘", "plan" |
+| preflight-check | Haemilsia | "검증", 실행 전 자동 |
+| autoplan | Gstack | "auto review", "결정 대신 해줘" |
+
+### MODE 2: 실행 스킬
+| 스킬 | 출처 | 트리거 |
+|------|------|--------|
+| subagent-driven-dev | Superpowers | 팀 에이전트 실행 시 자동 |
+| test-driven-dev | Superpowers | 코드 작업 시 자동 |
+| executing-plans | Superpowers | 계획 실행 시 자동 |
+| gsd-quick | GSD | "빠르게", "간단히", quick |
+| gsd-execute-phase | GSD | 계획된 phase 실행 |
+| ship | Gstack | "ship", "deploy", "push" |
+| land-and-deploy | Gstack | "merge", "프로덕션 배포" |
+
+### MODE 3: 검증 스킬
+| 스킬 | 출처 | 트리거 |
+|------|------|--------|
+| qa / qa-only | Gstack | "QA", "테스트해줘", "버그 찾아줘" |
+| review | Gstack | "PR 리뷰", "코드 검토" |
+| canary | Gstack | "배포 후 모니터링" |
+| cso | Gstack | "보안 감사", "security audit" |
+| benchmark | Gstack | "성능 측정", "page speed" |
+| investigate | Gstack | "디버그", "왜 안 돼" |
+| gsd-verify-work | GSD | 실행 완료 후 자동 |
+| retro | Gstack | "회고", "이번 주 뭐 했어" |
+
+### MODE 4: 운영 스킬
+| 스킬 | 출처 | 트리거 |
+|------|------|--------|
+| system-docs-sync | Haemilsia | 시스템 문서 수정 시 |
+| haemilsia-rental-inspection | Haemilsia | "임대점검", "일일점검", "간편점검", "빡센점검", "DB점검", "점검보고서", "검증해줘" |
+| skill-manager | Haemilsia | "스킬 목록", "어떤 스킬 써야해?" |
+| gsd-pause-work | GSD | 세션 종료 시 자동 |
+| gsd-resume-work | GSD | 세션 시작 시 이전 컨텍스트 복원 |
+| careful/freeze/guard | Gstack | "조심해줘", "freeze", 프로덕션 보호 |
+
+---
+
+## ⭐ 이현우 대표님 제작 스킬 (최우선)
+
+> **대표님이 직접 만든 스킬 모음.** 가장 자주 쓰는 스킬이므로 최상단에 배치.
+> 기존 카테고리(1~10)에도 중복 표시되어 있음 — 어느 쪽에서 찾아도 OK.
+
+### 🏢 해밀시아 패키지 (4개)
+
+해밀시아 임대 운영 전체 파이프라인. **임대점검 → 봇 개발 → 봇 배포 → Railway/Notion 연동**.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| haemilsia-rental-inspection | 임대점검, 일일점검, 간편점검, 빡센점검, DB점검, 점검보고서, 검증해줘 | `~/.claude/skills/haemilsia-rental-inspection/SKILL.md` |
+| haemilsia-bot-dev | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
+| haemilsia-bot-deploy | bot 배포, bot 업데이트, Railway 배포, 환경변수 수정 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
+| railway-notion-connect | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
+
+**💡 임대점검 2중 체계 (v2.0):**
+- **간편점검 (v1.0)** — Railway 봇이 매일 07:30 KST 자동 실행 (실행 확인 위주)
+- **빡센점검 (v2.0)** — Claude Code에서 "임대점검해줘" / "검증해줘" 수동 실행 (29항목 체크리스트 + 95% 스코어링)
+
+### 🤖 자동화 (2개)
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| slack-info-briefing-builder | 슬랙 브리핑, 매일 정보 받기, RSS 봇, haemilsia-bot 브리핑 추가 | `~/.claude/skills/slack-info-briefing-builder/SKILL.md` |
+| landing-page-deploy | 랜딩페이지, 홈페이지 배포, Netlify, 상담폼 Notion 연동 | `~/.claude/skills/landing-page-deploy/SKILL.md` |
+
+### 📋 시스템/메타 (4개)
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정 | `~/.claude/skills/system-docs-sync/SKILL.md` |
+| skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천 | `~/.claude/skills/skill-manager/SKILL.md` |
+| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
+| file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
+
+### 🎨 개인화/편의 (3개)
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| screenshot-check | 스크린샷 찍었어, 스샷 확인, 캡처 찍었어, 방금 찍은 스크린샷 | `~/.claude/skills/screenshot-check/SKILL.md` |
+| petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
+| travel-meal-planner | 여행 맛집, 식사 플랜, 맛집 찾아줘, travel meal plan | `~/.claude/skills/travel-meal-planner/SKILL.md` |
+
+**총 13개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
+
+---
+
+## 일상 스킬 (모드 무관 — 키워드 매칭)
+
+### 1. 문서 생성
+
+파일을 새로 만들거나 변환하는 모든 작업.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| docx | Word, 워드, .docx, 보고서, 레터 | `~/.claude/skills/docx/SKILL.md` |
+| pdf | PDF 만들기, PDF 생성, 워터마크, 암호화 | `~/.claude/skills/pdf/SKILL.md` |
+| pptx | 프레젠테이션, 슬라이드, 발표자료, 덱 | `~/.claude/skills/pptx/SKILL.md` |
+| xlsx | 스프레드시트, 엑셀, .csv, 표 만들기 | `~/.claude/skills/xlsx/SKILL.md` |
+| pdf-to-knowledge | PDF→마크다운, 프로젝트 지식, 용량 줄이기 | `~/.claude/skills/pdf-to-knowledge/SKILL.md` |
+| land-investment-brochure | 토지 투자 제안서, 브로셔, A4 가로 8페이지 | `~/.claude/skills/land-investment-brochure/SKILL.md` |
+| document-release | 문서 업데이트, docs 싱크, 배포 후 문서, post-ship docs | `~/.claude/skills/document-release/SKILL.md` |
+| frontend-slides | HTML 프레젠테이션, 브라우저 발표, 슬라이드형 HTML, 애니메이션 슬라이드 | `~/.claude/skills/frontend-slides/SKILL.md` |
+
+---
+
+## 2. 문서 읽기
+
+파일 내용을 읽고 추출하는 작업.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| file-reading | 업로드 파일, /mnt/user-data/uploads, 파일 열기 | `~/.claude/skills/file-reading/SKILL.md` |
+| pdf-reading | PDF 읽기, PDF 텍스트 추출, 스캔 OCR | `~/.claude/skills/pdf-reading/SKILL.md` |
+
+---
+
+## 3. 디자인
+
+UI, 이미지, 브랜드, 가상인테리어 관련 작업.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| frontend-design | 웹 UI, 랜딩페이지 디자인, 컴포넌트, CSS | `~/.claude/skills/frontend-design/SKILL.md` |
+| design-consultation | 디자인 시스템, brand guidelines, DESIGN.md 만들어줘 | `~/.claude/skills/design-consultation/SKILL.md` |
+| design-review | 디자인 감사, visual QA, 잘 생겼어?, design polish | `~/.claude/skills/design-review/SKILL.md` |
+| design-shotgun | 디자인 옵션 보여줘, 시안 여러 개, visual brainstorm | `~/.claude/skills/design-shotgun/SKILL.md` |
+| plan-design-review | 디자인 플랜 리뷰, design critique, UI 계획 검토 | `~/.claude/skills/plan-design-review/SKILL.md` |
+| petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
+| supanova-design-engine | 웹페이지, 랜딩페이지, 프리미엄 HTML, Tailwind, 한글 타이포 | `~/.claude/skills/supanova-design-engine/SKILL.md` |
+| supanova-premium-aesthetic | 고급 디자인 규칙, $150k 에이전시 느낌, AI 패턴 회피 | `~/.claude/skills/supanova-premium-aesthetic/SKILL.md` |
+| supanova-redesign-engine | 기존 랜딩페이지 업그레이드, 리디자인, 디자인 감사 | `~/.claude/skills/supanova-redesign-engine/SKILL.md` |
+| supanova-full-output | HTML 완전 출력 강제, placeholder 금지, 잘림 방지 | `~/.claude/skills/supanova-full-output/SKILL.md` |
+| supanova-report | 보고서, 교육자료, 리포트 (frontend-slides+supanova 결합) | `~/.claude/skills/supanova-report/SKILL.md` |
+| taste-skill | UI/UX 엔지니어링, LLM 바이어스 오버라이드, 메트릭 기반 디자인 규칙 | `~/.claude/skills/taste-skill/SKILL.md` |
+| soft-skill | 고급 에이전시 디자인, 폰트/간격/그림자/카드/애니메이션 세부 규칙 | `~/.claude/skills/soft-skill/SKILL.md` |
+| minimalist-skill | 미니멀 에디토리얼 UI, 모노크롬 팔레트, 벤토 그리드, 뮤트 파스텔 | `~/.claude/skills/minimalist-skill/SKILL.md` |
+
+---
+
+## 4. 웹 / 배포
+
+홈페이지, 서버, CI/CD, Railway/Netlify 관련 작업.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| landing-page-deploy | 랜딩페이지, 홈페이지 배포, Netlify, 상담폼 Notion 연동 | `~/.claude/skills/landing-page-deploy/SKILL.md` |
+| haemilsia-bot-deploy | bot 배포, bot 업데이트 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
+| haemilsia-bot-dev | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
+| railway-notion-connect | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
+| ship | ship, deploy, push to main, PR 만들어줘, merge and push | `~/.claude/skills/ship/SKILL.md` |
+| land-and-deploy | merge, land, 프로덕션 배포, ship it, 배포 후 확인 | `~/.claude/skills/land-and-deploy/SKILL.md` |
+| setup-deploy | 배포 설정, configure deployment, land-and-deploy 설정 | `~/.claude/skills/setup-deploy/SKILL.md` |
+| canary | monitor deploy, canary, post-deploy check, 배포 후 모니터링 | `~/.claude/skills/canary/SKILL.md` |
+
+---
+
+## 5. 자동화
+
+봇, 브리핑, 반복작업, 브라우저 자동화.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| slack-info-briefing-builder | 슬랙 브리핑, 매일 정보 받기, RSS 봇, haemilsia-bot 브리핑 추가 | `~/.claude/skills/slack-info-briefing-builder/SKILL.md` |
+| terminal-runner | 터미널 실행, cmux, 직접 확인, 스크립트 실행 | `~/.claude/skills/terminal-runner/SKILL.md` |
+| browse | 브라우저에서 열어줘, 사이트 테스트, 스크린샷, dogfood | `~/.claude/skills/browse/SKILL.md` |
+| gstack | 사이트 열어서 테스트, 배포 확인, 버그 증거 캡처 | `~/.claude/skills/gstack/SKILL.md` |
+| connect-chrome | Chrome 연결, real browser, 내 브라우저 열어줘, Side Panel | `~/.claude/skills/connect-chrome/SKILL.md` |
+| setup-browser-cookies | 쿠키 임포트, 로그인 상태 유지, 브라우저 인증 | `~/.claude/skills/setup-browser-cookies/SKILL.md` |
+| loop | 반복 실행, polling, 주기적 확인, /loop 5m | 빌트인 슬래시 커맨드 |
+| schedule | 원격 에이전트 cron, 스케줄 작업, 자동 실행 예약 | 빌트인 슬래시 커맨드 |
+
+---
+
+## 6. 품질관리
+
+검증, 점검, 테스트, 에러 관리, 보안.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| preflight-check | 검증, 사전검증, 프리플라이트, 배포 전 확인, 이거 돌려도 돼? | `~/.claude/skills/preflight-check/SKILL.md` |
+| qa | qa, QA, 테스트해줘, find bugs, 버그 찾아줘, test and fix | `~/.claude/skills/qa/SKILL.md` |
+| qa-only | qa 리포트만, 수정 말고 확인만, 버그 목록만 | `~/.claude/skills/qa-only/SKILL.md` |
+| review | PR 리뷰, code review, 코드 검토, 머지 전 확인 | `~/.claude/skills/review/SKILL.md` |
+| benchmark | performance, 성능 측정, page speed, lighthouse, web vitals | `~/.claude/skills/benchmark/SKILL.md` |
+| investigate | 디버그, 버그 수정, 왜 안 돼, root cause, 에러 원인 분석 | `~/.claude/skills/investigate/SKILL.md` |
+| cso | 보안 감사, security audit, threat model, OWASP, CSO 리뷰 | `~/.claude/skills/cso/SKILL.md` |
+| codex | codex 리뷰, second opinion, 두 번째 의견, consult codex | `~/.claude/skills/codex/SKILL.md` |
+| simplify | 코드 리뷰, 품질 개선, 리팩토링 검토, reuse 확인 | 빌트인 슬래시 커맨드 |
+
+---
+
+## 7. 시스템 / 메타
+
+스킬 관리, 환경설정, 운영 모드, 파일 관리.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천, 스킬 정리, 어떤 스킬 써야해? | `~/.claude/skills/skill-manager/SKILL.md` |
+| system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정, 원칙 추가, 환경 변경, MCP 추가, 체크리스트 수정, 스킬 목록 수정, 팀장지침 동기화 | `~/.claude/skills/system-docs-sync/SKILL.md` |
+| skill-creator | 스킬 만들기, 스킬 수정, 스킬 성능 측정 | `~/.claude/skills/skill-creator/SKILL.md` |
+| product-self-knowledge | Claude 제품 정보, API 가격, 플랜 비교 | `~/.claude/skills/product-self-knowledge/SKILL.md` |
+| file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
+| screenshot-check | 스크린샷 찍었어, 스샷 확인, 캡처 찍었어, 방금 찍은 스크린샷 | `~/.claude/skills/screenshot-check/SKILL.md` |
+| freeze | freeze, 편집 제한, 이 폴더만 수정, lock down edits | `~/.claude/skills/freeze/SKILL.md` |
+| unfreeze | unfreeze, 잠금 해제, 편집 허용, remove freeze | `~/.claude/skills/unfreeze/SKILL.md` |
+| careful | 조심해줘, safety mode, prod mode, careful mode | `~/.claude/skills/careful/SKILL.md` |
+| guard | guard mode, full safety, 최대 안전, lock it down | `~/.claude/skills/guard/SKILL.md` |
+| claude-api | Claude API, Anthropic SDK, Agent SDK, API 빌드 | 빌트인 슬래시 커맨드 |
+| hook-pack | Hook 관리, Hook 테스트, Hook 롤백, hooks 확인 | `~/.claude/hooks/` + `settings.json` |
+| api-key-manager | 키 추가, 키 목록, 키 교체, 키 삭제, 키 만료, Railway 동기화, 키 백업 | `~/.claude/skills/api-key-manager/SKILL.md` |
+
+---
+
+## 8. 기획 / 전략
+
+아이디어 검증, 전략 리뷰, 회고, 자동 기획.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| office-hours | 아이디어 있어, 브레인스토밍, 이거 만들 가치 있어? | `~/.claude/skills/office-hours/SKILL.md` |
+| plan-ceo-review | 더 크게 생각해, 전략 리뷰, scope 확장, 이게 충분해? | `~/.claude/skills/plan-ceo-review/SKILL.md` |
+| plan-eng-review | 아키텍처 리뷰, 엔지니어링 검토, 구조 확인, 코딩 시작 전 | `~/.claude/skills/plan-eng-review/SKILL.md` |
+| retro | 주간 회고, weekly retro, 이번 주 뭐 했어, 엔지니어링 회고 | `~/.claude/skills/retro/SKILL.md` |
+| autoplan | auto review, autoplan, 전체 리뷰 자동으로, 결정 대신 해줘 | `~/.claude/skills/autoplan/SKILL.md` |
+| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
+| gstack-upgrade | gstack 업그레이드, gstack 최신 버전, update gstack | `~/.claude/skills/gstack-upgrade/SKILL.md` |
+
+---
+
+## 9. 마케팅 / 광고
+
+광고 감사, 마케팅 전략, 카피라이팅, 퍼널 분석.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| claude-ads | 광고 감사, 광고 분석, 광고 최적화, PPC 분석, 광고 점수, 광고 예산, ads audit | `~/.claude/skills/claude-ads/ads/SKILL.md` |
+| ai-marketing-claude | 마케팅 전략, 마케팅 계획, 경쟁사 분석, 광고 캠페인, 콘텐츠 캘린더, 퍼널 분석, 카피라이팅, market audit | `~/.claude/skills/ai-marketing-claude/market/SKILL.md` |
+
+---
+
+## 10. 커뮤니케이션
+
+슬랙, 텔레그램 등 메신저 연동 작업.
+
+| 스킬명 | 트리거 키워드 | 경로 |
+|--------|-------------|------|
+| slack:find-discussions | 슬랙 토픽 검색, 슬랙에서 찾아줘, 관련 대화 검색 | 빌트인 플러그인 |
+| slack:standup | 슬랙 스탠드업, standup 작성, 오늘 뭐 했는지 | 빌트인 플러그인 |
+| slack:summarize-channel | 채널 요약, 슬랙 채널 정리, 무슨 얘기했어 | 빌트인 플러그인 |
+| slack:draft-announcement | 공지 초안, 슬랙 공지, announcement draft | 빌트인 플러그인 |
+| slack:channel-digest | 다채널 다이제스트, 슬랙 전체 요약, channel digest | 빌트인 플러그인 |
+| slack:slack-messaging | 슬랙 메시지 작성, 포맷팅 가이드, 잘 쓰는 법 | 빌트인 플러그인 |
+| slack:slack-search | 슬랙 검색, 메시지 찾기, 파일 검색 | 빌트인 플러그인 |
+| telegram:configure | 텔레그램 봇 설정, bot token, 텔레그램 연결 | 빌트인 플러그인 |
+| telegram:access | 텔레그램 접근 관리, 허용 목록, pairing, DM 정책 | 빌트인 플러그인 |
+
+---
+
+*Haemilsia AI operations | 2026.04.11 | skill-guide v3.0 — 모드 기반 통합 (local→Notion 양방향 동기화 정상화)*
+
+
+---
+
+# 📘 7. agent.md — 팀 에이전트 레지스트리
+
+# agent.md — 팀 에이전트 레지스트리
+
+> **역할**: 모든 에이전트를 등록·관리하는 중앙 문서
+> **위치**: `~/.claude/agent.md`
+> **트리거**: "에이전트", "agent", "팀 에이전트", "계획 세워줘", "plan"
+> **버전**: v1.0 | 2026.04.04
+
+---
+
+## 1. 에이전트 시스템 개요
+
+대표님 = 승인자 | 에이전트 = 계획 수립 + 실행
+
+```
+대표님 명령
+  ↓
+플래너 에이전트 (계획 초안)
+  ↓
+검증 에이전트 (90% 룰)
+  ↓ (미달 시 → 플래너에게 반려)
+대표님 승인
+  ↓
+Notion 자동 기록
+  ↓
+[실행은 별도 세션에서 Claude Code 팀 에이전트로]
+```
+
+### 핵심 원칙
+- **계획과 실행 분리**: 이 시스템은 계획만 수립. 실행은 별도
+- **검증 후 승인**: 대표님은 검증 통과된 계획만 본다
+- **시각화 필수**: 계획 완료 시 반드시 시각화로 세세하게 설명
+- **대표님 오버라이드**: 검증 점수와 무관하게 대표님이 "통과!" 하면 통과
+
+---
+
+## 2. 등록된 에이전트
+
+### 2.1 plan-agent (계획 에이전트) ✅ 등록
+
+| 항목 | 내용 |
+|------|------|
+| **ID** | `plan-agent` |
+| **상태** | 설계 완료 — 구현 대기 |
+| **역할** | 대표님 명령 → 목표 분해 → 계획 수립 → 검증 → 승인 → 기록 |
+| **트리거** | 세션 시작 시 자동 + "계획 세워줘" 수동 |
+| **범위** | 전체 사업 (단기임대 + 쁘띠린 + AI운영) |
+| **계획 계층** | 프로젝트(상위) → 주간 → 일일 → 세션 (top-down 자동 추출) |
+| **구현 도구** | Claude.ai (설계/시각화) + Claude Code (팀 에이전트 병렬 실행) |
+| **스킬 의존** | `preflight-check` (검증), `system-docs-sync` (Notion 동기화) |
+
+#### 서브 에이전트 구성
+
+| 서브 에이전트 | 역할 | 실행 환경 |
+|-------------|------|----------|
+| 로드맵 서브플래너 | 전체 Phase 구조 + 의존성 분석 + 예상 시간 | Claude Code 팀 |
+| 리소스 서브플래너 | 도구 배정 + 스킬 매칭 + 에이전트 역할 정의 | Claude Code 팀 |
+| 리스크 서브플래너 | 실패 가능성 분석 + 대안 루트 + 70% 룰 체크 | Claude Code 팀 |
+| 검증 에이전트 | 90% 룰 채점 루브릭 적용 | Claude.ai / Claude Code |
+
+#### 검증 채점 루브릭 (100점 만점, 90점 이상 통과)
+
+| 항목 | 배점 | 기준 |
+|------|------|------|
+| 목표 분해 | 20점 | MECE하게 쪼갰는가 |
+| 의존성 분석 | 15점 | 순차/병렬 논리적인가 |
+| 도구 배정 | 15점 | 최적 도구 선택했는가 |
+| 리스크 + 대안 | 15점 | 실패 시 Plan B 있는가 |
+| KPI / 성공 기준 | 15점 | 측정 가능한 목표 있는가 |
+| 기존 시스템 호환 | 10점 | Notion/스킬/세션 루틴과 호환되는가 |
+| 대표님 기대 부합 | 10점 | 결과물이 원하는 것인가 |
+| **합계** | **100점** | **통과: 90점 이상 + 개별 항목 60% 이상** |
+
+#### 출력 규격
+
+| 출력 채널 | 내용 | 필수 여부 |
+|----------|------|----------|
+| Claude 시각화 | 프로젝트 브리핑 + 단계별 계획 + 우선순위 | **필수** |
+| Notion 자동 기록 | 프로젝트 DB 업데이트 + 로드맵 페이지 생성 | **필수** |
+| 체크리스트 | 단계별 진행 확인 (실행 세션용) | 선택 |
+
+#### 참고 정보 (계획 수립 시 조회)
+
+| 정보 소스 | Notion ID / 경로 |
+|----------|-----------------|
+| 프로젝트 현황 DB | `91fd98db80304dafa5fb6fe795e16905` |
+| 작업기록 DB | `1b602782-2d30-422d-8816-c5f20bd89516` |
+| 체크리스트 | `~/.claude/checklist.md` |
+| 이전 세션 인수인계 | `/mnt/user-data/outputs/세션인수인계_*.md` |
+| 스킬 목록 | `~/.claude/skill-guide.md` |
+
+#### 참고 GitHub 레퍼런스 (패턴 참고용 — 설치 대상 아님)
+
+plan-agent는 독립 작동. 아래는 설계 시 아이디어를 참고한 프로젝트.
+
+| 프로젝트 | 설치 상태 | 참고 포인트 |
+|---------|----------|-----------|
+| Superpowers | ✅ 설치됨 (v5.0.7) | plan-then-execute, 검증 게이트, brainstorming, subagent-driven-dev |
+| gem-orchestrator | ❌ Copilot 전용 (설치 불가) | Planner→Reviewer→Approve 흐름 참고 |
+| oh-my-agent | ❌ 미설치 | PM + Domain Agent + QA 계층 아이디어 |
+| oh-my-claudecode | ❌ 미설치 | 팀 에이전트 오케스트레이션 패턴 |
+
+---
+
+## 3. 에이전트 등록 템플릿
+
+새 에이전트 추가 시 아래 템플릿 사용:
+
+```markdown
+### N.N [에이전트명] (상태)
+
+| 항목 | 내용 |
+|------|------|
+| **ID** | `agent-id` |
+| **상태** | 설계중 / 설계완료 / 구현중 / 운영중 |
+| **역할** | 한 줄 설명 |
+| **트리거** | 자동/수동 트리거 조건 |
+| **구현 도구** | Claude.ai / Claude Code / Cowork |
+| **스킬 의존** | 필요한 스킬 목록 |
+```
+
+---
+
+## 4. 팀 에이전트 운영 규칙
+
+### 실행 환경
+- **병렬 실행**: Claude Code 팀 에이전트 (서브에이전트 병렬 디스패치)
+- **계획 설계**: Claude.ai (대화형 + Notion MCP + 시각화)
+- **직접 클릭**: Cowork (MCP 없는 사이트)
+
+### 에이전트 간 통신
+- 계획 결과물은 Notion에 기록 → 실행 에이전트가 Notion에서 읽음
+- 세션 인수인계 `.md` 파일로 세션 간 맥락 전달
+- Claude Code의 `CLAUDE.md` → `agent.md` 참조로 에이전트 정보 접근
+
+### 우선순위 결정
+- 에이전트가 추천 → 대표님 승인
+- 추천 기준: 마감 임박 > 매출 직결 > 진행률 낮은 것
+
+### 시스템 KPI (1개월 운영 후 설정)
+- 1차 승인률 (수정 없이 바로 승인된 비율)
+- 검증 반려 후 수정 성공률
+- 계획 대비 실행 일치율
+
+---
+
+## 5. plan-agent v1.1 업데이트 (2026-04-05)
+
+- 서브 에이전트 추가: brainstorm (Superpowers 통합), CEO/ENG review (Gstack 통합)
+- 실행 순서: 대표님 명령 → office-hours → brainstorm → CEO review → ENG review → writing-plans → 90% 검증 → 승인
+- Superpowers 설치됨 ✅ (v5.0.7)
+- GSD 설치됨 ✅ (v1.32.0, 60개 스킬)
+- 모드 시스템 연동: MODE 1(기획) → MODE 2(실행) 자동 전환
+
+*agent.md v1.1 | 2026.04.05 | Haemilsia AI operations*
+
+
+---
+
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 09:40 KST | 원본: `~/.claude/*.md` (Git)*
