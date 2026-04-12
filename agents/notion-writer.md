@@ -48,8 +48,8 @@ mcp__claude_ai_Notion__notion-create-pages, mcp__claude_ai_Notion__notion-update
 1. `~/.claude/handoffs/`에서 최신 파일 읽기
 2. YAML frontmatter 파싱
    - **파싱 실패 시**: frontmatter 없으면 기존 방식(대화 맥락 기반) 폴백
-3. `## 작업 내용` 섹션 추출 → 작업내용요약
-4. `## 다음 세션 인수인계` 섹션 추출 → 다음세션인계
+3. `## 📝 작업 내용` 또는 `## 작업 내용` 섹션 추출 → 작업내용요약
+4. `## 💡 다음 세션 인수인계` 또는 `## 다음 세션 인수인계` 섹션 추출 → 다음세션인계
 5. Notion 작업기록 DB에 row 생성 (`notion-create-pages`)
 6. 성공 시: handoffs/ 파일의 `notion_synced: false` → `notion_synced: true` 변경
 7. 실패 시: `~/.claude/queue/pending_notion_{timestamp}.json`에 큐잉
@@ -62,8 +62,8 @@ mcp__claude_ai_Notion__notion-create-pages, mcp__claude_ai_Notion__notion-update
 | work_type[0] | 작업유형 | select |
 | date | 날짜 | date |
 | status=="완료" → true | 완료여부 | checkbox |
-| 본문 `## 작업 내용` | 작업내용요약 | text |
-| 본문 `## 다음 세션 인수인계` | 다음세션인계 | text |
+| 본문 `## (📝) 작업 내용` | 작업내용요약 | text |
+| 본문 `## (💡) 다음 세션 인수인계` | 다음세션인계 | text |
 | duration_min | 소요시간(분) | number |
 | commits | 커밋수 | number |
 | session | 세션번호 | text |
