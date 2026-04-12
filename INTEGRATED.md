@@ -3,7 +3,7 @@
 > **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-12 21:15 KST
+> 마지막 빌드: 2026-04-12 21:27 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -494,7 +494,7 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 
 # env-info.md — 환경/MCP/ID 정보
 
-업데이트: 2026-04-11 | v4.2.2 반영 — 슬랙 채널 매핑 테이블 추가
+업데이트: 2026-04-12 | v5.0 — REF v2.0 + C+ 에이전트 + checklist 삭제 반영
 
 ---
 
@@ -502,55 +502,116 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 
 | MCP | 주요 기능 | 상태 |
 |-----|----------|------|
-| Notion MCP | 페이지/DB 생성·수정·검색, 코멘트, 뷰 관리 | ✅ 연결됨 |
-| Slack MCP | 메시지 읽기/전송, 채널·유저 검색, 캔버스 생성 | ✅ 연결됨 |
-| Figma MCP | 디자인 컨텍스트, 스크린샷, 다이어그램 생성 | ✅ 연결됨 |
-| Chrome 제어 MCP | 브라우저 탭 관리, URL 열기, JS 실행 | ✅ 연결됨 |
-| Claude in Chrome | 웹 페이지 읽기, 폼 입력, 스크린샷, GIF 생성 | ✅ 연결됨 |
-| PDF MCP | PDF 읽기, 표시, 목록 조회 | ✅ 연결됨 |
-| Playwright MCP | 브라우저 자동화, 웹 테스트, 스크래핑 | ✅ 연결됨 |
+| Notion MCP | 페이지/DB 생성·수정·검색, 코멘트, 뷰 관리 | ✅ Claude.ai 세션 기반 |
+| Slack MCP | 메시지 읽기/전송, 채널·유저 검색, 캔버스 생성 | ✅ Claude.ai 세션 기반 |
+| Playwright MCP | 브라우저 자동화, 웹 테스트, 스크래핑 | ✅ Claude.ai 세션 기반 |
+| Figma MCP | 디자인 컨텍스트, 스크린샷, 다이어그램 생성 | ✅ Claude.ai 세션 기반 |
+| Chrome 제어 MCP | 브라우저 탭 관리, URL 열기, JS 실행 | ✅ Claude.ai 세션 기반 |
+| Claude in Chrome | 웹 페이지 읽기, 폼 입력, 스크린샷, GIF 생성 | ✅ Claude.ai 세션 기반 |
+| PDF MCP | PDF 읽기, 표시, 목록 조회 | ✅ Claude.ai 세션 기반 |
+
+> MCP는 Claude Code 로컬 설정이 아닌 **Claude.ai 세션 기반** 연결. 세션마다 사용 가능한 MCP가 다를 수 있음.
 
 ---
 
 ## 개발 환경
 
 ### 맥북 (메인)
-- Claude Code: `/Users/ihyeon-u/.local/bin/claude` (v2.1.81)
-- 터미널: cmux (AI 에이전트 전용)
-- IDE: Antigravity (VS Code 기반, Claude Sonnet 4.6 연결됨)
-- Bun: v1.3.11
-- 시작 스크립트: `~/start-claude.sh` (`tel` 별칭)
 
-### 설치된 플러그인/프레임워크
-- Superpowers: v5.0.7 (claude-plugins-official 마켓플레이스)
-- GSD: v1.32.0 (npx 글로벌 설치, 60개 스킬)
-- Gstack: browse 포함 44개 스킬 설치됨
-- Hook Pack v1: 방어 6종 + 공격 4종 (settings.json + ~/.claude/hooks/)
-- Slack 알림: `CLAUDE_CODE_SLACK_TOKEN` 환경변수 사용 (Claude Code Agent 앱, 아래 채널 매핑 참조)
-- SessionStart 훅: 세션 시작 시각 자동 기록 → `~/.claude/.session_start` (epoch + human time)
+| 항목 | 값 |
+|------|-----|
+| Claude Code | v2.1.101 (`/Users/ihyeon-u/.local/bin/claude`) |
+| 터미널 | cmux (AI 에이전트 전용) |
+| IDE | Antigravity (VS Code 기반, Claude Sonnet 4.6 연결됨) |
+| Bun | v1.3.11 |
+| 시작 스크립트 | `~/start-claude.sh` (`tel` 별칭) |
 
 ### Windows 노트북 (보조)
-- 모델: ASUS TUF Gaming A15
-- Claude Code: `C:\Users\Tempt\AppData\Roaming\npm\claude` (v2.1.81)
-- 용도: 24시간 서버 운영 예정
+
+| 항목 | 값 |
+|------|-----|
+| 모델 | ASUS TUF Gaming A15 |
+| 용도 | 24시간 서버 운영 예정 (미가동) |
 
 ---
 
-## 자주 쓰는 명령어
+## 설치된 플러그인/프레임워크
 
-```bash
-# Railway 서버 로그 확인
-railway logs
+| 이름 | 버전 | 스킬 수 | 비고 |
+|------|------|---------|------|
+| Superpowers | v5.0.7 | 20+ | claude-plugins-official 마켓플레이스 |
+| GSD | v0.0.3 | 60+ | npx 글로벌 설치 |
+| Gstack | v0.13.0.0 | 44+ | browse 포함 |
+| Slack 플러그인 | — | 6 | claude-plugins-official |
+| Telegram 플러그인 | — | 2 | claude-plugins-official |
+| 로컬 스킬 | — | 10+ | api-key-manager, haemilsia-*, file-organizer 등 |
+| **총 스킬** | — | **127개** | `~/.claude/skills/` 하위 디렉토리 수 |
 
-# Git 저장 및 배포
-git add . && git commit -m "업데이트" && git push
+---
 
-# Claude Code 실행
-claude
+## REF v2.0 (Rules Enforcement Framework)
 
-# 자료조사 에이전트 실행
-research7
+| 항목 | 값 |
+|------|-----|
+| Registry | `~/.claude/rules/enforcement.json` |
+| Dispatcher | `~/.claude/hooks/ref-dispatcher.sh` |
+| Notion Feedback | `~/.claude/hooks/ref-notion-feedback.sh` |
+| Session Tracker Init | `~/.claude/hooks/session-tracker-init.sh` |
+| Session Tracker Log | `~/.claude/hooks/session-tracker-log.sh` |
+| Session End Check | `~/.claude/hooks/session-end-check.sh` |
+| 활성 규칙 | **16개** (B1~B17, B11 제외) |
+| hard_block | 11개 (B1,B2,B3,B5,B8,B9,B10,B12,B14,B15,B17) |
+| soft_warn | 5개 (B4,B6,B7,B13,B16) |
+| 우회 | `--force-Bx` (3회 이상 시 Slack 알림) |
+| 위반 DB | Notion `⚠️ 규칙 위반 기록` (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`) |
+
+### settings.json 훅 구조
+
+| 이벤트 | 매처 | 훅 | 역할 |
+|--------|------|-----|------|
+| SessionStart | — | `.session_start` 기록 | 시작 시각 저장 |
+| SessionStart | — | `ref-session-start-remind.sh` | session.md 리마인더 |
+| SessionStart | — | `session-tracker-init.sh` | tracker 27개 필드 초기화 |
+| SessionStart | — | `api-key-health-check.sh` | API 키 건강 체크 |
+| SessionStart | — | `session-start-worklog.sh` | 워크로그 초기화 |
+| PreToolUse | Write\|Edit | `ref-dispatcher.sh` | B1/B5/B7 실시간 차단 |
+| PostToolUse | Write\|Edit | `session-tracker-log.sh` | 파일 변경 추적 |
+| PostToolUse | Notion create/update | `session-tracker-log.sh` | DB 저장 추적 |
+| PostToolUse | Notion query-view | `session-tracker-log.sh` | TOP 5 조회 추적 (B3) |
+| PostToolUse | Slack send_message | `session-tracker-log.sh` | 복습카드 전송 추적 (B12) |
+| PostToolUse | Agent | `session-tracker-log.sh` | 에이전트 dispatch 추적 (B13~B17) |
+| PostToolUse | Skill | `session-tracker-log.sh` | MODE 진입 감지 (B14/B15) |
+| Stop | — | `ref-dispatcher.sh Stop` | PreToolUse 규칙의 Stop 이벤트 처리 |
+| Stop | — | `session-end-check.sh` | B2~B17 전체 점검 + Slack 경고 + 세션 종료 차단 |
+
+### 세션 tracker 필드 (27개)
+
 ```
+session_id, started_at, work_performed, warning_sent,
+error_log_saved, violation_log_saved, work_logged, handoff_created,
+pending_sync[], top5_queried, tool_recommended,
+memory_updated, review_card_sent, agent_dispatched,
+skill_installed_no_guide, notion_unauthorized,
+system_files_edited, errors_resolved, new_concepts_introduced,
+skills_dir_changed, skill_guide_edited,
+mode1_entered, mode2_entered,
+preflight_executed, ceo_eng_review_executed,
+session_start_agents, session_end_agents
+```
+
+---
+
+## C+ 에이전트 시스템
+
+| 항목 | 값 |
+|------|-----|
+| 레지스트리 | `~/.claude/agent.md` (v2.2) |
+| 프로필 디렉토리 | `~/.claude/agents/*.md` (52개 파일, C+ 팀원 19명 + GSD/기타) |
+| 모드 | `live` (dry-run 전환 가능) |
+| 매니저 | Opus (대표님 대화 전담) |
+| Haiku | 7명 (규칙감시관, 기억관리관, 지침사서, 도구추천관, 노션기록관, 슬랙배달관, 경비원) |
+| Sonnet | 6명 (핸드오프작성관, 코드리뷰관, QA검사관, Preflight검증관, 청소원, 자문전문가) |
+| Opus | 6명 (복습카드관, 분위기메이커, 아이디어검증관, CEO리뷰어, ENG리뷰어, 외주감사관) |
 
 ---
 
@@ -558,10 +619,10 @@ research7
 
 | 채널 | ID | 타입 | 용도 |
 |------|-----|-----|------|
-| `#general-mode` | `C0AEM5EJ0ES` | private_channel | 작업일지 — 작업 완료/Notion 저장/에러 해결/세션 종료 알림 (상세 작업일지 포맷) |
-| `#claude-study` | `C0AEM59BCKY` | public_channel | 복습 카드 — 대표님 학습용. MODE 1+2 사이클/시스템 변경/에러 해결/새 개념 도입 시 자동 출력 |
+| `#general-mode` | `C0AEM5EJ0ES` | private_channel | 작업일지 — 작업 완료/Notion 저장/에러 해결/세션 종료 알림 |
+| `#claude-study` | `C0AEM59BCKY` | public_channel | 복습 카드 — 대표님 학습용 (task-routine.md 트리거) |
 
-**분리 원칙**: 작업 기록과 학습 기록을 별도 채널로 관리 → 나중에 `#claude-study`만 스크롤해서 복습 가능
+**분리 원칙**: 작업 기록과 학습 기록을 별도 채널로 관리
 
 ---
 
@@ -575,35 +636,49 @@ research7
 | 프로젝트 현황 DB | `91fd98db80304dafa5fb6fe795e16905` |
 | 자료조사 에이전트 시스템 | `3337f080-9621-81c7-8b84-ec68a1ebd31f` |
 | 규칙 위반 기록 DB | `27c13aa7-9e91-49d3-bb30-0e81b38189e4` |
+| API Key 장부 DB | `33f7f080-9621-8131-8bca-e6f16628ea9c` |
 
 ### 해밀시아 임대 DB
 
 | 대상 | ID |
 |------|-----|
-| 1️⃣ 임차인마스터 | `46cebf77c88f4d80a19db4ecabac56fb` |
-| 2️⃣ 미납리스크 | `e8707fc4dd684c449b433684e9bc36b7` |
-| 3️⃣ 이사예정관리 | `f0ce036515f94b9fa3c598a012aef405` |
-| 4️⃣ 공실검증 | `74edd4ff20544eeabafa333b37ec499d` |
-| 6️⃣ 아이리스공실 | `e2b7b3112da0450bb9d2958d35663c8e` |
-| 7️⃣ 퇴거정산서 | `30f7f080962180f99a1bf3e674c19a37` |
-| 0️⃣ 점검보고서 | `a74d6ce07341401c88ff57e68063d6bf` |
-| 📚 임대관리 스킬(Notion) | `3267f080962181a2824cf28bb493fcf9` |
+| 1 임차인마스터 | `46cebf77c88f4d80a19db4ecabac56fb` |
+| 2 미납리스크 | `e8707fc4dd684c449b433684e9bc36b7` |
+| 3 이사예정관리 | `f0ce036515f94b9fa3c598a012aef405` |
+| 4 공실검증 | `74edd4ff20544eeabafa333b37ec499d` |
+| 6 아이리스공실 | `e2b7b3112da0450bb9d2958d35663c8e` |
+| 7 퇴거정산서 | `30f7f080962180f99a1bf3e674c19a37` |
+| 0 점검보고서 | `a74d6ce07341401c88ff57e68063d6bf` |
+| 임대관리 스킬(Notion) | `3267f080962181a2824cf28bb493fcf9` |
 
 ---
 
-## 주요 파일 위치
+## 시스템 문서 (6개)
 
-| 파일 | 경로 | 내용 |
+| 파일 | 경로 | 역할 |
 |------|------|------|
-| CLAUDE.md | `~/.claude/CLAUDE.md` | 핵심 운영 지침 |
-| session.md | `~/.claude/session.md` | 세션 루틴 + 기록 규칙 |
-| checklist.md | `~/.claude/checklist.md` | 업무 실행 전 체크리스트 |
+| CLAUDE.md | `~/.claude/CLAUDE.md` | 라우팅 허브 (모드 + 도구 + 워크플로우) |
+| rules.md | `~/.claude/rules.md` | 하위원칙 + REF B1~B17 패턴 |
+| session.md | `~/.claude/session.md` | 세션 시작/종료 루틴 |
 | env-info.md | `~/.claude/env-info.md` | 이 파일 |
 | skill-guide.md | `~/.claude/skill-guide.md` | 전체 스킬 인덱스 |
-| rules.md | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
-| docs/rules/task-routine.md | `~/.claude/docs/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (on-demand) |
-| docs/rules/notion-logging.md | `~/.claude/docs/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
-| 환경변수 | `~/.zshrc` | API 키, alias 등 |
+| agent.md | `~/.claude/agent.md` | C+ 에이전트 레지스트리 |
+
+### 주요 디렉토리
+
+```
+~/.claude/
+├── CLAUDE.md, rules.md, session.md, env-info.md, skill-guide.md, agent.md
+├── INTEGRATED.md        ← 6개 문서 자동 concat (GitHub raw URL 서빙)
+├── skills/              ← 127개 스킬
+├── agents/              ← 19개 에이전트 프로필
+├── hooks/               ← 26개 훅 파일
+├── rules/               ← enforcement.json + api-keys-state.json
+├── code/                ← .py .sh .js 코드 파일
+├── handoffs/            ← 세션 인수인계 파일
+├── docs/                ← 상세 스펙/규칙 (on-demand 로드)
+└── plans/               ← 설계 스펙/실행 계획
+```
 
 ---
 
@@ -620,51 +695,42 @@ research7
 └── 리소스/          ← 이미지, 소스 파일, 프로젝트 폴더
 ```
 
-**숨긴 폴더** (터미널 전용)
-```
-~/.claude/
-├── CLAUDE.md        ← 핵심 운영 지침 (경량화 버전)
-├── session.md       ← 세션 루틴 + 기록 규칙
-├── checklist.md     ← 업무 실행 전 체크리스트
-├── env-info.md      ← 환경/MCP/ID 정보 (이 파일)
-├── skill-guide.md   ← 전체 스킬 인덱스
-├── rules.md         ← 하위원칙 + 자주 실수 패턴
-├── skills/          ← 스킬 폴더 (34개+)
-├── code/            ← .py .sh .js 코드 파일
-└── agents/          ← 에이전트 프롬프트
-```
-
 **파일명 규칙**: `[프로젝트]_[설명]_v[버전].확장자`
 
 ---
 
-## 🔐 API 키 관리 (api-key-manager)
+## API 키 관리 (api-key-manager)
 
 | 항목 | 값 |
 |------|-----|
 | Keychain 네임스페이스 | `haemilsia-api-keys` |
 | 상태 파일 | `~/.claude/rules/api-keys-state.json` |
-| 노션 장부 DB | 마이그레이션 후 `state.json` 의 `notion_db_id` 필드 참조 |
-| 노션 장부 부모 페이지 | 메인 대시보드 (`32d7f080-9621-8124-83c7-df64b6aa08ce`) |
+| 노션 장부 DB | `33f7f080-9621-8131-8bca-e6f16628ea9c` |
 | `.zshrc` 블록 마커 | `# >>> claude api-key-manager >>>` / `# <<< claude api-key-manager <<<` |
-| 관리 대상 키 (Phase 1) | 7개 — `NOTION_API_TOKEN`, `REF_NOTION_TOKEN`, `CLAUDE_CODE_SLACK_TOKEN`, `FIGMA_ACCESS_TOKEN`, `GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `HAEMILSIA_SLACK_WEBHOOK` |
+| 관리 대상 키 (7개) | `NOTION_API_TOKEN`, `REF_NOTION_TOKEN`, `CLAUDE_CODE_SLACK_TOKEN`, `FIGMA_ACCESS_TOKEN`, `GEMINI_API_KEY`, `YOUTUBE_API_KEY`, `HAEMILSIA_SLACK_WEBHOOK` |
 | 엔트리 스크립트 | `~/.claude/code/api-key-manager_v1.sh` |
-| 라이브러리 | `~/.claude/code/api-key-lib_v1.sh` |
-| 마이그레이션 | `~/.claude/code/api-key-migrate_v1.sh` (`--execute` 플래그로 실제 실행) |
-| 롤백 | `~/.claude/code/api-key-rollback_v1.sh` |
 | SessionStart 훅 | `~/.claude/hooks/api-key-health-check.sh` (하루 1회) |
-| 스킬 정의 | `~/.claude/skills/api-key-manager/SKILL.md` |
-| 설계 스펙 | `~/.claude/plans/api-key-manager-design_v1.md` |
 
-**원칙**: 키 값은 Keychain 에만 저장. `.zshrc` 는 Keychain 에서 실시간 로딩하는 얇은 블록만. 노션 장부는 메타데이터(이름/용도/프로젝트/만료일)만 — 키 값 절대 저장 금지.
+**원칙**: 키 값은 Keychain에만 저장. `.zshrc`는 Keychain에서 실시간 로딩하는 블록만. 노션 장부는 메타데이터만 — 키 값 절대 저장 금지.
 
 ---
 
 ## 배포 인프라
 
-- Railway (백엔드) · Netlify (프론트엔드) · GitHub (`temptation0924-design`)
-- 쁘띠린: `web-production-4810d.up.railway.app`
-- haemilsia-bot: `haemilsia-bot-production.up.railway.app`
+| 플랫폼 | 용도 | 주요 서비스 |
+|--------|------|------------|
+| Railway | 백엔드 | haemilsia-bot, API 서버 |
+| Netlify | 프론트엔드 | 랜딩페이지, 정적 사이트 |
+| GitHub | 소스 관리 | `temptation0924-design` 계정 |
+
+| 서비스 | URL |
+|--------|-----|
+| 쁘띠린 | `web-production-4810d.up.railway.app` |
+| haemilsia-bot | `haemilsia-bot-production.up.railway.app` |
+
+---
+
+*Haemilsia AI operations | 2026-04-12 | env-info v5.0 — REF v2.0 + C+ 에이전트 + 6개 시스템 문서 체계 반영*
 
 
 ---
@@ -1114,4 +1180,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 21:15 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 21:27 KST | 원본: `~/.claude/*.md` (Git)*
