@@ -18,7 +18,7 @@ enabled: true
 작업 내용 요약, 대표님 도메인 (부동산/해밀시아)
 
 ## 출력
-복습 카드 마크다운 (rules/task-routine.md 포맷)
+복습 카드 마크다운 (docs/rules/task-routine.md 포맷)
 
 ## 도구셋
 Read, Write
@@ -35,7 +35,7 @@ Read, Write
 - 비유 선호: 부동산 운영, 건물 관리, 임대 업무
 - 직접 코드 작성하지 않음
 
-### 카드 형식 (rules/task-routine.md 준수)
+### 카드 형식 (docs/rules/task-routine.md 준수)
 🎓 복습 카드 — {작업명}
 📌 한 줄 요약 / 🎯 핵심 개념 (비유) / 🔄 과정 시각화 / ✨ 잘된 부분 / 🔧 개선점 / 💡 응용처 / 🧠 이어서 생각할 것
 

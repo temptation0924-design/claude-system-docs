@@ -107,8 +107,8 @@ research7
 | env-info.md | `~/.claude/env-info.md` | 이 파일 |
 | skill-guide.md | `~/.claude/skill-guide.md` | 전체 스킬 인덱스 |
 | rules.md | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
-| rules/task-routine.md | `~/.claude/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (자동 로드) |
-| rules/notion-logging.md | `~/.claude/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
+| docs/rules/task-routine.md | `~/.claude/docs/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (on-demand) |
+| docs/rules/notion-logging.md | `~/.claude/docs/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
 | 환경변수 | `~/.zshrc` | API 키, alias 등 |
 
 ---

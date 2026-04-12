@@ -26,12 +26,7 @@ MISSING=""
 [ "$WORK_LOGGED" != "true" ] && MISSING+="❌ B2: 작업기록 DB 미저장\\n"
 [ "$HANDOFF" != "true" ] && MISSING+="❌ B2: 인수인계 파일 미생성\\n"
 
-# REF Phase 1: B8 검사 (pending_sync 잔여)
-PENDING_SYNC_COUNT=$(jq -r '.pending_sync | length // 0' "$TRACKER" 2>/dev/null)
-if [ -n "$PENDING_SYNC_COUNT" ] && [ "$PENDING_SYNC_COUNT" -gt 0 ]; then
-  PENDING_FILES=$(jq -r '.pending_sync | join(", ")' "$TRACKER" 2>/dev/null)
-  MISSING+="⚠️ B8: Notion 통합본 동기화 누락 (${PENDING_FILES})\\n"
-fi
+# B8 검사 — 2026-04-12 폐기 (Notion 개별 동기화 폐기, GitHub INTEGRATED.md만 사용)
 
 if [ -n "$MISSING" ]; then
   # Slack 경고: 1회만 전송

@@ -30,7 +30,6 @@
 | plan-eng-review | Gstack | "아키텍처 리뷰", "구조 확인" |
 | plan-design-review | Gstack | "디자인 리뷰", "UI 계획 검토" |
 | writing-plans | Superpowers | 계획 승인 후 자동 |
-| plan-agent | Haemilsia | "계획 세워줘", "plan" |
 | preflight-check | Haemilsia | "검증", 실행 전 자동 |
 | autoplan | Gstack | "auto review", "결정 대신 해줘" |
 
@@ -102,7 +101,6 @@
 |--------|-------------|------|
 | system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정 | `~/.claude/skills/system-docs-sync/SKILL.md` |
 | skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천 | `~/.claude/skills/skill-manager/SKILL.md` |
-| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
 | file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
 
 ### 🎨 개인화/편의 (3개)
@@ -113,7 +111,7 @@
 | petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
 | travel-meal-planner | 여행 맛집, 식사 플랜, 맛집 찾아줘, travel meal plan | `~/.claude/skills/travel-meal-planner/SKILL.md` |
 
-**총 13개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
+**총 12개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
 
 ---
 
@@ -255,7 +253,6 @@ UI, 이미지, 브랜드, 가상인테리어 관련 작업.
 | plan-eng-review | 아키텍처 리뷰, 엔지니어링 검토, 구조 확인, 코딩 시작 전 | `~/.claude/skills/plan-eng-review/SKILL.md` |
 | retro | 주간 회고, weekly retro, 이번 주 뭐 했어, 엔지니어링 회고 | `~/.claude/skills/retro/SKILL.md` |
 | autoplan | auto review, autoplan, 전체 리뷰 자동으로, 결정 대신 해줘 | `~/.claude/skills/autoplan/SKILL.md` |
-| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
 | gstack-upgrade | gstack 업그레이드, gstack 최신 버전, update gstack | `~/.claude/skills/gstack-upgrade/SKILL.md` |
 
 ---

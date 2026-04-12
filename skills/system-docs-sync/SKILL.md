@@ -2,9 +2,8 @@
 name: system-docs-sync
 description: >
   시스템 문서(CLAUDE.md, rules.md, session.md, checklist.md, env-info.md, skill-guide.md, agent.md)를
-  Git 원본 파일에서 Notion 개별 동기화본 + 자동 빌드 통합본으로 단방향 반영하는 스킬.
-  수정 내용이 다른 파일에도 영향을 주면 연쇄 수정까지 자동 처리하고,
-  1~7번 중 하나라도 수정되면 통합본(8번)을 7개 파일 concat으로 재빌드한다.
+  수정하고, 연쇄 영향 파일을 자동 처리한 뒤, 통합본(INTEGRATED.md)을 GitHub에 재빌드하는 스킬.
+  Notion 개별 페이지 동기화는 2026-04-12 폐기됨 — GitHub raw URL만 사용.
   반드시 이 스킬을 사용할 것:
   "CLAUDE.md 수정", "session.md 수정", "checklist.md 수정", "env-info.md 수정",
   "skill-guide.md 수정", "rules.md 수정", "agent.md 수정", "시스템 문서 수정",
@@ -15,52 +14,39 @@ description: >
 
 # System Docs Sync
 
-Git 리포지토리(`~/.claude/`)가 **원본**. 로컬 파일 수정 후 → Notion 열람본에 **단방향 백업 동기화**하는 스킬.
-연결된 파일까지 연쇄 수정한다.
+Git 리포지토리(`~/.claude/`)가 **유일한 원본**. 로컬 파일 수정 후 → GitHub 통합본만 재빌드.
 
-> **비유**: 주방 레시피 원본은 주방 벽(Git)에 있고, 사무실 캐비넷(Notion)은 복사본.
-> 주방에서 레시피를 고치면 → 이 스킬이 사무실 복사본도 맞춰줍니다.
-> **반대 방향(Notion→Git)은 금지**. 항상 Git이 진실의 원천.
+> **비유**: 주방 레시피 원본은 주방 벽(Git)에 있고, 열람용 사본은 GitHub에 1부만 있다.
+> 주방에서 레시피를 고치면 → 이 스킬이 열람용 사본을 자동 갱신합니다.
 
 ---
 
-## 관리 대상: 파일 ↔ 동기화 위치 매핑
+## 관리 대상: 7개 시스템 문서
 
-| # | 로컬 파일 | Notion 개별 동기화본 | 내용 |
-|---|-----------|-----------------|------|
-| 1 | `~/.claude/CLAUDE.md` | `3357f080962181aa8804f879e0a5d7c9` | 핵심 원칙 + 역할 + 도구 계층 + 파일 라우팅 |
-| 2 | `~/.claude/rules.md` | `3387f080962181b3836bd87166cae250` | 하위원칙 + 자주 실수 패턴 |
-| 3 | `~/.claude/session.md` | `3357f080962181638f83def033685c7f` | 세션 시작/종료 루틴 + 기록 규칙 |
-| 4 | `~/.claude/checklist.md` | `3357f080962181488769e0dbbf95f40a` | 업무 체크리스트 + 오류 대응표 |
-| 5 | `~/.claude/env-info.md` | `3357f080962181a09968c7fcd2107ebc` | MCP·환경·Notion ID·명령어 |
-| 6 | `~/.claude/skill-guide.md` | `3357f0809621816d9e2bff84fef2696a` | 전체 스킬 목록 + 추천 규칙 |
-| 7 | `~/.claude/agent.md` | `3387f0809621810d9e32dbf7f83e3cc4` | 에이전트 레지스트리 + 계획 시스템 |
+| # | 파일 | 내용 |
+|---|------|------|
+| 1 | `~/.claude/CLAUDE.md` | 핵심 원칙 + 역할 + 도구 계층 + 파일 라우팅 |
+| 2 | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
+| 3 | `~/.claude/session.md` | 세션 시작/종료 루틴 + 기록 규칙 |
+| 4 | `~/.claude/checklist.md` | 업무 체크리스트 + 오류 대응표 |
+| 5 | `~/.claude/env-info.md` | MCP·환경·Notion ID·명령어 |
+| 6 | `~/.claude/skill-guide.md` | 전체 스킬 목록 + 추천 규칙 |
+| 7 | `~/.claude/agent.md` | 에이전트 레지스트리 + 계획 시스템 |
 
-### 통합본 (Claude.ai 단일 열람본) — **GitHub raw URL 방식**
+### 통합본 — GitHub raw URL 방식
 
 | 항목 | 값 |
 |------|-----|
-| **원본 파일** | `~/.claude/INTEGRATED.md` (1~7번 자동 concat, Git tracked) |
+| **원본 파일** | `~/.claude/INTEGRATED.md` (1~7번 자동 concat) |
 | **빌드 스크립트** | `~/.claude/code/build-integrated_v1.sh` |
 | **GitHub raw URL** | `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` |
-| **Notion 허브 페이지** | `3317f0809621816688feef408023224b` (짧은 안내 + GitHub URL + 자식 링크만) |
-| **Claude.ai 열람 방식** | GitHub raw URL을 웹 fetch로 직접 읽음 (Notion 페이지 경유 X) |
-
-> **⭐ 핵심 설계 (v4.2 — B-4 방식)**:
-> - 통합본은 **GitHub public raw URL**로 서빙. Notion에 53KB를 올릴 필요 없음.
-> - Bash 스크립트가 7개 md를 concat → `INTEGRATED.md` 생성 → git push 한 줄로 반영.
-> - Notion 부모 페이지(`3317f080...`)는 **허브 역할**로 축소: GitHub URL 링크 + 자식 페이지 7개 링크만.
-> - Notion 직접 수정 금지. Git이 원본이자 열람본의 Single Source of Truth.
+| **Claude.ai 열람 방식** | GitHub raw URL을 웹 fetch로 직접 읽음 |
 
 ---
 
-## 실행 절차 (5단계)
+## 실행 절차 (3단계)
 
 ### Step 1: 수정 대상 파일 식별
-
-사용자의 수정 요청을 분석하여 **어떤 파일이 1차 대상인지** 판별한다.
-
-**판별 기준:**
 
 | 수정 내용 키워드 | 1차 대상 파일 |
 |-----------------|--------------|
@@ -72,9 +58,7 @@ Git 리포지토리(`~/.claude/`)가 **원본**. 로컬 파일 수정 후 → No
 | 스킬 추가, 스킬 삭제, 스킬 목록, 트리거 | skill-guide.md |
 | 에이전트, agent, 팀 에이전트, 계획, plan | agent.md |
 
-복수 파일에 해당하면 → 전부 나열하고 대표님 확인 후 진행.
-
-### Step 2: 연쇄 영향 분석
+### Step 2: 연쇄 영향 분석 + 수정
 
 1차 대상 파일 수정 시, 다른 파일에도 영향을 주는지 확인한다.
 
@@ -82,14 +66,14 @@ Git 리포지토리(`~/.claude/`)가 **원본**. 로컬 파일 수정 후 → No
 
 ```
 CLAUDE.md (중심 허브)
-├── 원칙 변경 → rules.md (하위원칙 갱신 필요)
-├── 원칙 변경 → session.md (루틴에 원칙 참조 있음)
-├── 원칙 변경 → checklist.md (체크리스트에 원칙 반영)
+├── 원칙 변경 → rules.md (하위원칙 갱신)
+├── 원칙 변경 → session.md (루틴에 원칙 참조)
+├── 원칙 변경 → checklist.md (체크리스트에 반영)
 ├── 도구 추가/삭제 → env-info.md (환경 정보 갱신)
 └── 스킬 참조 변경 → skill-guide.md (스킬 규칙 갱신)
 
 rules.md
-├── 하위원칙 변경 → CLAUDE.md (핵심 원칙과 정합성 확인)
+├── 하위원칙 변경 → CLAUDE.md (정합성 확인)
 └── 세션 루틴 규칙 변경 → session.md (루틴 절차 갱신)
 
 session.md
@@ -98,196 +82,71 @@ session.md
 
 env-info.md
 ├── MCP 추가/삭제 → CLAUDE.md (도구 역할표 갱신)
-├── Notion ID 변경 → session.md (DB ID 참조 갱신)
 └── 배포 인프라 변경 → checklist.md (배포 체크리스트 갱신)
 
 skill-guide.md
 └── 스킬 추가/삭제 → CLAUDE.md (스킬 참조 원칙 갱신 가능)
 
-checklist.md
-└── 대체로 독립적 (다른 파일에 영향 드묾)
-
 agent.md
 ├── 에이전트 추가/삭제 → CLAUDE.md (라우팅 맵 갱신)
-├── 세션 루틴 변경 → session.md (plan-agent 트리거 갱신)
-└── 스킬 의존 변경 → skill-guide.md (스킬 참조 갱신)
+└── 세션 루틴 변경 → session.md (트리거 갱신)
 ```
 
 **실행 규칙:**
 - 연쇄 영향이 있으면 → "이 수정은 [파일명]에도 영향을 줍니다. 함께 수정할까요?" 확인
-- 대표님 승인 후 → 1차 대상 + 연쇄 대상 모두 수정 목록에 추가
+- 대표님 승인 후 → 1차 대상 + 연쇄 대상 모두 수정
 
-### Step 3: 양쪽 동시 수정
+### Step 3: 통합본 재빌드 + GitHub push
 
-**3a. 로컬 파일 수정 (Claude Code 실행)**
-```bash
-# 대상 파일 읽기
-cat ~/.claude/[파일명]
-
-# 수정 적용
-# (Claude Code가 직접 파일 편집)
-
-# 수정 확인
-cat ~/.claude/[파일명]
-```
-
-**3b. 개별 Notion 페이지 수정 (1~7번)**
-- Notion MCP `notion-update-page` 사용
-- 매핑 테이블의 페이지 ID로 해당 페이지 접근
-- 같은 내용을 Notion 마크다운 형식으로 변환하여 반영
-
-**환경별 형식 차이:**
-
-| 항목 | 로컬 파일 (Claude Code) | Notion 페이지 (Claude.ai) |
-|------|------------------------|--------------------------|
-| 테이블 | 마크다운 테이블 `| a | b |` | Notion 테이블 블록 |
-| 코드 | ` ```bash ``` ` 코드블록 | Notion 코드 블록 |
-| 링크 | `[텍스트](URL)` | Notion 인라인 링크 |
-| 경로 | `~/.claude/파일명` 그대로 | 백틱으로 감싸서 표시 |
-
-**3c. 통합본(`INTEGRATED.md`) 재빌드 + GitHub push ⭐ 필수**
-
-1~7번 중 **어느 하나라도 수정**되면 Bash 스크립트로 통합본을 재빌드하고 GitHub에 push한다.
-Claude.ai는 GitHub raw URL에서 최신본을 읽는다 — Notion MCP로 53KB 업로드할 필요 없음.
-
-**빌드 절차 (Bash 한 줄)**:
+1~7번 중 **어느 하나라도 수정**되면 빌드 스크립트 실행:
 
 ```bash
 ~/.claude/code/build-integrated_v1.sh --push
 ```
 
-**스크립트가 하는 일**:
+**스크립트 동작**:
+1. 7개 원본 파일 존재 검증
+2. 순서대로 concat → `INTEGRATED.md` 생성
+3. `git add INTEGRATED.md` → commit → push
+4. 변경 없으면 push 생략
 
-1. **7개 원본 파일 존재 검증** — 누락 시 즉시 실패 (원본 훼손 방지)
-2. **순서대로 concat**:
-   ```
-   CLAUDE.md → rules.md → session.md → checklist.md
-   → env-info.md → skill-guide.md → agent.md
-   ```
-3. **헤더 + 목차 + 7개 섹션 + 푸터** 생성 → `~/.claude/INTEGRATED.md` 저장
-4. **`git add INTEGRATED.md`** (다른 WIP 파일 건드리지 않음, 이것만 스테이징)
-5. **변경 있으면** `git commit -m "chore(integrated): rebuild integrated view — <timestamp>"` + `git push`
-6. **변경 없으면** push 생략 (빈 커밋 방지)
-
-**출력 예시**:
-```
-✅ INTEGRATED.md 빌드 완료
-   경로: /Users/ihyeon-u/.claude/INTEGRATED.md
-   크기: 52614 bytes
-   줄 수: 1022 lines
-   빌드 시각: 2026-04-12 09:35 KST
-
-=== git push 모드 ===
-[main abc1234] chore(integrated): rebuild integrated view — 2026-04-12 09:35 KST
- 1 file changed, 42 insertions(+), 38 deletions(-)
-✅ GitHub push 완료
-
-📎 GitHub raw URL:
-   https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md
-```
-
-**중요 원칙**:
-- 1~7번 중 **단 한 파일**만 수정해도 **7개 전체 재빌드** (부분 업데이트 금지 — drift 방지)
-- 빌드 결과물은 **결정적**(determinic) — 같은 입력이면 같은 출력 (빌드 시각만 다름)
-- 빌드 실패 시 → 1~7번 Notion 동기화는 유지, 통합본은 실패 상태 보고 (원본 훼손 금지)
-- `--push` 없이 실행하면 드라이런 (로컬 INTEGRATED.md만 갱신, git은 건드리지 않음)
-- 리포는 public이라 **민감 정보 금지** (`.gitignore` whitelist 방식으로 보호)
-
-**Claude.ai에서 통합본 읽기**:
-- 북마크 URL: `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md`
-- Claude.ai에 이 URL을 붙여넣으면 자동으로 웹 fetch 후 전체 통합본(~52KB) 읽음
-- Notion 허브 페이지(`3317f080...`)에도 이 URL이 첫 줄에 명시되어 있음
-
-### Step 4: 연쇄 대상 파일도 수정
-
-Step 2에서 식별된 연쇄 대상 파일들에 대해 Step 3을 반복한다.
-순서: 1차 대상 먼저 → 연쇄 대상 순서대로.
-
-### Step 5: 동기화 완료 보고
-
-수정 완료 후 아래 형식으로 보고:
-
+**완료 보고 형식**:
 ```
 ✅ system-docs-sync 완료
 
 📝 수정된 파일:
-  1. CLAUDE.md (로컬 ✅ / Notion ✅) — 원칙 문구 변경
-  2. session.md (로컬 ✅ / Notion ✅) — 체크리스트 참조 갱신 [연쇄]
+  1. CLAUDE.md — 원칙 문구 변경
+  2. session.md — 체크리스트 참조 갱신 [연쇄]
 
 🔗 연쇄 수정: 1건
-📌 버전: v3.0 유지 (소규모 수정)
-   또는: v3.0 → v3.1 (항목 추가/삭제 시)
+📦 GitHub push: ✅ 완료
 ```
-
----
-
-## 운영 지침 v4.0 동기화 규칙
-
-운영 지침 v4.0 (`3317f0809621816688feef408023224b`)은 **7개 파일의 통합본**이다.
-
-**동기화 방향 (단방향: Git → Notion):**
-- Git 개별 파일(CLAUDE.md 등) 수정 시 → Notion 개별 페이지 + 통합본 갱신
-- Notion 직접 수정 금지 — 수정은 반드시 Git 파일에서 먼저 수행
-
-**섹션 매핑:**
-
-| 운영 지침 섹션 | 대응 파일 |
-|--------------|----------|
-| 1. 역할 + 도구 선택 | CLAUDE.md |
-| 2. 핵심 원칙 (6개) | CLAUDE.md |
-| 3. 파일 라우팅 맵 + 모드 시스템 | CLAUDE.md |
-| 4. 업무 모드 시스템 (MODE 1-4) | CLAUDE.md |
-| 5. 1% 룰 | CLAUDE.md |
-| 하위원칙 + 실수 패턴 | rules.md |
-| 세션 루틴 + 기록 | session.md |
-| 업무 체크리스트 | checklist.md |
-| 환경 + 연결 정보 | env-info.md |
-| 스킬 시스템 | skill-guide.md |
-| 에이전트 레지스트리 | agent.md |
-
----
-
-## 버전 관리 규칙
-
-| 변경 유형 | 버전 처리 |
-|----------|----------|
-| 오타 수정, 문구 다듬기 | 버전 유지 (패치) |
-| 항목 추가/삭제 | 마이너 버전 +0.1 (예: v3.0 → v3.1) |
-| 구조 변경, 섹션 재편 | 메이저 버전 +1.0 (예: v3.0 → v4.0) |
-
-버전 변경 시 → 운영 지침 상단의 버전 표기 + 업데이트 날짜도 함께 갱신.
 
 ---
 
 ## 주의사항
 
 1. **수정 전 확인 필수**: "이렇게 수정합니다" → 대표님 승인 후 실행
-2. **양쪽 다 실패하면**: 한쪽만 수정된 불일치 상태 방지 — 로컬 먼저 수정 성공 확인 후 Notion 수정
-3. **Git이 마스터**: Git 파일과 Notion 열람본이 충돌하면 → Git이 우선, Notion을 Git에 맞춤
-4. **Notion 백업 동기화**: 이 스킬은 Git→Notion "단방향 백업"이므로 별도 확인 없이 바로 반영 (신규 저장이 아님)
-5. **대규모 구조 변경 시**: 예시 1개 먼저 보여주고 승인 후 나머지 (핵심원칙 5번 준수)
+2. **Git이 유일한 원본**: 다른 곳에서 수정 금지
+3. **대규모 구조 변경 시**: 예시 1개 먼저 보여주고 승인 후 나머지
+4. **민감 정보 금지**: 리포는 public — 토큰, API키 절대 포함 금지
 
 ---
 
 ## Claude.ai에서 수정이 필요할 때
 
-Git이 원본이므로 Claude.ai에서 Notion을 직접 수정하지 않는다.
-대신 다음 절차를 따른다:
+Git이 원본이므로 Claude.ai에서 직접 수정하지 않는다.
 
-1. **수정 요청 지시서 생성** → Git 파일에 반영할 내용을 담은 지시서 작성
-2. 지시서를 대표님께 전달 → Claude Code에서 Git 파일 수정 실행
-3. Claude Code가 Git 수정 완료 → 이 스킬(system-docs-sync)로 Notion 백업 동기화
-
-**지시서 형식:**
-```
-# system-docs-sync Git 수정 지시서
-날짜: YYYY-MM-DD
-대상: ~/.claude/CLAUDE.md
-변경: [수정 내용 상세]
-요청 출처: Claude.ai
-→ Claude Code에서 Git 파일 수정 후 Notion 동기화 필요
-```
+1. **수정 요청 지시서 생성** → Git 파일에 반영할 내용
+2. Claude Code에서 Git 파일 수정 실행
+3. `build-integrated_v1.sh --push`로 통합본 갱신
 
 ---
 
-*system-docs-sync v4.2 | 2026.04.12 | B-4 전환 — 통합본을 GitHub raw URL로 서빙 (bash 스크립트 `build-integrated_v1.sh --push`)*
+## 변경 이력
+
+- **v5.0** (2026-04-12): Notion 개별 7페이지 동기화 폐기. GitHub INTEGRATED.md만 사용.
+- **v4.2** (2026-04-12): B-4 전환 — 통합본을 GitHub raw URL로 서빙
+- **v4.0** (2026-04-11): 7개 시스템 문서 체계 확립
+
+*system-docs-sync v5.0 | 2026.04.12 | Notion 개별 동기화 폐기 — GitHub INTEGRATED.md 단일 경로*

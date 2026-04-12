@@ -40,5 +40,42 @@ mcp__claude_ai_Notion__notion-create-pages, mcp__claude_ai_Notion__notion-update
 - 외부 장애 시: ~/.claude/queue/pending_notion_{timestamp}.json에 큐잉
 - dry-run 모드: 실제 저장 차단, "이럴 거였음" 출력
 
+### 작업기록 DB 자동 싱크 (세션 종료 시)
+
+**트리거**: 세션 종료 Stage 2에서 호출됨 (handoffs/ 파일 생성 후)
+
+**절차**:
+1. `~/.claude/handoffs/`에서 최신 파일 읽기
+2. YAML frontmatter 파싱
+   - **파싱 실패 시**: frontmatter 없으면 기존 방식(대화 맥락 기반) 폴백
+3. `## 작업 내용` 섹션 추출 → 작업내용요약
+4. `## 다음 세션 인수인계` 섹션 추출 → 다음세션인계
+5. Notion 작업기록 DB에 row 생성 (`notion-create-pages`)
+6. 성공 시: handoffs/ 파일의 `notion_synced: false` → `notion_synced: true` 변경
+7. 실패 시: `~/.claude/queue/pending_notion_{timestamp}.json`에 큐잉
+
+**매핑 테이블**:
+| frontmatter | Notion 필드 | 비고 |
+|---|---|---|
+| session | 작업제목 | title |
+| projects (join with ", ") | 관련프로젝트 | text |
+| work_type[0] | 작업유형 | select |
+| date | 날짜 | date |
+| status=="완료" → true | 완료여부 | checkbox |
+| 본문 `## 작업 내용` | 작업내용요약 | text |
+| 본문 `## 다음 세션 인수인계` | 다음세션인계 | text |
+| duration_min | 소요시간(분) | number |
+| commits | 커밋수 | number |
+| session | 세션번호 | text |
+
+### 미싱크 handoffs/ 재시도 (세션 시작 시)
+
+**트리거**: 매니저가 세션 시작 시 미싱크 파일 발견 시 호출
+
+**절차**:
+1. `grep -l "notion_synced: false" ~/.claude/handoffs/*.md`로 미싱크 파일 목록
+2. 각 파일에 대해 위 자동 싱크 절차 실행
+3. 최대 3회 시도. 3회 초과 시 스킵 + "미싱크 파일 N개 있음" 경고 출력
+
 ## 에스컬레이션
 실패 시: Haiku → Sonnet → Opus / 타임아웃: 10초

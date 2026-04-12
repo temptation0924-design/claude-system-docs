@@ -2,7 +2,7 @@
 
 > **역할**: 19명 에이전트 팀의 중앙 레지스트리 + 디스패치 규칙
 > **위치**: `~/.claude/agent.md`
-> **버전**: v2.0 | 2026-04-12
+> **버전**: v2.2 | 2026-04-12
 > **스펙**: `~/.claude/docs/specs/c-plus-agent-system-design_20260412_v1.md`
 
 ---
@@ -40,11 +40,11 @@ mode: live
 | 8 | handoff-scribe | 핸드오프작성관 | Sonnet | handoffs/*.md 생성 | 2 | true |
 | 9 | code-reviewer | 코드리뷰관 | Sonnet | spec 준수 + 코드 품질 리뷰 | 2 | true |
 | 10 | qa-inspector | QA검사관 | Sonnet | /qa + /review + Playwright | 2 | true |
-| 11 | preflight-trio | Preflight검증관 | Sonnet×2+Opus×1 | 3 Agent 병렬 검증 | 2 | true |
+| 11 | preflight-trio | Preflight검증관 | Sonnet×2+Opus×1 | 계획 품질 점검 + 3 Agent 병렬 구현 검증 | 2 | true |
 | 12 | janitor | 청소원 | Sonnet | 환경 유지 + 역사적 유물 경보 | 2 | true |
-| 13 | study-coach | 복습카드관 | Opus | 학습 카드 (깊은 비유 + 개념) | 3 | true |
-| 14 | moodmaker | 분위기메이커 | Opus | 적시 유머/격려/축하 | 3 | true |
-| 15 | task-planner | 기획플래너 | Opus | writing-plans micro-task 분해 | 3 | true |
+| 13 | advisor | 자문전문가 | Sonnet | 에이전트 실패 진단 + 접근법 조정 | 2 | true |
+| 14 | study-coach | 복습카드관 | Opus | 학습 카드 (깊은 비유 + 개념) | 3 | true |
+| 15 | moodmaker | 분위기메이커 | Opus | 적시 유머/격려/축하 | 3 | true |
 | 16 | socratic-challenger | 아이디어검증관 | Opus | office-hours 소크라테스 질문 | 3 | true |
 | 17 | ceo-reviewer | CEO 리뷰어 | Opus | 전략 관점 플랜 리뷰 | 3 | true |
 | 18 | eng-reviewer | ENG 리뷰어 | Opus | 아키텍처 관점 플랜 리뷰 | 3 | true |
@@ -75,6 +75,7 @@ mode: live
 | **"정리해줘" (단독)** | 복습카드관 (기본값 — 학습 정리) | - |
 | **"환경 정리", "파일 정리"** | 청소원 | - |
 | **"정리" + 맥락 애매** | 매니저가 "학습 정리? 환경 정리?" 1회 확인 | - |
+| **Haiku/Sonnet 실패** | 자문전문가 (빠른 판별 통과 시) → 진단 후 재시도 or 승급 | - |
 
 ---
 
@@ -96,11 +97,20 @@ mode: live
 ## 5. 에스컬레이션 체인
 
 ```
-Haiku 실패 → Sonnet 재시도 (자동)
-Sonnet 실패 → Opus 재시도 (자동)
-Opus 실패 → 매니저가 대표님께 수동 개입 요청
+Haiku 실패 → [빠른 판별] → 자문전문가 진단 (5초) → 조정 후 Haiku 재시도 or Sonnet 승급
+Sonnet 실패 → [빠른 판별] → 자문전문가 진단 (5초) → 조정 후 Sonnet 재시도 or Opus 승급
+Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 ```
 
+### 빠른 판별 (자문 스킵 → 바로 승급)
+에러에 `timeout`, `rate_limit`, `context_length_exceeded`, `model_capacity`, `too many tokens`, `overloaded` 포함 시 자문전문가 개입 없이 즉시 모델 승급.
+
+### 자문전문가 규칙
+- 자문 개입은 **1회만** (자문 후 재시도도 실패 → 기존 모델 승급)
+- 자문전문가 본인 실패 → 스킵하고 기존 승급 진행
+- 진단 타임아웃: **5초**
+
+### 기본 규칙
 - 같은 팀원 재dispatch 최대 2회
 - 타임아웃: Haiku 10초 / Sonnet 25초 / Opus 45초
 - 모든 에스컬레이션 → 에러로그 DB 자동 기록
@@ -113,8 +123,8 @@ Opus 실패 → 매니저가 대표님께 수동 개입 요청
 | 등급 | 수 | 비용 비중 |
 |------|-----|---------|
 | Haiku (인턴) | 7명 | ~15% |
-| Sonnet (팀장) | 5명 | ~30% |
-| Opus (임원) | 7명 | ~50% |
+| Sonnet (팀장) | 6명 | ~30% |
+| Opus (임원) | 6명 | ~50% |
 | 매니저 (Opus) | 1명 | ~5% |
 
 ---
@@ -131,4 +141,4 @@ Opus 실패 → 매니저가 대표님께 수동 개입 요청
 8. 대표님 대기시간 최소화 — 1명 지연 시 부분 응답 가능
 9. 에이전트 프로필은 dispatch 시에만 읽고, 매니저 context에 캐시하지 않음
 
-*agent.md v2.0 | C+ Agent System | 2026-04-12 | Haemilsia AI Operations*
+*agent.md v2.2 | C+ Agent System | 2026-04-12 | plan-agent/task-planner 폐기, 자문전문가 신설, preflight-trio 계획품질 점검 추가*

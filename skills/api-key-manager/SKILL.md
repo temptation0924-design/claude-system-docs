@@ -81,8 +81,8 @@ bash ~/.claude/code/api-key-manager_v1.sh health-check
 1. **키 값은 절대 대화에 출력 안 함** — 마스킹(`xoxb-...y987`)만 허용
 2. **대표님이 타이핑할 건 환경변수 이름/값뿐** — 나머지 플래그는 스킬이 채움
 3. **대표님 확인 없이 삭제/교체 금지** — Y/N 게이트 필수
-4. **Slack 알림** `#general-mode` 에 작업일지 포맷 (상세는 `rules/slack-worklog.md`)
-5. **복습 카드** 새 시스템 도입/에러 해결 시만 `#claude-study` (상세는 `rules/task-routine.md`)
+4. **Slack 알림** `#general-mode` 에 작업일지 포맷 (상세는 `docs/rules/slack-worklog.md`)
+5. **복습 카드** 새 시스템 도입/에러 해결 시만 `#claude-study` (상세는 `docs/rules/task-routine.md`)
 
 ## 관련 문서
 

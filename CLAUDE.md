@@ -34,7 +34,7 @@
 | Cowork | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
 | Claude.ai | **GitHub raw URL 통합본** — `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` (7개 md 자동 concat, 5분 캐시) |
 
-> **원본**: Git 리포지토리(`~/.claude/`)가 원본. 수정 시 → Git 파일 먼저 수정 → `system-docs-sync` 스킬로 개별 Notion 백업 + `build-integrated_v1.sh --push`로 GitHub 통합본 재빌드. GitHub URL과 Notion 허브 페이지(`3317f080...`)는 자동 갱신되는 공개 열람본 — 직접 수정 금지.
+> **원본**: Git 리포지토리(`~/.claude/`)가 유일한 원본. 수정 시 → Git 파일 먼저 수정 → `build-integrated_v1.sh --push`로 GitHub 통합본 재빌드 (~10초). Notion 개별 백업 7페이지는 2026-04-12 폐기 (비효율). Notion은 DB 기록 전용 (작업기록/에러로그/규칙위반).
 
 ---
 
@@ -61,7 +61,7 @@
 
 ## 3. 업무 모드 시스템
 
-> **C+ 에이전트 시스템**: 모든 MODE 루틴은 `agent.md` v2.0의 19명 전문 팀원을 통해 병렬 dispatch됩니다. 세부 트리거는 `agent.md` 섹션 3 참조. 에이전트 프로필은 `~/.claude/agents/` 디렉토리 참조. CEO+ENG 리뷰는 **병렬 실행**.
+> **C+ 에이전트 시스템**: 모든 MODE 루틴은 `agent.md` v2.2의 19명 전문 팀원을 통해 병렬 dispatch됩니다. 세부 트리거는 `agent.md` 섹션 3 참조. 에이전트 프로필은 `~/.claude/agents/` 디렉토리 참조. CEO+ENG 리뷰는 **병렬 실행**.
 
 모든 업무는 4가지 모드 중 하나로 자동 라우팅된다.
 

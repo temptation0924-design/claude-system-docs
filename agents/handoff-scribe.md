@@ -34,8 +34,10 @@ Read, Write, Bash (git log, date)
 ### 절차
 1. `~/.claude/.session_start`에서 시작 시각 읽기
 2. 소요시간 계산: `$(( ($(date +%s) - epoch) / 60 ))분`
-3. `git log --oneline -10`으로 최근 커밋 확인
-4. 인수인계 파일 생성
+3. `git log --since="$epoch" --oneline`으로 세션 중 커밋 수집
+4. `~/.claude/.session_worklog` 읽어서 세션 이벤트 참조 (없으면 스킵)
+5. YAML frontmatter 포함하여 인수인계 파일 생성
+6. `.session_worklog` 삭제 (존재 시)
 
 ### 파일명 규칙
 `~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md`
@@ -43,6 +45,17 @@ Read, Write, Bash (git log, date)
 
 ### 파일 구조
 \`\`\`
+---
+session: "YYYY-MM-DD_N차"
+date: YYYY-MM-DD
+duration_min: {소요시간(분)}
+mode: [{사용된 MODE 목록}]
+projects: [{관련 프로젝트 목록}]
+commits: {커밋 수}
+work_type: [{작업유형 - 설계/코딩/배포/디버깅/기획/문서화}]
+status: 완료/진행중
+notion_synced: false
+---
 # 세션 인수인계 — YYYY-MM-DD N차
 
 **일시**: YYYY-MM-DD HH:MM ~ HH:MM KST
@@ -61,6 +74,16 @@ Read, Write, Bash (git log, date)
 ## 💡 다음 세션 인수인계
 {이어갈 내용 또는 "없음"}
 \`\`\`
+
+### frontmatter 자동 채움 규칙
+- `session`: 파일명에서 추출 (YYYY-MM-DD_N차)
+- `date`: 오늘 날짜 (ISO)
+- `duration_min`: epoch 차이 / 60
+- `commits`: `git log --since` 결과 줄 수
+- `projects`: COMMIT 메시지 + 작업 내용에서 프로젝트명 추론
+- `mode`: .session_worklog의 MODE 엔트리에서 추출. 없으면 대화 맥락에서 판단.
+- `work_type`: 코드 변경=코딩, 문서 변경=문서화, 배포=배포, 기획=기획 등
+- `notion_synced`: 항상 false
 
 ### 주의사항
 - 한국어로 작성

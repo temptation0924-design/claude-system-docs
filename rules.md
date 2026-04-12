@@ -1,7 +1,7 @@
 # rules.md — 하위원칙 + 자주 실수 패턴
 
 > **원본 위치**: `~/.claude/rules.md` | **GitHub**: `temptation0924-design/claude-system-docs`
-> **마지막 동기화**: 2026-04-12 v1.6 — A1~A7 + B 섹션 전체 정비
+> **마지막 동기화**: 2026-04-12 v1.7 — A7 Notion 개별 동기화 폐기
 
 ---
 
@@ -92,7 +92,7 @@
   6. **세션 소요시간 계산** (`~/.claude/.session_start` epoch 활용)
   7. **TOP 5 자체 점검** → 어긴 항목 있으면 Notion DB의 해당 `위반코드` row에 `반복횟수 +1` (신규 패턴이면 Select 옵션 추가 후 신규 row 생성)
      - ⏰ **맨 마지막에 점검**: 1~6 진행 중 드러난 위반까지 반영하기 위함
-  8. Slack 알림 (Claude Code Agent → #general-mode `C0AEM5EJ0ES` private_channel) — 상세 작업일지 포맷은 [`rules/slack-worklog.md`](rules/slack-worklog.md) 참조
+  8. Slack 알림 (Claude Code Agent → #general-mode `C0AEM5EJ0ES` private_channel) — 상세 작업일지 포맷은 [`docs/rules/slack-worklog.md`](docs/rules/slack-worklog.md) 참조
 
 ### A5. 도구 추천 규칙
 
@@ -132,7 +132,7 @@
 - **시스템 문서**: `~/.claude/` (루트)
 
 **배포 전 체크리스트**
-- **90% 룰**: preflight-check 종합 점수 90% 이상 ([`rules/preflight-check.md`](rules/preflight-check.md) 참조)
+- **90% 룰**: preflight-check 종합 점수 90% 이상 ([`docs/rules/preflight-check.md`](docs/rules/preflight-check.md) 참조)
   - 공식: `100% - (CRITICAL × 15%) - (WARNING × 3%)`
   - 90% 미만 FAIL → 자동 수정 → 재검증 반복 (PASS까지)
 - **훅 통과 확인**: B1/B2/B5/B8 자동 차단 훅 (`~/.claude/hooks/`)
@@ -144,41 +144,25 @@
 
 > **TODO** (별도 세션): 위 배포 스킬 4개 이름이 직관적이지 않아 재명명 예정. 변경 완료 후 A6 재수정.
 
-### A7. Git → Notion/GitHub 동기화 규칙 (2026-04-12 v1.6 업데이트 — B-4 전환 반영)
+### A7. Git → GitHub 동기화 규칙 (2026-04-12 v1.7 — Notion 개별 동기화 폐기)
 
 **원칙**
-- **Git (`~/.claude/`) = 단일 원본** (Source of Truth)
-- **Notion 개별 페이지 7개** = 백업본
-- **GitHub raw URL 통합본** = Claude.ai 열람본 (2026-04-12 B-4 전환)
-- **일방향 배포**: Git → (Notion 7개 + GitHub 통합본 1개) = **8개 대상**
-- 🚫 **금지**: Notion에서 직접 수정하는 것. 양쪽 분기 시 **B8 위반 (14회 반복 — TOP 5 2순위)**
+- **Git (`~/.claude/`) = 유일한 원본** (Source of Truth)
+- **GitHub raw URL 통합본** = Claude.ai 열람본
+- **Notion 개별 백업 7페이지** = 2026-04-12 폐기 (비효율 — 16분+12만 토큰 소모)
+- Notion은 **DB 기록 전용** (작업기록, 에러로그, 규칙 위반 기록)
 
-**동기화 대상 (8개 = 7 + 1)**
+**동기화 대상: 1개**
 
-개별 문서 7개 (Notion 백업):
-- `CLAUDE.md`, `rules.md`, `session.md`, `skill-guide.md`, `env-info.md`, `checklist.md`, `agent.md`
-
-통합본 1개 (GitHub raw):
-- `INTEGRATED.md` — 위 7개 자동 concat (`build-integrated_v1.sh`)
+- `INTEGRATED.md` — 7개 시스템 문서 자동 concat (`build-integrated_v1.sh`)
 - URL: `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md`
-- **효과**: 매 빌드 시 토큰 절감 25K → 0 (2026-04-12 B-4 전환 성과)
-- 근거: [`project_integrated_view_b4_v1.md`](projects/-Users-ihyeon-u/memory/project_integrated_view_b4_v1.md) 메모리
 
-**수정 흐름 (일상 운영)**
+**수정 흐름**
 1. Git 파일 수정 (`~/.claude/*.md`)
-2. `system-docs-sync` 스킬 실행 → Notion 개별 7개 동기화
-3. `build-integrated_v1.sh --push` → GitHub `INTEGRATED.md` 재빌드
-4. PostToolUse 훅이 자동으로 2,3번 리마인더 주입
+2. `build-integrated_v1.sh --push` → GitHub `INTEGRATED.md` 재빌드 (~10초)
 
-**drift 발생 시 복구 (예외 상황)**
-- Git ↔ Notion 불일치 감지 → 더 최신인 쪽을 source로 지정 → 반대쪽 덮어쓰기
-- 복구 후 즉시 정상 흐름(Git → Notion/GitHub)으로 복귀
-- 근거: [`feedback_bidirectional_sync_v1.md`](projects/-Users-ihyeon-u/memory/feedback_bidirectional_sync_v1.md) 메모리
-
-**B8 재발 방지 체크리스트**
-- [ ] Notion 개별 7개 동기화 완료
-- [ ] GitHub `INTEGRATED.md` 재빌드 완료
-- [ ] **8개 모두 체크 전 완료 선언 금지** ⚠️
+**B8 체크리스트 (간소화)**
+- [ ] GitHub `INTEGRATED.md` 재빌드 + push 완료
 
 ### A8. 에이전트 디스패치 원칙 (2026-04-12 C+ 시스템 신설)
 
@@ -188,7 +172,7 @@
 - **수동 모드 진입 시** 매니저가 추천 1~3개 필수 제시 (이유 + 모델 등급 + 예상 소요)
 - **Notion 읽기 실패** → 에스컬레이션 안 함. 1회 타임아웃 → 즉시 폴백 (캐시 참조)
 - **에스컬레이션 로그** → 에러로그 DB 자동 기록
-- **상세 규칙**: `rules/agent-dispatch.md` 참조
+- **상세 규칙**: `docs/rules/agent-dispatch.md` 참조
 - **에이전트 레지스트리**: `agent.md` v2.0 참조
 - **에이전트 프로필**: `~/.claude/agents/*.md` (19개)
 
@@ -228,4 +212,4 @@
 
 ---
 
-*Haemilsia AI operations | 2026.04.12 | v1.6 — A1~A7 + B 섹션 전체 정비 (A1 날짜/예외, A2 루틴 분기, A3 3단 체크, A4 세션 루틴, A5 2케이스 분기, A6 경로 명시, A7 B-4 전환, B 범위 B12 확장)*
+*Haemilsia AI operations | 2026.04.12 | v1.7 — A7 Notion 개별 동기화 폐기, GitHub INTEGRATED.md 단일 경로*
