@@ -3,7 +3,7 @@
 > **이 파일은 7개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-12 15:40 KST
+> 마지막 빌드: 2026-04-12 15:47 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -259,7 +259,7 @@
   6. **세션 소요시간 계산** (`~/.claude/.session_start` epoch 활용)
   7. **TOP 5 자체 점검** → 어긴 항목 있으면 Notion DB의 해당 `위반코드` row에 `반복횟수 +1` (신규 패턴이면 Select 옵션 추가 후 신규 row 생성)
      - ⏰ **맨 마지막에 점검**: 1~6 진행 중 드러난 위반까지 반영하기 위함
-  8. Slack 알림 (Claude Code Agent → #general-mode `C0AEM5EJ0ES` private_channel) — 상세 작업일지 포맷은 [`rules/slack-worklog.md`](rules/slack-worklog.md) 참조
+  8. Slack 알림 (Claude Code Agent → #general-mode `C0AEM5EJ0ES` private_channel) — 상세 작업일지 포맷은 [`docs/rules/slack-worklog.md`](docs/rules/slack-worklog.md) 참조
 
 ### A5. 도구 추천 규칙
 
@@ -299,7 +299,7 @@
 - **시스템 문서**: `~/.claude/` (루트)
 
 **배포 전 체크리스트**
-- **90% 룰**: preflight-check 종합 점수 90% 이상 ([`rules/preflight-check.md`](rules/preflight-check.md) 참조)
+- **90% 룰**: preflight-check 종합 점수 90% 이상 ([`docs/rules/preflight-check.md`](docs/rules/preflight-check.md) 참조)
   - 공식: `100% - (CRITICAL × 15%) - (WARNING × 3%)`
   - 90% 미만 FAIL → 자동 수정 → 재검증 반복 (PASS까지)
 - **훅 통과 확인**: B1/B2/B5/B8 자동 차단 훅 (`~/.claude/hooks/`)
@@ -339,7 +339,7 @@
 - **수동 모드 진입 시** 매니저가 추천 1~3개 필수 제시 (이유 + 모델 등급 + 예상 소요)
 - **Notion 읽기 실패** → 에스컬레이션 안 함. 1회 타임아웃 → 즉시 폴백 (캐시 참조)
 - **에스컬레이션 로그** → 에러로그 DB 자동 기록
-- **상세 규칙**: `rules/agent-dispatch.md` 참조
+- **상세 규칙**: `docs/rules/agent-dispatch.md` 참조
 - **에이전트 레지스트리**: `agent.md` v2.0 참조
 - **에이전트 프로필**: `~/.claude/agents/*.md` (19개)
 
@@ -418,7 +418,7 @@
 > **TOP 5는 Notion DB에서 동적 조회** (하드코딩 없음). `반복횟수` 필드가 자동 랭킹 소스.
 
 ## 작업 단위 루틴
-→ 상세 스펙은 [`rules/task-routine.md`](rules/task-routine.md) 참조 (트리거 조건 + 복습 카드 형식 + 원칙)
+→ 상세 스펙은 [`docs/rules/task-routine.md`](docs/rules/task-routine.md) 참조 (트리거 조건 + 복습 카드 형식 + 원칙)
 - **트리거 요약**: MODE 1+2 사이클 완료 / 시스템 설정 변경 / 파일 구조 변경 / 에러 해결 / 새 개념 도입 → 자동 복습 카드 출력
 - **수동 호출**: "복습해줘" / "정리해줘" / "다시 설명해줘"
 - **전송 대상**: `#claude-study` (`C0AEM59BCKY`) — 작업일지 채널과 분리
@@ -456,14 +456,14 @@
 ---
 
 ## 노션 기록 원칙
-→ 상세 스펙은 [`rules/notion-logging.md`](rules/notion-logging.md) 참조 (DB 자동 판단 표 + 기록 형식 표)
+→ 상세 스펙은 [`docs/rules/notion-logging.md`](docs/rules/notion-logging.md) 참조 (DB 자동 판단 표 + 기록 형식 표)
 - 핵심: 저장 전 2단계 확인 (`rules.md` A2 참조) + 임의 저장 금지
 
 ---
 
 ## 오류 발생 시
-→ 상세 스펙은 [`rules/error-handling.md`](rules/error-handling.md) 참조 (감지 키워드 + 기록 형식 + 절차 6단계)
-- 핵심 흐름: 에러로그 DB 먼저 검색 → task 체크리스트 → 원인 분석 → 재발 방지 → **복습 카드 자동 트리거** ([`rules/task-routine.md`](rules/task-routine.md) 참조)
+→ 상세 스펙은 [`docs/rules/error-handling.md`](docs/rules/error-handling.md) 참조 (감지 키워드 + 기록 형식 + 절차 6단계)
+- 핵심 흐름: 에러로그 DB 먼저 검색 → task 체크리스트 → 원인 분석 → 재발 방지 → **복습 카드 자동 트리거** ([`docs/rules/task-routine.md`](docs/rules/task-routine.md) 참조)
 
 ---
 
@@ -634,8 +634,8 @@ research7
 | env-info.md | `~/.claude/env-info.md` | 이 파일 |
 | skill-guide.md | `~/.claude/skill-guide.md` | 전체 스킬 인덱스 |
 | rules.md | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
-| rules/task-routine.md | `~/.claude/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (자동 로드) |
-| rules/notion-logging.md | `~/.claude/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
+| docs/rules/task-routine.md | `~/.claude/docs/rules/task-routine.md` | 작업 단위 루틴 + 복습 카드 규칙 (on-demand) |
+| docs/rules/notion-logging.md | `~/.claude/docs/rules/notion-logging.md` | 노션 DB 저장 스펙 (DB 판단 + 기록 형식) |
 | 환경변수 | `~/.zshrc` | API 키, alias 등 |
 
 ---
@@ -1140,4 +1140,4 @@ Opus 실패 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 15:40 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 15:47 KST | 원본: `~/.claude/*.md` (Git)*
