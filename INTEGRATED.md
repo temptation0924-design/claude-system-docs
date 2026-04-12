@@ -3,7 +3,7 @@
 > **이 파일은 7개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-12 15:47 KST
+> 마지막 빌드: 2026-04-12 20:06 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -81,7 +81,7 @@
 
 ## 3. 업무 모드 시스템
 
-> **C+ 에이전트 시스템**: 모든 MODE 루틴은 `agent.md` v2.0의 19명 전문 팀원을 통해 병렬 dispatch됩니다. 세부 트리거는 `agent.md` 섹션 3 참조. 에이전트 프로필은 `~/.claude/agents/` 디렉토리 참조. CEO+ENG 리뷰는 **병렬 실행**.
+> **C+ 에이전트 시스템**: 모든 MODE 루틴은 `agent.md` v2.2의 19명 전문 팀원을 통해 병렬 dispatch됩니다. 세부 트리거는 `agent.md` 섹션 3 참조. 에이전트 프로필은 `~/.claude/agents/` 디렉토리 참조. CEO+ENG 리뷰는 **병렬 실행**.
 
 모든 업무는 4가지 모드 중 하나로 자동 라우팅된다.
 
@@ -387,13 +387,13 @@
 
 # session.md — 세션 루틴 + 기록 규칙
 
-업데이트: 2026-04-12 | v5.0 — C+ 에이전트 시스템 병렬 dispatch 적용
+업데이트: 2026-04-12 | v5.1 — 작업기록 자동화 (frontmatter + .session_worklog + Notion 자동 싱크)
 
 ---
 
 ## 세션 시작
 
-> **🤖 자동 처리 (SessionStart 훅)**: 세션 시작 시 `~/.claude/.session_start` 파일에 시작 시각 자동 기록 (epoch + human time JSON).
+> **🤖 자동 처리 (SessionStart 훅)**: 세션 시작 시 `~/.claude/.session_start` 파일에 시작 시각 자동 기록 (epoch + human time JSON). `~/.claude/.session_worklog` 초기화.
 
 ### C+ 하이브리드 루틴 (매니저 직접 + Agent dispatch)
 
@@ -404,6 +404,7 @@
    - → 단순 작업은 Agent spawn 없이 **매니저가 직접** (spawn 오버헤드 0)
    - → Notion 지연 시: 1회 타임아웃 → 즉시 폴백 (캐시 참조)
    - 🆕 **매일 첫 세션**: `[청소원 Sonnet]` Agent dispatch (환경 점검, 복잡 판단)
+   - 🆕 **미싱크 handoffs/ 재시도**: `notion_synced: false`인 파일 발견 시 `[노션기록관 Haiku]` dispatch (최대 3회)
 
 2. **매니저가 결과 병합 + 통합 응답 출력**:
    - TOP 5 표 (규칙감시관) + 관련 메모리 (기억관리관) + 지침 요약 (지침사서) + 환경 리포트 (청소원, 해당 시) + 환영 한 줄 (분위기메이커)
@@ -416,6 +417,23 @@
 > **수동 오버라이드**: "순차로 해" → 위 팀원 순서대로 실행. `/agent rule-watcher` → 단독 실행.
 > **에스컬레이션**: 팀원 실패 시 Haiku→Sonnet→Opus 자동 승급 (agent.md 섹션 5 참조)
 > **TOP 5는 Notion DB에서 동적 조회** (하드코딩 없음). `반복횟수` 필드가 자동 랭킹 소스.
+
+### 세션 중 워크로그 기록 규칙
+
+Claude Code(매니저)가 세션 중 다음 이벤트 발생 시 `~/.claude/.session_worklog`에 직접 append:
+
+| 이벤트 | 기록 내용 | 방법 |
+|--------|----------|------|
+| MODE 전환 | `[HH:MM] MODE: MODE X → MODE Y 전환` | Bash append |
+| 에러 해결 완료 | `[HH:MM] ERROR_RESOLVED: {에러 요약}` | Bash append |
+
+**방어 로직**: 파일 없으면 자동 생성 후 append.
+```bash
+[ ! -f ~/.claude/.session_worklog ] && echo "[$(date +%H:%M)] SESSION_START: (auto-created)" > ~/.claude/.session_worklog
+echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_worklog
+```
+
+---
 
 ## 작업 단위 루틴
 → 상세 스펙은 [`docs/rules/task-routine.md`](docs/rules/task-routine.md) 참조 (트리거 조건 + 복습 카드 형식 + 원칙)
@@ -431,17 +449,17 @@
 ### C+ 병렬 dispatch 루틴
 
 1. **자체 점검**: 오늘 TOP 5 패턴 중 어긴 것 확인 (매니저가 직접 판단)
-2. **Stage 1 — 매니저가 필수 3명 + 조건부 2명 dispatch** (병렬):
+2. **Stage 1 — 매니저가 필수 2명 + 조건부 2명 dispatch** (병렬):
    - `[규칙감시관 Haiku]` — TOP 5 자체점검 + 위반 발견 시 DB update (반복횟수 +1)
-   - `[노션기록관 Haiku]` — 작업기록 DB 저장
-   - `[핸드오프작성관 Sonnet]` — `~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 생성
+   - `[핸드오프작성관 Sonnet]` — `.session_worklog` 참조 → `~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 생성 (frontmatter 포함) → `.session_worklog` 삭제
    - `[노션기록관 Haiku(2)]` — ⚡ **에러 발생 시에만** 에러로그 DB 저장 (없으면 스킵)
    - `[복습카드관 Opus]` — ⚡ **트리거 조건 충족 시에만** 학습 카드 생성 (없으면 스킵)
    - → 예상 소요: **5~8초**
 
-3. **Stage 2 — 매니저가 결과 병합 후 1명 dispatch** (순차, Stage 1 결과 필요):
+3. **Stage 2 — 매니저가 결과 병합 후 2명 dispatch** (순차, Stage 1 결과 필요):
+   - `[노션기록관 Haiku]` — handoffs/ frontmatter 파싱 → Notion 작업기록 DB 자동 싱크 → `notion_synced: true` 마킹
    - `[슬랙배달관 Haiku]` — #general-mode 작업일지 + #claude-study 학습 카드 (해당 시)
-   - → 예상 소요: **2~3초**
+   - → 예상 소요: **3~5초**
 
 > **2026-04-12 간소화**: 청소원 세션 종료 dispatch 제거 (매일 첫 세션 시작에서만 실행). 노션기록관(2)·복습카드관은 조건부 실행으로 전환.
 
@@ -736,7 +754,6 @@ research7
 | plan-eng-review | Gstack | "아키텍처 리뷰", "구조 확인" |
 | plan-design-review | Gstack | "디자인 리뷰", "UI 계획 검토" |
 | writing-plans | Superpowers | 계획 승인 후 자동 |
-| plan-agent | Haemilsia | "계획 세워줘", "plan" |
 | preflight-check | Haemilsia | "검증", 실행 전 자동 |
 | autoplan | Gstack | "auto review", "결정 대신 해줘" |
 
@@ -808,7 +825,6 @@ research7
 |--------|-------------|------|
 | system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정 | `~/.claude/skills/system-docs-sync/SKILL.md` |
 | skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천 | `~/.claude/skills/skill-manager/SKILL.md` |
-| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
 | file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
 
 ### 🎨 개인화/편의 (3개)
@@ -819,7 +835,7 @@ research7
 | petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
 | travel-meal-planner | 여행 맛집, 식사 플랜, 맛집 찾아줘, travel meal plan | `~/.claude/skills/travel-meal-planner/SKILL.md` |
 
-**총 13개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
+**총 12개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
 
 ---
 
@@ -961,7 +977,6 @@ UI, 이미지, 브랜드, 가상인테리어 관련 작업.
 | plan-eng-review | 아키텍처 리뷰, 엔지니어링 검토, 구조 확인, 코딩 시작 전 | `~/.claude/skills/plan-eng-review/SKILL.md` |
 | retro | 주간 회고, weekly retro, 이번 주 뭐 했어, 엔지니어링 회고 | `~/.claude/skills/retro/SKILL.md` |
 | autoplan | auto review, autoplan, 전체 리뷰 자동으로, 결정 대신 해줘 | `~/.claude/skills/autoplan/SKILL.md` |
-| plan-agent | 계획 세워줘, plan, 로드맵, 뭘 해야하지, 세션 시작 자동 | `~/.claude/skills/plan-agent/SKILL.md` |
 | gstack-upgrade | gstack 업그레이드, gstack 최신 버전, update gstack | `~/.claude/skills/gstack-upgrade/SKILL.md` |
 
 ---
@@ -1006,7 +1021,7 @@ UI, 이미지, 브랜드, 가상인테리어 관련 작업.
 
 > **역할**: 19명 에이전트 팀의 중앙 레지스트리 + 디스패치 규칙
 > **위치**: `~/.claude/agent.md`
-> **버전**: v2.0 | 2026-04-12
+> **버전**: v2.2 | 2026-04-12
 > **스펙**: `~/.claude/docs/specs/c-plus-agent-system-design_20260412_v1.md`
 
 ---
@@ -1044,11 +1059,11 @@ mode: live
 | 8 | handoff-scribe | 핸드오프작성관 | Sonnet | handoffs/*.md 생성 | 2 | true |
 | 9 | code-reviewer | 코드리뷰관 | Sonnet | spec 준수 + 코드 품질 리뷰 | 2 | true |
 | 10 | qa-inspector | QA검사관 | Sonnet | /qa + /review + Playwright | 2 | true |
-| 11 | preflight-trio | Preflight검증관 | Sonnet×2+Opus×1 | 3 Agent 병렬 검증 | 2 | true |
+| 11 | preflight-trio | Preflight검증관 | Sonnet×2+Opus×1 | 계획 품질 점검 + 3 Agent 병렬 구현 검증 | 2 | true |
 | 12 | janitor | 청소원 | Sonnet | 환경 유지 + 역사적 유물 경보 | 2 | true |
-| 13 | study-coach | 복습카드관 | Opus | 학습 카드 (깊은 비유 + 개념) | 3 | true |
-| 14 | moodmaker | 분위기메이커 | Opus | 적시 유머/격려/축하 | 3 | true |
-| 15 | task-planner | 기획플래너 | Opus | writing-plans micro-task 분해 | 3 | true |
+| 13 | advisor | 자문전문가 | Sonnet | 에이전트 실패 진단 + 접근법 조정 | 2 | true |
+| 14 | study-coach | 복습카드관 | Opus | 학습 카드 (깊은 비유 + 개념) | 3 | true |
+| 15 | moodmaker | 분위기메이커 | Opus | 적시 유머/격려/축하 | 3 | true |
 | 16 | socratic-challenger | 아이디어검증관 | Opus | office-hours 소크라테스 질문 | 3 | true |
 | 17 | ceo-reviewer | CEO 리뷰어 | Opus | 전략 관점 플랜 리뷰 | 3 | true |
 | 18 | eng-reviewer | ENG 리뷰어 | Opus | 아키텍처 관점 플랜 리뷰 | 3 | true |
@@ -1079,6 +1094,7 @@ mode: live
 | **"정리해줘" (단독)** | 복습카드관 (기본값 — 학습 정리) | - |
 | **"환경 정리", "파일 정리"** | 청소원 | - |
 | **"정리" + 맥락 애매** | 매니저가 "학습 정리? 환경 정리?" 1회 확인 | - |
+| **Haiku/Sonnet 실패** | 자문전문가 (빠른 판별 통과 시) → 진단 후 재시도 or 승급 | - |
 
 ---
 
@@ -1100,11 +1116,20 @@ mode: live
 ## 5. 에스컬레이션 체인
 
 ```
-Haiku 실패 → Sonnet 재시도 (자동)
-Sonnet 실패 → Opus 재시도 (자동)
-Opus 실패 → 매니저가 대표님께 수동 개입 요청
+Haiku 실패 → [빠른 판별] → 자문전문가 진단 (5초) → 조정 후 Haiku 재시도 or Sonnet 승급
+Sonnet 실패 → [빠른 판별] → 자문전문가 진단 (5초) → 조정 후 Sonnet 재시도 or Opus 승급
+Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 ```
 
+### 빠른 판별 (자문 스킵 → 바로 승급)
+에러에 `timeout`, `rate_limit`, `context_length_exceeded`, `model_capacity`, `too many tokens`, `overloaded` 포함 시 자문전문가 개입 없이 즉시 모델 승급.
+
+### 자문전문가 규칙
+- 자문 개입은 **1회만** (자문 후 재시도도 실패 → 기존 모델 승급)
+- 자문전문가 본인 실패 → 스킵하고 기존 승급 진행
+- 진단 타임아웃: **5초**
+
+### 기본 규칙
 - 같은 팀원 재dispatch 최대 2회
 - 타임아웃: Haiku 10초 / Sonnet 25초 / Opus 45초
 - 모든 에스컬레이션 → 에러로그 DB 자동 기록
@@ -1117,8 +1142,8 @@ Opus 실패 → 매니저가 대표님께 수동 개입 요청
 | 등급 | 수 | 비용 비중 |
 |------|-----|---------|
 | Haiku (인턴) | 7명 | ~15% |
-| Sonnet (팀장) | 5명 | ~30% |
-| Opus (임원) | 7명 | ~50% |
+| Sonnet (팀장) | 6명 | ~30% |
+| Opus (임원) | 6명 | ~50% |
 | 매니저 (Opus) | 1명 | ~5% |
 
 ---
@@ -1135,9 +1160,9 @@ Opus 실패 → 매니저가 대표님께 수동 개입 요청
 8. 대표님 대기시간 최소화 — 1명 지연 시 부분 응답 가능
 9. 에이전트 프로필은 dispatch 시에만 읽고, 매니저 context에 캐시하지 않음
 
-*agent.md v2.0 | C+ Agent System | 2026-04-12 | Haemilsia AI Operations*
+*agent.md v2.2 | C+ Agent System | 2026-04-12 | plan-agent/task-planner 폐기, 자문전문가 신설, preflight-trio 계획품질 점검 추가*
 
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 15:47 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 20:06 KST | 원본: `~/.claude/*.md` (Git)*
