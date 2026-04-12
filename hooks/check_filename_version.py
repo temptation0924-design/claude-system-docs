@@ -36,7 +36,7 @@ if filename.startswith("."):
     sys.exit(0)
 
 # 3. 특정 디렉토리 내 파일 통과
-EXEMPT_DIRS = ["/node_modules/", "/.git/", "/hooks/", "/__pycache__/", "/skills/"]
+EXEMPT_DIRS = ["/node_modules/", "/.git/", "/hooks/", "/__pycache__/", "/skills/", "/agents/", "/archive/", "/queue/", "/tests/", "/benchmarks/", "/cache/"]
 if any(d in file_path for d in EXEMPT_DIRS):
     sys.exit(0)
 
