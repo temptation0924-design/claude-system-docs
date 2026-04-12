@@ -8,16 +8,15 @@
 
 > **🤖 자동 처리 (SessionStart 훅)**: 세션 시작 시 `~/.claude/.session_start` 파일에 시작 시각 자동 기록 (epoch + human time JSON).
 
-### C+ 병렬 dispatch 루틴
+### C+ 하이브리드 루틴 (매니저 직접 + Agent dispatch)
 
-1. **매니저가 4~5명 동시 dispatch** (Stage 1, 병렬):
-   - `[규칙감시관 Haiku]` — Notion TOP 5 쿼리 (→ agent.md 섹션 3 참조)
-   - `[기억관리관 Haiku]` — MEMORY.md + 개별 메모리 스캔
-   - `[지침사서 Haiku]` — rules/session/skill-guide 로드
-   - `[분위기메이커 Opus]` — 환영 인사 준비
-   - `[청소원 Sonnet]` — 매일 첫 세션만: 환경 점검 스캔
-   - → 예상 소요: **5~8초** (가장 느린 팀원 기준)
-   - → 규칙감시관 Notion 지연 시: 에스컬레이션 없이 1회 타임아웃 → 즉시 폴백 (캐시 참조)
+1. **매니저가 직접 병렬 도구 호출** (Stage 1, ~15초):
+   - Notion TOP 5 쿼리 (notion-query-database-view 직접 호출)
+   - MEMORY.md + 개별 메모리 스캔 (Read 직접)
+   - rules/session/skill-guide 핵심 로드 (Read 직접)
+   - → 단순 작업은 Agent spawn 없이 **매니저가 직접** (spawn 오버헤드 0)
+   - → Notion 지연 시: 1회 타임아웃 → 즉시 폴백 (캐시 참조)
+   - 🆕 **매일 첫 세션**: `[청소원 Sonnet]` Agent dispatch (환경 점검, 복잡 판단)
 
 2. **매니저가 결과 병합 + 통합 응답 출력**:
    - TOP 5 표 (규칙감시관) + 관련 메모리 (기억관리관) + 지침 요약 (지침사서) + 환경 리포트 (청소원, 해당 시) + 환영 한 줄 (분위기메이커)
