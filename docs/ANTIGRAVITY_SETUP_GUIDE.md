@@ -29,7 +29,7 @@ echo $NOTION_API_TOKEN     # Phase 3 — Notion 저장용
 export ANTHROPIC_API_KEY='sk-ant-...'
 export GEMINI_API_KEY='...'
 export YOUTUBE_API_KEY='...'
-export NOTION_API_TOKEN='<Keychain에서 로드>'
+export NOTION_API_TOKEN='<Keychain에서 로드 — api-key-manager 참조>'
 ```
 
 ### 0-3. Phase 1 파일 설치
