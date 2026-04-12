@@ -1,14 +1,15 @@
 ---
 name: system-docs-sync
 description: >
-  시스템 문서(CLAUDE.md, session.md, checklist.md, env-info.md, skill-guide.md, rules.md)를
-  로컬 파일과 Notion 동기화 페이지에 동시 반영하는 스킬.
-  수정 내용이 다른 파일에도 영향을 주면 연쇄 수정까지 자동 처리한다.
+  시스템 문서(CLAUDE.md, rules.md, session.md, checklist.md, env-info.md, skill-guide.md, agent.md)를
+  Git 원본 파일에서 Notion 개별 동기화본 + 자동 빌드 통합본으로 단방향 반영하는 스킬.
+  수정 내용이 다른 파일에도 영향을 주면 연쇄 수정까지 자동 처리하고,
+  1~7번 중 하나라도 수정되면 통합본(8번)을 7개 파일 concat으로 재빌드한다.
   반드시 이 스킬을 사용할 것:
   "CLAUDE.md 수정", "session.md 수정", "checklist.md 수정", "env-info.md 수정",
-  "skill-guide.md 수정", "rules.md 수정", "시스템 문서 수정", "지침 수정", "원칙 추가",
-  "세션 루틴 변경", "환경 정보 변경", "MCP 추가", "도구 추가",
-  "체크리스트 수정", "스킬 목록 수정", "운영 지침 동기화",
+  "skill-guide.md 수정", "rules.md 수정", "agent.md 수정", "시스템 문서 수정",
+  "지침 수정", "원칙 추가", "세션 루틴 변경", "환경 정보 변경", "MCP 추가", "도구 추가",
+  "체크리스트 수정", "스킬 목록 수정", "운영 지침 동기화", "통합본 재빌드",
   또는 시스템 운영 규칙/환경/루틴에 변경이 필요한 모든 상황에서 자동 트리거.
 ---
 
@@ -23,9 +24,9 @@ Git 리포지토리(`~/.claude/`)가 **원본**. 로컬 파일 수정 후 → No
 
 ---
 
-## 관리 대상: 파일 ↔ Notion 매핑
+## 관리 대상: 파일 ↔ 동기화 위치 매핑
 
-| # | 로컬 파일 | Notion 페이지 ID | 내용 |
+| # | 로컬 파일 | Notion 개별 동기화본 | 내용 |
 |---|-----------|-----------------|------|
 | 1 | `~/.claude/CLAUDE.md` | `3357f080962181aa8804f879e0a5d7c9` | 핵심 원칙 + 역할 + 도구 계층 + 파일 라우팅 |
 | 2 | `~/.claude/rules.md` | `3387f080962181b3836bd87166cae250` | 하위원칙 + 자주 실수 패턴 |
@@ -35,11 +36,21 @@ Git 리포지토리(`~/.claude/`)가 **원본**. 로컬 파일 수정 후 → No
 | 6 | `~/.claude/skill-guide.md` | `3357f0809621816d9e2bff84fef2696a` | 전체 스킬 목록 + 추천 규칙 |
 | 7 | `~/.claude/agent.md` | `3387f0809621810d9e32dbf7f83e3cc4` | 에이전트 레지스트리 + 계획 시스템 |
 
-| 8 | *(통합본 — 로컬 파일 없음)* | `3317f0809621816688feef408023224b` | **Claude 운영 지침 v4.0 통합본** (Claude.ai용 열람본) |
+### 통합본 (Claude.ai 단일 열람본) — **GitHub raw URL 방식**
 
-> **중요**: 8번 통합본은 개별 파일(1~7)의 CLAUDE.md 해당 섹션을 합친 Notion 열람본.
-> Git 원본 수정 후 → 개별 Notion 페이지 + 통합본 양쪽 모두 백업 동기화할 것.
-> **동기화 방향: Git(원본) → Notion(열람본). Notion 직접 수정 금지.**
+| 항목 | 값 |
+|------|-----|
+| **원본 파일** | `~/.claude/INTEGRATED.md` (1~7번 자동 concat, Git tracked) |
+| **빌드 스크립트** | `~/.claude/code/build-integrated_v1.sh` |
+| **GitHub raw URL** | `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` |
+| **Notion 허브 페이지** | `3317f0809621816688feef408023224b` (짧은 안내 + GitHub URL + 자식 링크만) |
+| **Claude.ai 열람 방식** | GitHub raw URL을 웹 fetch로 직접 읽음 (Notion 페이지 경유 X) |
+
+> **⭐ 핵심 설계 (v4.2 — B-4 방식)**:
+> - 통합본은 **GitHub public raw URL**로 서빙. Notion에 53KB를 올릴 필요 없음.
+> - Bash 스크립트가 7개 md를 concat → `INTEGRATED.md` 생성 → git push 한 줄로 반영.
+> - Notion 부모 페이지(`3317f080...`)는 **허브 역할**로 축소: GitHub URL 링크 + 자식 페이지 7개 링크만.
+> - Notion 직접 수정 금지. Git이 원본이자 열람본의 Single Source of Truth.
 
 ---
 
@@ -120,7 +131,7 @@ cat ~/.claude/[파일명]
 cat ~/.claude/[파일명]
 ```
 
-**3b. Notion 페이지 수정**
+**3b. 개별 Notion 페이지 수정 (1~7번)**
 - Notion MCP `notion-update-page` 사용
 - 매핑 테이블의 페이지 ID로 해당 페이지 접근
 - 같은 내용을 Notion 마크다운 형식으로 변환하여 반영
@@ -133,6 +144,59 @@ cat ~/.claude/[파일명]
 | 코드 | ` ```bash ``` ` 코드블록 | Notion 코드 블록 |
 | 링크 | `[텍스트](URL)` | Notion 인라인 링크 |
 | 경로 | `~/.claude/파일명` 그대로 | 백틱으로 감싸서 표시 |
+
+**3c. 통합본(`INTEGRATED.md`) 재빌드 + GitHub push ⭐ 필수**
+
+1~7번 중 **어느 하나라도 수정**되면 Bash 스크립트로 통합본을 재빌드하고 GitHub에 push한다.
+Claude.ai는 GitHub raw URL에서 최신본을 읽는다 — Notion MCP로 53KB 업로드할 필요 없음.
+
+**빌드 절차 (Bash 한 줄)**:
+
+```bash
+~/.claude/code/build-integrated_v1.sh --push
+```
+
+**스크립트가 하는 일**:
+
+1. **7개 원본 파일 존재 검증** — 누락 시 즉시 실패 (원본 훼손 방지)
+2. **순서대로 concat**:
+   ```
+   CLAUDE.md → rules.md → session.md → checklist.md
+   → env-info.md → skill-guide.md → agent.md
+   ```
+3. **헤더 + 목차 + 7개 섹션 + 푸터** 생성 → `~/.claude/INTEGRATED.md` 저장
+4. **`git add INTEGRATED.md`** (다른 WIP 파일 건드리지 않음, 이것만 스테이징)
+5. **변경 있으면** `git commit -m "chore(integrated): rebuild integrated view — <timestamp>"` + `git push`
+6. **변경 없으면** push 생략 (빈 커밋 방지)
+
+**출력 예시**:
+```
+✅ INTEGRATED.md 빌드 완료
+   경로: /Users/ihyeon-u/.claude/INTEGRATED.md
+   크기: 52614 bytes
+   줄 수: 1022 lines
+   빌드 시각: 2026-04-12 09:35 KST
+
+=== git push 모드 ===
+[main abc1234] chore(integrated): rebuild integrated view — 2026-04-12 09:35 KST
+ 1 file changed, 42 insertions(+), 38 deletions(-)
+✅ GitHub push 완료
+
+📎 GitHub raw URL:
+   https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md
+```
+
+**중요 원칙**:
+- 1~7번 중 **단 한 파일**만 수정해도 **7개 전체 재빌드** (부분 업데이트 금지 — drift 방지)
+- 빌드 결과물은 **결정적**(determinic) — 같은 입력이면 같은 출력 (빌드 시각만 다름)
+- 빌드 실패 시 → 1~7번 Notion 동기화는 유지, 통합본은 실패 상태 보고 (원본 훼손 금지)
+- `--push` 없이 실행하면 드라이런 (로컬 INTEGRATED.md만 갱신, git은 건드리지 않음)
+- 리포는 public이라 **민감 정보 금지** (`.gitignore` whitelist 방식으로 보호)
+
+**Claude.ai에서 통합본 읽기**:
+- 북마크 URL: `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md`
+- Claude.ai에 이 URL을 붙여넣으면 자동으로 웹 fetch 후 전체 통합본(~52KB) 읽음
+- Notion 허브 페이지(`3317f080...`)에도 이 URL이 첫 줄에 명시되어 있음
 
 ### Step 4: 연쇄 대상 파일도 수정
 
@@ -226,4 +290,4 @@ Git이 원본이므로 Claude.ai에서 Notion을 직접 수정하지 않는다.
 
 ---
 
-*system-docs-sync v4.0 | 2026.04.08 | Git 원본 전환 — 단방향 백업 동기화 체계*
+*system-docs-sync v4.2 | 2026.04.12 | B-4 전환 — 통합본을 GitHub raw URL로 서빙 (bash 스크립트 `build-integrated_v1.sh --push`)*
