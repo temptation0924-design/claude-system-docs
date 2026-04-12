@@ -25,6 +25,20 @@
 !hooks/**
 !code/
 !code/**
+!docs/
+!docs/**
+!archive/
+!archive/**
+!queue/
+!queue/**
+!tests/
+!tests/**
+!benchmarks/
+!benchmarks/**
+!cache/
+!cache/**
+!handoffs/
+!handoffs/**
 
 # === Exclude: project code & embedded git repos ===
 skills/CODE/**
