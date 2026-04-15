@@ -3,7 +3,7 @@
 > **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-15 15:12 KST
+> 마지막 빌드: 2026-04-15 15:17 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -139,7 +139,7 @@
 **워크플로우**:
 - 세션 시작 → `session.md` 루틴
 - 일상 업무 → `skill-guide.md` 키워드 매칭
-- 세션 종료 → `/gsd-pause-work` + 인수인계 자동 생성 + Notion 기록
+- 세션 종료 → `session.md` "세션 종료" 루틴 (핸드오프작성관 → `handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 자동 생성 + Notion 기록)
 
 ### 전역 브리핑 레이어 (Easy Briefing)
 
@@ -1407,4 +1407,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-15 15:12 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-15 15:17 KST | 원본: `~/.claude/*.md` (Git)*
