@@ -180,33 +180,41 @@
 
 ## B. 자주 실수 패턴 (Notion DB 이관 완료)
 
-**이관일**: 2026-04-11 v1.4 → **최종 업데이트**: 2026-04-12 v1.6
+**이관일**: 2026-04-11 v1.4 → **최종 업데이트**: 2026-04-12 v2.0
 **위치**: Notion DB [`⚠️ 규칙 위반 기록`](https://www.notion.so/6bb0c6c2ed9444baba4180ab70b35fb9) (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`)
-**범위**: **B1~B13** (2026-04-12 B13 추가 — C+ 에이전트 관련)
+**범위**: **B1~B17** (2026-04-12 REF v2.0 — Phase 2+3 통합 활성화 + C+ 에이전트 시스템 규칙)
 
-| B13 | 에이전트 dispatch 없이 매니저 직접 실행 | 3회 이상 같은 툴 순차 반복 시 "병렬화 가능" 자동 제안 |
 **구조**: `위반코드` SELECT 필드 + `반복횟수` (수동 +1) + `재발방지` 개별 기록
 
 **조회 방법**
 - 세션 시작 TOP 5: `해결여부=false` + `반복횟수 DESC` + `limit 5` 쿼리
 - 신규 위반 발생 시: 해당 `위반코드` row의 `반복횟수 +1` (A4 종료 루틴 7번에서 실행)
-- 신규 패턴: Select 옵션에 `B13+` 추가 후 신규 row 생성
+- 신규 패턴: Select 옵션에 추가 후 신규 row 생성
 
-**REF Framework 자동 집행 훅 현황** (Phase 1 — 2026-04-11 구축)
+**REF v2.0 자동 집행 훅 현황** (2026-04-12 전체 활성화)
 
-| 코드 | 이름 | 상태 | 훅 위치 |
-|------|------|------|---------|
-| B1 | 파일명 버전 누락 | ✅ 자동 차단 | `~/.claude/hooks/check_filename_version.py` |
-| B2 | 세션 인수인계 미생성 | ✅ 자동 차단 | `~/.claude/hooks/session-end-check.sh` |
-| B5 | 스킬 설치 패턴/경로 오류 | ✅ 자동 차단 | `~/.claude/hooks/check_skill_path.py` |
-| B8 | Git→Notion 통합본 누락 | ⚠️ 경고만 | `session-end-check.sh` (tracker_check) |
-| B7 | 다운로드 파일명 패턴 | ⏸️ Phase 2 대기 | - |
-| B9 | 스킬 설치 후 skill-guide 미등록 | ⏸️ Phase 2 대기 | - |
-| B10 | 메모리 상태 반영 누락 | ⏸️ Phase 2 대기 | - |
-| B3, B4, B6 | AI 판단 필요 영역 | ❌ Phase 3 | - |
-| B11, B12 | 2026-04-11 신규 추가 | ❌ 미구축 | - |
+| 코드 | 이름 | 감지 시점 | 강도 | 훅 |
+|------|------|----------|------|-----|
+| B1 | 파일명 버전 누락 | PreToolUse:Write | hard_block | `check_filename_version.py` |
+| B2 | 세션 인수인계 미생성 | Stop | hard_block | `session-end-check.sh` |
+| B3 | 세션 시작 루틴 미실시 | Stop | hard_block | tracker: `top5_queried` |
+| B4 | 도구 추천 누락 | Stop | soft_warn | tracker: `tool_recommended` |
+| B5 | 스킬 설치 경로 오류 | PreToolUse:Write | hard_block | `check_skill_path.py` |
+| B6 | Notion 임의 저장 | Stop | soft_warn | tracker: `notion_unauthorized` |
+| B7 | 다운로드 파일명 패턴 | PreToolUse:Write | soft_warn | `check_filename_version.py --mode=B7` |
+| B8 | INTEGRATED.md 재빌드 누락 | Stop | hard_block | tracker: `pending_sync` |
+| B9 | 스킬 설치 후 skill-guide 미등록 | Stop | hard_block | tracker: `skills_dir + skill_guide` |
+| B10 | 메모리 상태 반영 누락 | Stop | hard_block | tracker: `memory_updated` |
+| B11 | 환경변수 토큰 채팅 노출 | — | 수동 | (stdout 패턴 감지 Phase 3) |
+| B12 | 복습카드 미생성 | Stop | hard_block | tracker: `review_card_sent` |
+| B13 | 에이전트 미dispatch | Stop | soft_warn | tracker: `agent_dispatched` |
+| B14 | Preflight Gate 미실시 | Stop | hard_block | tracker: `preflight_executed` (MODE 1 시) |
+| B15 | CEO/ENG 리뷰 미실시 | Stop | hard_block | tracker: `ceo_eng_review_executed` (MODE 1 시) |
+| B16 | 세션 시작 에이전트 미dispatch | Stop | soft_warn | tracker: `session_start_agents` |
+| B17 | 세션 종료 에이전트 미dispatch | Stop | hard_block | tracker: `session_end_agents` |
+| B18 | Agent dispatch 파일 경로 누락 | — | 수동 감시 | docs/agents.md SELF-CHECK (Wave 2 표준 프롬프트 템플릿 복붙) |
 
-**우회 방법**: 대표님 메시지에 `--force-B1`, `--force-B2`, `--force-B5` 형식으로 명시 → 훅이 우회 카운터 증가 (같은 코드 3회 이상 우회 시 Slack 알림 발송)
+**우회 방법**: 대표님 메시지에 `--force-B1` ~ `--force-B18` 형식으로 명시 → 훅이 우회 카운터 증가 (같은 코드 3회 이상 우회 시 Slack 알림 발송)
 
 **원칙**: 개별 정의는 Notion DB가 단일 원본. rules.md 내 하드코딩 목록 삭제 (중복 관리 방지).
 

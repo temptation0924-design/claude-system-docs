@@ -51,7 +51,7 @@ description: |
 | 이사예정관리 판정 (9분기 v3.4) | [`rules/3-이사예정관리.md`](rules/3-이사예정관리.md) |
 | 공실검증 판정 (13분기 v3.3) | [`rules/4-공실검증.md`](rules/4-공실검증.md) |
 | 아이리스공실 판정 (17분기 v3.4) + 엑셀비교 + 엑셀 매핑 주의 | [`rules/5-아이리스공실.md`](rules/5-아이리스공실.md) |
-| 퇴거정산서 판정 | [`rules/6-퇴거정산서.md`](rules/6-퇴거정산서.md) (⚠️ STUB, v4.x 확장 예정) |
+| 퇴거정산서 판정 (v4.0 결핍 판정 4분기) | [`rules/6-퇴거정산서.md`](rules/6-퇴거정산서.md) |
 | 신규입주자 판정 (7규칙 v3.8) | [`rules/7-신규입주자.md`](rules/7-신규입주자.md) |
 | 슬랙 메시지 형식 | [`docs/slack-format.md`](docs/slack-format.md) |
 | 미해결 추적, 에스컬레이션, 긴급도 승격 | [`docs/unresolved.md`](docs/unresolved.md) |
@@ -87,7 +87,7 @@ description: |
 | 3 | 이사예정관리 | 3️⃣ | [`rules/3-이사예정관리.md`](rules/3-이사예정관리.md) |
 | 4 | 공실검증 | 4️⃣ | [`rules/4-공실검증.md`](rules/4-공실검증.md) |
 | 5 | 아이리스공실 | 6️⃣ | [`rules/5-아이리스공실.md`](rules/5-아이리스공실.md) |
-| 6 | 퇴거정산서 | 7️⃣ | [`rules/6-퇴거정산서.md`](rules/6-퇴거정산서.md) (STUB) |
+| 6 | 퇴거정산서 | 7️⃣ | [`rules/6-퇴거정산서.md`](rules/6-퇴거정산서.md) (v4.0 ACTIVE) |
 | 7 | 신규입주자DB | 8️⃣ | [`rules/7-신규입주자.md`](rules/7-신규입주자.md) |
 | 📊 | 점검보고서 (기록 전용) | — | [`docs/report-db.md`](docs/report-db.md) |
 
