@@ -3,7 +3,7 @@
 > **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-15 12:13 KST
+> 마지막 빌드: 2026-04-15 12:54 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -373,8 +373,9 @@
 | B15 | CEO/ENG 리뷰 미실시 | Stop | hard_block | tracker: `ceo_eng_review_executed` (MODE 1 시) |
 | B16 | 세션 시작 에이전트 미dispatch | Stop | soft_warn | tracker: `session_start_agents` |
 | B17 | 세션 종료 에이전트 미dispatch | Stop | hard_block | tracker: `session_end_agents` |
+| B18 | Agent dispatch 파일 경로 누락 | — | 수동 감시 | docs/agents.md SELF-CHECK (Wave 2 표준 프롬프트 템플릿 복붙) |
 
-**우회 방법**: 대표님 메시지에 `--force-B1` ~ `--force-B17` 형식으로 명시 → 훅이 우회 카운터 증가 (같은 코드 3회 이상 우회 시 Slack 알림 발송)
+**우회 방법**: 대표님 메시지에 `--force-B1` ~ `--force-B18` 형식으로 명시 → 훅이 우회 카운터 증가 (같은 코드 3회 이상 우회 시 Slack 알림 발송)
 
 **원칙**: 개별 정의는 Notion DB가 단일 원본. rules.md 내 하드코딩 목록 삭제 (중복 관리 방지).
 
@@ -1221,4 +1222,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-15 12:13 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-15 12:54 KST | 원본: `~/.claude/*.md` (Git)*
