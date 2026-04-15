@@ -3,7 +3,7 @@
 > **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-12 21:27 KST
+> 마지막 빌드: 2026-04-15 11:25 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -638,18 +638,48 @@ session_start_agents, session_end_agents
 | 규칙 위반 기록 DB | `27c13aa7-9e91-49d3-bb30-0e81b38189e4` |
 | API Key 장부 DB | `33f7f080-9621-8131-8bca-e6f16628ea9c` |
 
-### 해밀시아 임대 DB
+### 해밀시아 임대 DB (점검 대상 7개 + 보고서 + 스킬)
 
-| 대상 | ID |
-|------|-----|
-| 1 임차인마스터 | `46cebf77c88f4d80a19db4ecabac56fb` |
-| 2 미납리스크 | `e8707fc4dd684c449b433684e9bc36b7` |
-| 3 이사예정관리 | `f0ce036515f94b9fa3c598a012aef405` |
-| 4 공실검증 | `74edd4ff20544eeabafa333b37ec499d` |
-| 6 아이리스공실 | `e2b7b3112da0450bb9d2958d35663c8e` |
-| 7 퇴거정산서 | `30f7f080962180f99a1bf3e674c19a37` |
-| 0 점검보고서 | `a74d6ce07341401c88ff57e68063d6bf` |
-| 임대관리 스킬(Notion) | `3267f080962181a2824cf28bb493fcf9` |
+> 임대 스킬군 4개(rental-inspection, bot-deploy, bot-dev, railway-notion-connect) 공통 참조 자산. 2026-04-15 rental-inspection SKILL.md 분할과 함께 뷰 URL 일괄 승격.
+
+| 번호 | 대상 | Notion ID | 쿼리 뷰 | 기본 필터 |
+|------|------|-----------|---------|----------|
+| 1️⃣ | 임차인마스터 | `46cebf77c88f4d80a19db4ecabac56fb` | 📊전체이력 | 사건종료=false |
+| 2️⃣ | 미납리스크 | `e8707fc4dd684c449b433684e9bc36b7` | 🚨[연체]확인필요 | 입금완료=false + 미납 |
+| 3️⃣ | 이사예정관리 | `f0ce036515f94b9fa3c598a012aef405` | 📊전체이력 | 완료=false |
+| 4️⃣ | 공실검증 | `74edd4ff20544eeabafa333b37ec499d` | 📊전체이력 | 확인=false |
+| 6️⃣ | 아이리스공실 | `e2b7b3112da0450bb9d2958d35663c8e` | 📊전체확인 | 확인=false |
+| 7️⃣ | 퇴거정산서 | `30f7f080962180f99a1bf3e674c19a37` | 전체 | 퇴거상황=진행중[입금대기] |
+| 8️⃣ | 신규입주자DB | `8259bedb061e4dc59ce17d6df200dfd9` | Default view | 잔금완납=false |
+| 📊 | 점검보고서 | `a74d6ce07341401c88ff57e68063d6bf` | — | 기록 전용 |
+| 📚 | 임대관리 스킬(Notion) | `3267f080962181a2824cf28bb493fcf9` | — | 원본 스킬 |
+
+#### 검증된 뷰 URL (2026-04-10 확인, 복사해서 사용 — UUID 조합 금지)
+
+```
+1️⃣ 임차인마스터 📊전체이력:
+https://www.notion.so/46cebf77c88f4d80a19db4ecabac56fb?v=3137f080962180789c9c000c0708f184
+
+2️⃣ 미납리스크 🚨[연체]확인필요:
+https://www.notion.so/e8707fc4dd684c449b433684e9bc36b7?v=30d7f080962180f584cd000ccef1bdde
+
+3️⃣ 이사예정관리 📊전체이력:
+https://www.notion.so/f0ce036515f94b9fa3c598a012aef405?v=3157f0809621808bad84000c98fa3693
+
+4️⃣ 공실검증 📊전체이력:
+https://www.notion.so/74edd4ff20544eeabafa333b37ec499d?v=3157f080962180b998b1000c6ada19af
+
+6️⃣ 아이리스공실 📊전체확인:
+https://www.notion.so/e2b7b3112da0450bb9d2958d35663c8e?v=3137f080962180728829000c6fec6131
+
+7️⃣ 퇴거정산서 전체:
+https://www.notion.so/30f7f080962180f99a1bf3e674c19a37?v=30f7f080962180f89baa000c9744f8b9
+
+8️⃣ 신규입주자DB Default view:
+https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db072fe0319
+```
+
+**금지사항**: 뷰 URL을 UUID에서 직접 조합하지 말 것. 위 URL을 그대로 복사해서 사용할 것. 새 뷰가 필요하면 먼저 `notion-fetch`로 DB 스키마를 확인한 후 URL을 업데이트할 것.
 
 ---
 
@@ -1180,4 +1210,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-12 21:27 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-15 11:25 KST | 원본: `~/.claude/*.md` (Git)*
