@@ -1,23 +1,22 @@
 #!/usr/bin/env bash
-# build-integrated_v1.sh — 7개 시스템 문서를 하나의 통합본(INTEGRATED.md)으로 concat
+# build-integrated_v1.sh — 6개 시스템 문서를 하나의 통합본(INTEGRATED.md)으로 concat
 #
 # 사용법:
 #   ./build-integrated_v1.sh           # INTEGRATED.md 빌드만
 #   ./build-integrated_v1.sh --push    # 빌드 + git add + commit + push
 #
-# 목적: Claude.ai가 GitHub raw URL 하나로 7개 시스템 문서 전체를 한 번에 읽을 수 있게
+# 목적: Claude.ai가 GitHub raw URL 하나로 6개 시스템 문서 전체를 한 번에 읽을 수 있게
 #       통합본을 자동 생성/동기화. 원본은 Git의 개별 md 파일 (Single Source of Truth).
 #
 # 원본 파일 순서:
 #   1. CLAUDE.md       라우팅 허브 (역할 + 도구 + 라우팅 + 모드)
 #   2. rules.md        하위원칙 + 자주 실수 패턴
 #   3. session.md      세션 시작/종료 루틴
-#   4. checklist.md    모드별 사전 체크리스트
-#   5. env-info.md     환경/MCP/Notion ID/배포 인프라
-#   6. skill-guide.md  전체 스킬 목록 + 추천 규칙
-#   7. agent.md        팀 에이전트 레지스트리
+#   4. env-info.md     환경/MCP/Notion ID/배포 인프라
+#   5. skill-guide.md  전체 스킬 목록 + 추천 규칙
+#   6. agent.md        팀 에이전트 레지스트리
 #
-# v1.0 | 2026-04-12 | Haemilsia AI operations
+# v1.1 | 2026-04-12 | checklist.md 삭제 (7개→6개)
 
 set -euo pipefail
 
@@ -25,15 +24,15 @@ CLAUDE_DIR="$HOME/.claude"
 OUTPUT="$CLAUDE_DIR/INTEGRATED.md"
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M KST')
 
-# 7개 원본 파일: "filename:section_title" 형식
+# 7개 원본 파일: "filename|section_title" 형식
 FILES=(
   "CLAUDE.md|📘 1. CLAUDE.md — 라우팅 허브"
   "rules.md|📘 2. rules.md — 하위원칙 + 자주 실수 패턴"
   "session.md|📘 3. session.md — 세션 시작/종료 루틴"
-  "checklist.md|📘 4. checklist.md — 모드별 사전 체크리스트"
-  "env-info.md|📘 5. env-info.md — 환경/MCP/Notion ID/배포 인프라"
-  "skill-guide.md|📘 6. skill-guide.md — 스킬 가이드"
-  "agent.md|📘 7. agent.md — 팀 에이전트 레지스트리"
+  "env-info.md|📘 4. env-info.md — 환경/MCP/Notion ID/배포 인프라"
+  "skill-guide.md|📘 5. skill-guide.md — 스킬 가이드"
+  "agent.md|📘 6. agent.md — 팀 에이전트 레지스트리"
+  "briefing.md|📘 7. briefing.md — 쉬운 설명 브리핑"
 )
 
 # --- 1) 파일 존재 검증 ---
@@ -49,7 +48,7 @@ done
 {
   # 헤더 + 목차
   printf '# 🤖 Claude 운영 지침 v4.2 (통합본)\n\n'
-  printf '> **이 파일은 7개 시스템 문서의 자동 빌드 통합본입니다.**\n'
+  printf '> **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**\n'
   printf '> 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)\n'
   printf '> 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.\n'
   printf '> 마지막 빌드: %s\n\n' "$TIMESTAMP"
@@ -57,10 +56,9 @@ done
   printf '1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)\n'
   printf '2. **rules.md** — 하위원칙 + 자주 실수 패턴\n'
   printf '3. **session.md** — 세션 시작/종료 루틴\n'
-  printf '4. **checklist.md** — 모드별 사전 체크리스트\n'
-  printf '5. **env-info.md** — 환경/MCP/Notion ID/배포 인프라\n'
-  printf '6. **skill-guide.md** — 전체 스킬 목록 + 추천 규칙\n'
-  printf '7. **agent.md** — 팀 에이전트 레지스트리\n\n'
+  printf '4. **env-info.md** — 환경/MCP/Notion ID/배포 인프라\n'
+  printf '5. **skill-guide.md** — 전체 스킬 목록 + 추천 규칙\n'
+  printf '6. **agent.md** — 팀 에이전트 레지스트리\n\n'
   printf -- '---\n'
 
   # 7개 섹션 본문
