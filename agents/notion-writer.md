@@ -1,6 +1,7 @@
 ---
-id: notion-writer
-name: 노션기록관
+name: notion-writer
+description: "노션기록관 — 작업기록/에러로그/규칙위반 DB 저장. 세션 종료 자동 dispatch + 미싱크 handoffs 재시도."
+tools: Read, Write, Edit, Bash, mcp__claude_ai_Notion__notion-create-pages, mcp__claude_ai_Notion__notion-update-page, mcp__claude_ai_Notion__notion-fetch
 model: haiku
 layer: 1
 enabled: true
