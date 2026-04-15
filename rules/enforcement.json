@@ -1,79 +1,158 @@
 {
-  "version": "1.0",
-  "phase": 1,
+  "version": "2.0",
+  "phase": "2+3 통합 활성화 (2026-04-12)",
   "rules": [
     {
       "code": "B1",
       "name": "파일명 버전 누락",
       "event": "PreToolUse:Write",
-      "detector": {
-        "type": "script",
-        "path": "~/.claude/hooks/check_filename_version.py",
-        "args": ["--mode=B1"]
-      },
+      "detector": { "type": "script", "path": "~/.claude/hooks/check_filename_version.py", "args": ["--mode=B1"] },
       "severity": "hard_block",
       "enabled": true,
-      "override_flag": "--force-B1",
-      "notion_page_id": "33f7f080962181dca42be485d8910bf4"
+      "override_flag": "--force-B1"
     },
     {
       "code": "B2",
       "name": "세션 인수인계 미생성",
       "event": "Stop",
-      "detector": {
-        "type": "script",
-        "path": "~/.claude/hooks/session-end-check.sh"
-      },
+      "detector": { "type": "tracker_check", "tracker_field": "handoff_created" },
       "severity": "hard_block",
       "enabled": true,
-      "override_flag": "--force-B2",
-      "notion_page_id": "33f7f080962181a5a034c62fdaaae3ae",
-      "recovery": "~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md 생성"
+      "override_flag": "--force-B2"
+    },
+    {
+      "code": "B3",
+      "name": "세션 시작 루틴 미실시",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "top5_queried" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B3"
+    },
+    {
+      "code": "B4",
+      "name": "도구 추천 누락 (MODE 1/2 진입 세션 한정)",
+      "event": "Stop",
+      "detector": {
+        "type": "tracker_check",
+        "tracker_field": "tool_recommended",
+        "applies_when": "mode1_entered == true || mode2_entered == true"
+      },
+      "severity": "soft_warn",
+      "enabled": true,
+      "override_flag": "--force-B4"
     },
     {
       "code": "B5",
       "name": "스킬 설치 패턴/경로 오류",
       "event": "PreToolUse:Write",
-      "detector": {
-        "type": "script",
-        "path": "~/.claude/hooks/check_skill_path.py"
-      },
+      "detector": { "type": "script", "path": "~/.claude/hooks/check_skill_path.py" },
       "severity": "hard_block",
       "enabled": true,
-      "override_flag": "--force-B5",
-      "notion_page_id": "33f7f080962181fb9098f774a8f53ae7"
+      "override_flag": "--force-B5"
+    },
+    {
+      "code": "B6",
+      "name": "Notion 임의 저장",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "notion_unauthorized" },
+      "severity": "soft_warn",
+      "enabled": true,
+      "override_flag": "--force-B6"
     },
     {
       "code": "B7",
       "name": "다운로드 파일명 패턴 미준수",
       "event": "PreToolUse:Write",
-      "detector": {
-        "type": "script",
-        "path": "~/.claude/hooks/check_filename_version.py",
-        "args": ["--mode=B7"]
-      },
+      "detector": { "type": "script", "path": "~/.claude/hooks/check_filename_version.py", "args": ["--mode=B7"] },
       "severity": "soft_warn",
-      "enabled": false,
-      "notion_page_id": "33f7f080962181478062dc0b996eb883",
-      "note": "Phase 2 초입 활성화 대상 (반복횟수 2회, 가장 아픈 것 기준 미달)"
+      "enabled": true,
+      "override_flag": "--force-B7"
     },
     {
       "code": "B8",
-      "name": "Git→Notion 백업 동기화 시 통합본 누락",
+      "name": "INTEGRATED.md 재빌드 누락",
       "event": "Stop",
-      "detector": {
-        "type": "tracker_check",
-        "tracker_field": "pending_sync"
-      },
+      "detector": { "type": "tracker_check", "tracker_field": "pending_sync" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B8"
+    },
+    {
+      "code": "B9",
+      "name": "스킬 설치 후 skill-guide 미등록",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "skill_installed_no_guide" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B9"
+    },
+    {
+      "code": "B10",
+      "name": "메모리 상태 반영 누락",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "memory_updated" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B10"
+    },
+    {
+      "code": "B12",
+      "name": "복습카드 미생성",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "review_card_sent" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B12"
+    },
+    {
+      "code": "B13",
+      "name": "에이전트 dispatch 없이 매니저 직접 실행",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "agent_dispatched" },
       "severity": "soft_warn",
       "enabled": true,
-      "notion_page_id": "33f7f0809621813da4c9e1408a9f6b0e",
-      "recovery": "session-end-check.sh가 B2 검사와 함께 pending_sync 배열 확인 후 system-docs-sync 실행"
+      "override_flag": "--force-B13"
     },
-    { "code": "B3", "enabled": false, "note": "AI 판단 필요 — Phase 3" },
-    { "code": "B4", "enabled": false, "note": "AI 판단 필요 — Phase 3" },
-    { "code": "B6", "enabled": false, "note": "AI 판단 필요 — Phase 3" },
-    { "code": "B9", "enabled": false, "note": "Phase 2 — 스킬 디렉토리 diff 추적" },
-    { "code": "B10", "enabled": false, "note": "Phase 2 — MEMORY.md diff 체크" }
+    {
+      "code": "B14",
+      "name": "MODE 1 Preflight Gate 미실시",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "preflight_executed" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B14",
+      "note": "MODE 1 기획 완료 후 3 Agent 사전검증(90% PASS) 없이 MODE 2 진입 차단"
+    },
+    {
+      "code": "B15",
+      "name": "CEO/ENG 리뷰 미실시",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "ceo_eng_review_executed" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B15",
+      "note": "MODE 1 기획 시 CEO+ENG 리뷰 병렬 실행 필수"
+    },
+    {
+      "code": "B16",
+      "name": "세션 시작 에이전트 미dispatch",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "session_start_agents" },
+      "severity": "soft_warn",
+      "enabled": true,
+      "override_flag": "--force-B16",
+      "note": "세션 시작 시 규칙감시관+기억관리관+지침사서+분위기메이커 4명 병렬 dispatch"
+    },
+    {
+      "code": "B17",
+      "name": "세션 종료 에이전트 미dispatch",
+      "event": "Stop",
+      "detector": { "type": "tracker_check", "tracker_field": "session_end_agents" },
+      "severity": "hard_block",
+      "enabled": true,
+      "override_flag": "--force-B17",
+      "note": "세션 종료 시 규칙감시관+핸드오프작성관+노션기록관 필수 dispatch"
+    }
   ]
 }
