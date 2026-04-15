@@ -2,6 +2,7 @@
 date: 2026-04-15
 topic: 커스텀 에이전트 시스템 등록 + 서브에이전트 자동 승인
 status: completed
+phases_completed: [Phase 1 (notion-writer), Phase 2 (5명 핵심), Phase 3 (13명 일괄 — 2026-04-15 확장)]
 related: handoffs/세션인수인계_20260415_3차_v1.md (교훈 6번)
 ---
 
