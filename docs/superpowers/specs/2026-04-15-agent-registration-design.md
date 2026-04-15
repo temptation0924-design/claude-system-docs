@@ -154,6 +154,7 @@ model: haiku
 ## 검증
 
 ### Phase 1 성공 기준
+- [ ] **새 세션 시스템 프롬프트의 "Available agent types" 리스트에 `notion-writer` 등장** (캐시 무효화 검증)
 - [ ] `Agent({subagent_type: "notion-writer", ...})` 호출 시 에러 없이 spawn
 - [ ] 서브에이전트가 `Read`, `Write`, `Edit`, `Bash` 호출 시 permission denied 없음
 - [ ] 서브에이전트가 `mcp__claude_ai_Notion__notion-create-pages` 호출 시 정상 작동
@@ -166,6 +167,7 @@ model: haiku
 ## 사후 작업 (이번 spec 외)
 
 - session.md / agent.md 문서 업데이트 — Agent dispatch 호출 방식 명시 (`subagent_type: "notion-writer"` 식 표준 표기)
+- **rules/ 파일 편집 라우팅** — 핵심 6명에 코드 편집 전담 없으므로, rules/* 또는 본격 코드 수정은 시스템 등록된 `gsd-code-fixer` (Read·Edit·Write·Bash·Grep·Glob 보유) subagent_type으로 dispatch 권장. memory-keeper도 Edit 보유하나 메모리/문서 편집용으로 한정
 - 나머지 23명 agent 등록 — 사용 빈도 확인 후 필요한 것만 추가
 - 메모리 feedback 작성 — "한글 별명 agent는 description에 한글 + name은 영문 kebab-case"
 
