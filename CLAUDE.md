@@ -120,7 +120,7 @@
 **워크플로우**:
 - 세션 시작 → `session.md` 루틴
 - 일상 업무 → `skill-guide.md` 키워드 매칭
-- 세션 종료 → `/gsd-pause-work` + 인수인계 자동 생성 + Notion 기록
+- 세션 종료 → `session.md` "세션 종료" 루틴 (핸드오프작성관 → `handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 자동 생성 + Notion 기록)
 
 ### 전역 브리핑 레이어 (Easy Briefing)
 
