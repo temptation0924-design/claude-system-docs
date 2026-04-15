@@ -1,6 +1,7 @@
 ---
-id: security-guard
-name: 경비원
+name: security-guard
+description: "경비원 — REF Framework (B1/B2/B5/B8) 실시간 감시 + 훅 결과 해석 + 위반 사전 차단."
+tools: Read, Bash, Grep, Glob
 model: haiku
 layer: 1
 enabled: true

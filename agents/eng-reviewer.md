@@ -1,6 +1,7 @@
 ---
-id: eng-reviewer
-name: ENG 리뷰어
+name: eng-reviewer
+description: "ENG 리뷰어 — 아키텍처 관점 플랜 리뷰(edge cases, test coverage). MODE 1 writing-plans 완료 후 CEO와 병렬."
+tools: Read, Bash, Grep, Glob
 model: opus
 layer: 3
 enabled: true

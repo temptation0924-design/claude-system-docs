@@ -1,6 +1,7 @@
 ---
-id: qa-inspector
-name: QA검사관
+name: qa-inspector
+description: "QA검사관 — /qa + /review 실행 (Playwright/browse 활용). 배포 후·MODE 3 진입 시 자동."
+tools: Read, Bash, Grep, Glob
 model: sonnet
 layer: 2
 enabled: true

@@ -1,6 +1,7 @@
 ---
-id: doc-librarian
-name: 지침사서
+name: doc-librarian
+description: "지침사서 — rules/*.md·session.md·skill-guide.md·env-info.md 로드 + 필요 섹션 추출. 세션 시작·MODE 전환 시 자동."
+tools: Read, Glob, Grep
 model: haiku
 layer: 1
 enabled: true

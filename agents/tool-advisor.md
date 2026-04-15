@@ -1,6 +1,7 @@
 ---
-id: tool-advisor
-name: 도구추천관
+name: tool-advisor
+description: "도구추천관 — 업무 설명을 받아 Code/Claude.ai/Cowork 중 최적 매칭 + 이유 생성. MODE 전환 시 자동."
+tools: Read, Glob, Grep
 model: haiku
 layer: 1
 enabled: true

@@ -1,6 +1,7 @@
 ---
-id: preflight-trio
-name: Preflight검증관
+name: preflight-trio
+description: "Preflight검증관 — writing-plans 결과 계획 품질 점검 + 3 Agent 병렬 구현 검증. MODE 1 게이트 자동."
+tools: Read, Grep, Glob, Bash
 model: sonnet
 layer: 2
 enabled: true

@@ -1,6 +1,7 @@
 ---
-id: system-auditor
-name: 외주 감사관
+name: system-auditor
+description: "외주 감사관 — C+ 시스템 전체 감사(spec vs 현실 + 팀원별 가동률 + 이상 탐지). P7 완료 2주 후·월 1회."
+tools: Read, Bash, Grep, Glob
 model: opus
 layer: 3
 enabled: true

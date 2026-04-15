@@ -1,6 +1,7 @@
 ---
-id: slack-courier
-name: 슬랙배달관
+name: slack-courier
+description: "슬랙배달관 — #general-mode 작업일지 + #claude-study 복습 카드 발송. 세션 종료 Stage 2 자동 dispatch."
+tools: Read, Bash, mcp__claude_ai_Slack__slack_send_message, mcp__claude_ai_Slack__slack_search_channels
 model: haiku
 layer: 1
 enabled: true

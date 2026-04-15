@@ -1,6 +1,7 @@
 ---
-id: socratic-challenger
-name: 아이디어검증관
+name: socratic-challenger
+description: "아이디어검증관 — office-hours 소크라테스 질문(사업 아이디어 파훼). MODE 1 + 사업 아이디어 감지 시 자동."
+tools: Read, Grep, Glob
 model: opus
 layer: 3
 enabled: true

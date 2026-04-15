@@ -1,6 +1,7 @@
 ---
-id: code-reviewer
-name: 코드리뷰관
+name: code-reviewer
+description: "코드리뷰관 — spec 준수 + 코드 품질 2단계 리뷰. MODE 2 코드 작업 완료 시 자동."
+tools: Read, Bash, Grep, Glob
 model: sonnet
 layer: 2
 enabled: true

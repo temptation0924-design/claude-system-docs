@@ -1,6 +1,7 @@
 ---
-id: advisor
-name: 자문전문가
+name: advisor
+description: "자문전문가 — 에이전트 실패 시 원인 진단 + 접근법 조정. 같은 모델 재시도 or 승급 추천."
+tools: Read, Grep, Glob
 model: sonnet
 layer: 2
 enabled: true

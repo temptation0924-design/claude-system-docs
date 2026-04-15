@@ -1,6 +1,7 @@
 ---
-id: ceo-reviewer
-name: CEO 리뷰어
+name: ceo-reviewer
+description: "CEO 리뷰어 — 전략 관점 플랜 리뷰(scope expansion, 10-star product). MODE 1 writing-plans 완료 후 ENG와 병렬."
+tools: Read, Bash, Grep, Glob
 model: opus
 layer: 3
 enabled: true

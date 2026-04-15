@@ -1,6 +1,7 @@
 ---
-id: moodmaker
-name: 분위기메이커
+name: moodmaker
+description: "분위기메이커 — 세션 분위기 관리 + 적시 유머/격려/축하 + 쉼표 제안. 30분+ 연속작업·에러 해결·마일스톤 자동."
+tools: Read
 model: opus
 layer: 3
 enabled: true
