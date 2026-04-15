@@ -3,6 +3,7 @@
 
 # === Whitelist: system docs ===
 !.gitignore
+!settings.json
 !README.md
 !CLAUDE.md
 !rules.md

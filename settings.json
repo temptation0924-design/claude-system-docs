@@ -1,0 +1,201 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Read(/Users/ihyeon-u/**)",
+      "Edit(/Users/ihyeon-u/**)",
+      "Write(/Users/ihyeon-u/**)",
+      "Bash(*)",
+      "mcp__*",
+      "Agent",
+      "Skill",
+      "WebFetch",
+      "WebSearch",
+      "NotebookEdit",
+      "Edit(/.claude/skills/screenshot-check/**)",
+      "mcp__claude_ai_Notion__notion-create-database",
+      "Edit(/.claude/skills/haemilsia-rental-inspection/**)",
+      "mcp__claude_ai_Notion__notion-query-database-view",
+      "Bash(echo \"[$\\(date +%H:%M\\)] SESSION_START: \\(auto-created\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 1 전환 \\(SKILL.md 분할 기획\\)\")"
+    ],
+    "additionalDirectories": [
+      "/Users/ihyeon-u/haemilsia-bot-old",
+      "/Users/ihyeon-u/.claude",
+      "/Users/ihyeon-u/.claude/docs",
+      "/Users/ihyeon-u/.claude/docs/superpowers/specs"
+    ],
+    "defaultMode": "bypassPermissions",
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(rm -rf *)",
+      "Bash(rm -rf .*)",
+      "Bash(git reset --hard *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '{\"epoch\":%s,\"time\":\"%s\"}' \"$(date +%s)\" \"$(date '+%Y-%m-%d %H:%M KST')\" > ~/.claude/.session_start"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/ref-session-start-remind.sh"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-init.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/api-key-health-check.sh",
+            "timeout": 6
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-start-worklog.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Write",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-log.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude_ai_Notion__notion-create-pages|mcp__claude_ai_Notion__notion-update-page",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-log.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude_ai_Notion__notion-query-database-view",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-log.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude_ai_Slack__slack_send_message",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-log.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-log.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-tracker-log.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/ref-dispatcher.sh Stop",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/session-end-check.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "node \"/Users/ihyeon-u/.claude/hooks/gsd-statusline.js\""
+  },
+  "enabledPlugins": {
+    "slack@claude-plugins-official": true,
+    "telegram@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
+    }
+  },
+  "effortLevel": "medium",
+  "skipDangerousModePermissionPrompt": true
+}
