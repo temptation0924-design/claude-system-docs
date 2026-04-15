@@ -26,7 +26,7 @@ filename = os.path.basename(file_path)
 # 시스템 파일 (버전 불필요)
 SYSTEM_FILES = {
     "CLAUDE.md", "session.md", "checklist.md", "env-info.md",
-    "skill-index.md", "skill-guide.md", "agent.md", "rules.md",
+    "skill-index.md", "skill-guide.md", "agent.md", "rules.md", "briefing.md",
     "SKILL.md", ".env", "settings.json", "settings.local.json",
     "package.json", "package-lock.json", "README.md", "CHANGELOG.md",
     ".gitignore", "Dockerfile", "Procfile", "requirements.txt",
