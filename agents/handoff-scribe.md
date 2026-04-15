@@ -1,6 +1,7 @@
 ---
-id: handoff-scribe
-name: 핸드오프작성관
+name: handoff-scribe
+description: "핸드오프작성관 — 세션 종료 시 ~/.claude/handoffs/세션인수인계_*.md 생성. frontmatter 자동 채움."
+tools: Read, Write, Bash
 model: sonnet
 layer: 2
 enabled: true

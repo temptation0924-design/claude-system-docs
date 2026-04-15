@@ -1,6 +1,7 @@
 ---
-id: study-coach
-name: 복습카드관
+name: study-coach
+description: "복습카드관 — 작업 단위 복습 카드 생성 (부동산/운영 도메인 비유 + 개념 요약). MODE 1+2 완료 시 자동 트리거."
+tools: Read, Write
 model: opus
 layer: 3
 enabled: true

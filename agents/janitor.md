@@ -1,6 +1,7 @@
 ---
-id: janitor
-name: 청소원
+name: janitor
+description: "청소원 — ~/.claude/ 환경 청결 점검 (handoffs/ 30일+ archive 제안, MEMORY.md 통합 제안). 매일 첫 세션 자동."
+tools: Read, Write, Bash, Glob
 model: sonnet
 layer: 2
 enabled: true

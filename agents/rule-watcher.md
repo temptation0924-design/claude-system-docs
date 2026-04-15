@@ -1,6 +1,7 @@
 ---
-id: rule-watcher
-name: 규칙감시관
+name: rule-watcher
+description: "규칙감시관 — Notion 규칙위반 DB 쿼리 → TOP 5 추출 + 한 줄 다짐 생성. 세션 시작·종료 자동 점검."
+tools: Read, Bash, mcp__claude_ai_Notion__notion-fetch, mcp__claude_ai_Notion__notion-query-database-view
 model: haiku
 layer: 1
 enabled: true

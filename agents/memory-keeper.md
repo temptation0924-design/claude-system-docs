@@ -1,6 +1,7 @@
 ---
-id: memory-keeper
-name: 기억관리관
+name: memory-keeper
+description: "기억관리관 — MEMORY.md + 개별 메모리 파일 스캔 → 관련 메모리 top 5 추출 (읽기 전용)."
+tools: Read, Glob, Grep
 model: haiku
 layer: 1
 enabled: true
