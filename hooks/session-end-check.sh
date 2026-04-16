@@ -142,27 +142,26 @@ fi
 ALL_ISSUES="${BLOCKS}${WARNS}"
 
 if [ -n "$ALL_ISSUES" ]; then
-  # Slack 경고 1회
-  if [ "$WARNING_SENT" != "true" ] && [ -n "$CLAUDE_CODE_SLACK_TOKEN" ]; then
-    SLACK_MSG=$(printf "⚠️ REF v2.0 세션 종료 점검:\\n${ALL_ISSUES}")
-    curl -s -X POST https://slack.com/api/chat.postMessage \
-      -H "Authorization: Bearer $CLAUDE_CODE_SLACK_TOKEN" \
-      -H "Content-Type: application/json" \
-      -d "$(jq -n --arg ch "C0AEM5EJ0ES" --arg txt "$SLACK_MSG" '{channel:$ch,text:$txt}')" \
-      --max-time 5 > /dev/null 2>&1
+  # === NEW (2026-04-16): tracker에 violations 배열 기록 — slack-courier가 읽어 통합 메시지 조립 ===
+  VIOLATIONS_JSON=$(printf '%s\n' "$BLOCKS" "$WARNS" | \
+    LC_ALL=en_US.UTF-8 grep -oE '(❌|⚠️) B[0-9]+[^$]*' | \
+    sed 's/\\n//g' | \
+    jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null)
 
-    TMPFILE=$(mktemp "${TRACKER}.XXXXXX")
-    jq '.warning_sent = true' "$TRACKER" > "$TMPFILE" && mv "$TMPFILE" "$TRACKER" || rm -f "$TMPFILE"
+  if [ -n "$VIOLATIONS_JSON" ] && [ "$VIOLATIONS_JSON" != "null" ]; then
+    TMP_V=$(mktemp "${TRACKER}.XXXXXX")
+    jq --argjson v "$VIOLATIONS_JSON" '.violations = $v' "$TRACKER" > "$TMP_V" \
+      && mv "$TMP_V" "$TRACKER" || rm -f "$TMP_V"
   fi
 
-  # Notion 피드백 (위반 코드별 비동기)
+  # Notion 피드백 (위반 코드별 비동기) — 기존 로직 보존
   for CODE in B2 B3 B8 B9 B10 B12 B14 B15 B17; do
     if echo -e "$BLOCKS" | grep -q "$CODE"; then
       bash "$HOME/.claude/hooks/ref-notion-feedback.sh" "$CODE" "세션 종료 시 ${CODE} 미이행" &
     fi
   done
 
-  # hard_block이 있으면 차단, soft_warn만이면 경고만
+  # hard_block만 차단 (slack 발송은 slack-courier가 담당 — Q4=C 역할 분리)
   if [ -n "$BLOCKS" ]; then
     echo "{\"additionalContext\": \"🚨 [REF v2.0 세션 종료 차단]\\n${ALL_ISSUES}반드시 완료 후 세션을 종료하세요.\\n우회: --force-Bx (예: --force-B10)\"}"
   else
