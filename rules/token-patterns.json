@@ -1,0 +1,38 @@
+{
+  "version": "1.0",
+  "behavior_patterns": [
+    {
+      "name": "env_echo_combo",
+      "regex": "\\$\\{[A-Z_]+:\\+[^}]*\\}\\$\\{[A-Z_]+:-[^}]*\\}",
+      "desc": "${VAR:+x}${VAR:-y} 콤보 — VAR이 set이면 VAR 값 출력 (4/11 원청 사례)",
+      "severity": "high"
+    },
+    {
+      "name": "echo_token_var",
+      "regex": "(echo|printf)\\s+[\"']?\\$\\{?[A-Z_]*(TOKEN|KEY|SECRET|PASSWORD|API)\\b",
+      "desc": "echo $TOKEN / printf $API_KEY",
+      "severity": "high"
+    },
+    {
+      "name": "cat_env",
+      "regex": "cat\\s+[^\\s|;&]*\\.env(\\.|\\s|$)",
+      "desc": "cat .env / cat .env.production",
+      "severity": "medium"
+    },
+    {
+      "name": "printenv_secret",
+      "regex": "printenv\\s+[A-Z_]*(TOKEN|KEY|SECRET|PASSWORD)",
+      "desc": "printenv SECRET",
+      "severity": "medium"
+    }
+  ],
+  "value_patterns": [
+    { "name": "notion_token",   "regex": "ntn_[A-Za-z0-9]{40,}",          "desc": "Notion API token",     "severity": "critical" },
+    { "name": "anthropic_key",  "regex": "sk-ant-[A-Za-z0-9\\-_]{80,}",   "desc": "Anthropic API key",    "severity": "critical" },
+    { "name": "slack_token",    "regex": "xox[baprs]-[A-Za-z0-9\\-]{10,}", "desc": "Slack token",         "severity": "critical" },
+    { "name": "github_pat",     "regex": "gh[pousr]_[A-Za-z0-9]{36,}",    "desc": "GitHub PAT",           "severity": "critical" },
+    { "name": "gitlab_pat",     "regex": "glpat-[A-Za-z0-9\\-_]{20,}",    "desc": "GitLab PAT",           "severity": "critical" },
+    { "name": "aws_access",     "regex": "AKIA[0-9A-Z]{16}",              "desc": "AWS access key",       "severity": "critical" },
+    { "name": "google_api",     "regex": "AIza[0-9A-Za-z\\-_]{35}",       "desc": "Google API key",       "severity": "critical" }
+  ]
+}
