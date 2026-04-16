@@ -68,6 +68,34 @@ mcp__claude_ai_Notion__notion-create-pages, mcp__claude_ai_Notion__notion-update
 | duration_min | 소요시간(분) | number |
 | commits | 커밋수 | number |
 | session | 세션번호 | text |
+| violations (변환) | 경고사항 | rich_text (2026-04-16 추가) |
+
+### 경고사항 필드 싱크 (2026-04-16 추가 — slack 알림 통일 ③)
+
+frontmatter의 `violations` 배열을 Notion 작업기록 DB 의 `경고사항` Rich text 필드로 변환한다.
+
+**변환 규칙**:
+1. 각 위반 문자열(`"❌ B4: 도구 추천 누락"`)에서 정규식 `(❌|⚠️) (B[0-9]+)` 추출 → 이모지 + 코드 획득
+2. 각 코드에 대해 규칙위반 DB 페이지(`enforcement.json`의 `notion_page_id`)에서 `반복횟수` 필드 조회 (`notion-fetch`)
+3. 압축 포맷 조립: `⚠️ B4 (1회) / ❌ B10 (5회)` — 여러 위반은 ` / ` 로 연결
+4. 빈 배열 또는 violations 필드 부재: `✅ 없음` 저장
+5. 경고사항 필드 존재 여부: DB 스키마에 필드 없으면 이 필드 생략 (나머지 레코드는 정상 생성 — graceful degradation)
+
+**예시**:
+
+frontmatter:
+```yaml
+violations:
+  - "⚠️ B4: 도구 추천 누락"
+  - "❌ B10: MEMORY.md 갱신 누락"
+```
+
+→ Notion `경고사항` 필드: `⚠️ B4 (2회) / ❌ B10 (5회)`
+
+**에러 처리**:
+- 반복횟수 조회 실패: `⚠️ B4 (?회)` (물음표 표기, 나머지 필드는 정상)
+- violations 파싱 실패: `❓ 위반 파싱 실패` 저장 + 에러로그 DB 기록
+- 경고사항 필드가 스키마에 없음: 해당 필드 생략 후 나머지 레코드 정상 생성 (대표님이 DB 필드 추가하면 다음 세션부터 자동 작동)
 
 ### 미싱크 handoffs/ 재시도 (세션 시작 시)
 
