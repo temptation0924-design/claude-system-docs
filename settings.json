@@ -19,15 +19,10 @@
       "Edit(/.claude/skills/haemilsia-rental-inspection/**)",
       "mcp__claude_ai_Notion__notion-query-database-view",
       "Bash(echo \"[$\\(date +%H:%M\\)] SESSION_START: \\(auto-created\\)\")",
-      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 1 전환 \\(SKILL.md 분할 기획\\)\")"
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 1 전환 \\(SKILL.md 분할 기획\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 2 전환 \\(B1 hook 근본 개선\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: 서브에이전트 권한 거부 오진\\(誤診\\) → 실제는 B1 hook 차단\")"
     ],
-    "additionalDirectories": [
-      "/Users/ihyeon-u/haemilsia-bot-old",
-      "/Users/ihyeon-u/.claude",
-      "/Users/ihyeon-u/.claude/docs",
-      "/Users/ihyeon-u/.claude/docs/superpowers/specs"
-    ],
-    "defaultMode": "bypassPermissions",
     "deny": [
       "Bash(rm -rf /)",
       "Bash(rm -rf ~)",
@@ -36,6 +31,14 @@
       "Bash(git reset --hard *)",
       "Bash(git push --force *)",
       "Bash(git push -f *)"
+    ],
+    "defaultMode": "bypassPermissions",
+    "additionalDirectories": [
+      "/Users/ihyeon-u/haemilsia-bot-old",
+      "/Users/ihyeon-u/.claude",
+      "/Users/ihyeon-u/.claude/docs",
+      "/Users/ihyeon-u/.claude/docs/superpowers/specs",
+      "/Users/ihyeon-u/.claude/handoffs"
     ]
   },
   "hooks": {
