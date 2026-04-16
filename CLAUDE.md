@@ -32,7 +32,7 @@
 |------|------------|
 | Claude Code | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
 | Cowork | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
-| Claude.ai | **GitHub raw URL 통합본** — `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` (7개 md 자동 concat, 5분 캐시) |
+| Claude.ai | **GitHub raw URL 통합본** — `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` (8개 md 자동 concat, 5분 캐시) |
 
 > **원본**: Git 리포지토리(`~/.claude/`)가 유일한 원본. 수정 시 → Git 파일 먼저 수정 → `build-integrated_v1.sh --push`로 GitHub 통합본 재빌드 (~10초). Notion 개별 백업 7페이지는 2026-04-12 폐기 (비효율). Notion은 DB 기록 전용 (작업기록/에러로그/규칙위반).
 
@@ -55,6 +55,7 @@
 | "업무하자" | MODE 1~4 선택 질문 | 모드 선택 후 진입 |
 | "quick", "빠르게", "간단히" | /gsd-quick | 간소화 모드 |
 | "설명해줘", "쉽게 풀어줘", "쉽게 설명해줘", "비유로 설명", "무슨 말이야?", "다시 설명" | `briefing.md` | 쉬운 설명 브리핑 (수동 재설명) |
+| "슬랙", "slack", "채널", "브리핑 채널" | `slack.md` | 슬랙 운영 허브 (채널 지도 + 로드맵) |
 | 항상 (기본) | `CLAUDE.md` | 이 지침의 로컬 버전 |
 
 ---
