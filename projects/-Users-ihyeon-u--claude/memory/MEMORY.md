@@ -11,3 +11,5 @@
 - [Agent dispatch 권한 - B1이 진짜 원인 (B19 v2)](feedback_agent_dispatch_mode_v1.md) — 2026-04-17 재조사: bypassPermissions 자동 상속됨, "권한 거부"는 대부분 B1 hook 차단
 - [REF v2.0 훅 false positive 패치](project_ref_hook_fp_fix_v1.md) — 2026-04-16 알림 14건/세션 → 0건 (A+B+C 풀세트, jq 단일화 + B-3 제거)
 - [B1 hook 시스템 파일 근본 개선](project_b1_hook_system_files_fix_v1.md) — 2026-04-17 ~/.claude/ 루트 자동 예외 + INTEGRATED.md 등록 + 테스트 9/9 PASS
+- [MODE 2 무중단 진행 원칙](feedback_mode2_no_interrupt_v1.md) — 2026-04-16 MODE 2 실행 중 질문 금지. 수동 개입은 "대표님 할 일" 누적 기록 후 최종 보고.
+- [Notion MCP DB 스키마 DDL](reference_notion_mcp_schema_ddl_v1.md) — 2026-04-16 notion-update-data-source로 DB 필드 추가/삭제/이름변경 자동화. 수동 UI 작업 불필요.

@@ -318,13 +318,19 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 
 **Rationale:** Target field for violations backup (Q1=B).
 
-- [ ] **Step 1: Skip MCP — use manual addition directly**
+- [x] **Step 1: MCP 자동 추가 — `notion-update-data-source` 사용 (2026-04-16 수정)**
 
-Notion MCP 도구셋에 `notion-update-data-source`가 **등록되지 않음** (2026-04-16 기준). Schema 변경용 MCP 도구 부재로 Step 2 수동 추가가 기본 경로.
+Preflight에서 "MCP 미지원"으로 잘못 진단했으나 **실제로 `mcp__claude_ai_Notion__notion-update-data-source` 도구 존재**. DDL 구문으로 필드 추가 가능:
 
-(향후 MCP에 해당 도구가 추가되면 이 Task를 자동화 가능 — 그 전까지는 수동.)
+```
+mcp__claude_ai_Notion__notion-update-data-source
+  data_source_id: "1b602782-2d30-422d-8816-c5f20bd89516"
+  statements: 'ADD COLUMN "경고사항" RICH_TEXT'
+```
 
-- [ ] **Step 2: Manual — ask 대표님 to add via Notion UI**
+**실행 결과 (2026-04-16 완료)**: 스키마에 `"경고사항": {"type":"text"}` 추가 확인.
+
+- [ ] **Step 2: Manual fallback — ONLY if MCP fails**
 
 Print this instruction block and wait for 대표님 confirmation:
 
