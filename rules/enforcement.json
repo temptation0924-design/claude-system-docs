@@ -119,7 +119,7 @@
       "enabled": true,
       "override_flag": "--force-B8",
       "notion_page_id": "3407f080-9621-81a7-a294-f6489722906f",
-      "next_action": "bash ~/.claude/build-integrated_v1.sh --push 실행해 INTEGRATED.md 재빌드"
+      "next_action": "bash ~/.claude/code/build-integrated_v1.sh --push 실행해 INTEGRATED.md 재빌드"
     },
     {
       "code": "B9",
