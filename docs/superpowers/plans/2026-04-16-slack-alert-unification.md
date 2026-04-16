@@ -138,8 +138,10 @@ ALL_ISSUES="${BLOCKS}${WARNS}"
 
 # === NEW: tracker에 violations 배열 기록 (slack-courier가 읽음) ===
 if [ -n "$ALL_ISSUES" ]; then
-  VIOLATIONS_JSON=$(echo -e "${BLOCKS}${WARNS}" | \
-    grep -oE '(❌|⚠️) B[0-9]+:[^\n]*' | \
+  # macOS BSD grep + UTF-8 이모지 처리 보강
+  VIOLATIONS_JSON=$(printf '%s\n' "$BLOCKS" "$WARNS" | \
+    LC_ALL=en_US.UTF-8 grep -oE '(❌|⚠️) B[0-9]+[^$]*' | \
+    sed 's/\\n//g' | \
     jq -R -s 'split("\n") | map(select(length > 0))' 2>/dev/null)
 
   if [ -n "$VIOLATIONS_JSON" ] && [ "$VIOLATIONS_JSON" != "null" ]; then
@@ -266,8 +268,10 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 - [ ] **Step 1: Verify it's really unused**
 
 ```bash
-grep -rn "slack_notify" ~/.claude/settings.json ~/.claude/hooks/ 2>/dev/null
+grep -rn "slack_notify" ~/.claude/settings.json ~/.claude/hooks/ 2>/dev/null || true
 ```
+
+(`|| true`로 grep exit 1/2 무시 — 파일 없어도 Step 진행 가능)
 
 Expected: matches only within `slack_notify.sh` itself (no references from settings.json or other hook scripts).
 
@@ -314,19 +318,15 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>"
 
 **Rationale:** Target field for violations backup (Q1=B).
 
-- [ ] **Step 1: Try via MCP — use `notion-update-data-source` if available**
+- [ ] **Step 1: Skip MCP — use manual addition directly**
 
-```
-Use tool: mcp__claude_ai_Notion__notion-update-data-source
-data_source_id: 1b602782-2d30-422d-8816-c5f20bd89516
-add property: {"name": "경고사항", "type": "rich_text"}
-```
+Notion MCP 도구셋에 `notion-update-data-source`가 **등록되지 않음** (2026-04-16 기준). Schema 변경용 MCP 도구 부재로 Step 2 수동 추가가 기본 경로.
 
-If MCP succeeds → skip Step 2. If it fails (e.g., permission error) → fall back to Step 2.
+(향후 MCP에 해당 도구가 추가되면 이 Task를 자동화 가능 — 그 전까지는 수동.)
 
-- [ ] **Step 2: Manual fallback — ask 대표님 to add via Notion UI**
+- [ ] **Step 2: Manual — ask 대표님 to add via Notion UI**
 
-If MCP failed, print this instruction block and wait for 대표님 confirmation:
+Print this instruction block and wait for 대표님 confirmation:
 
 ```
 📋 Notion 작업기록 DB 필드 추가 요청:
@@ -380,9 +380,15 @@ Using Edit tool, add to the prompt (after the existing frontmatter template desc
 
 tracker JSON(`/tmp/claude-session-tracker-{session_id}.json`)의 `violations` 배열을 읽어 frontmatter에 복사한다.
 
+**SESSION_ID 추출** (handoff-scribe 실행 컨텍스트):
+```bash
+# 최신 tracker 파일 자동 탐지 (session_id 변수 없어도 동작)
+TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
+```
+
 **읽기**:
 ```bash
-jq -c '.violations // []' /tmp/claude-session-tracker-${SESSION_ID}.json
+jq -c '.violations // []' "$TRACKER"
 ```
 
 **frontmatter 기록 예시**:
@@ -526,9 +532,11 @@ tools: Read, Bash, mcp__claude_ai_Slack__slack_send_message, mcp__claude_ai_Slac
 
 - [ ] **Step 3: Append unified message composition section to prompt**
 
+⚠️ **중첩 코드펜스 처리**: 아래 삽입 블록은 outer fence를 `~~~` (물결표)로 쓰고, 내부 예시는 `` ``` `` (백틱) 유지. Edit 도구 사용 시 outer fence만 `~~~`로 교체.
+
 Add this section to the bottom of the slack-courier prompt (before 에스컬레이션):
 
-```markdown
+~~~markdown
 ### 통합 작업일지 메시지 조립 (2026-04-16 추가)
 
 세션 종료 시 #general-mode 발송 메시지는 반드시 아래 포맷을 따른다.
@@ -611,7 +619,7 @@ jq -c '.violations // []' "$TRACKER"
 
 - **세션 종료 Stage 2에만 경고 섹션 포함** (Q5=A)
 - 작업 완료 / Notion 저장 / 에러 해결 이벤트 발송 시에는 **기존 작업일지 포맷만** 사용 (경고 섹션 없음)
-```
+~~~
 
 - [ ] **Step 4: Verify the edit applied**
 
@@ -660,11 +668,15 @@ Expected: `tools:` line includes `notion-fetch`.
 
 - [ ] **Step 2: Dry-run slack-courier (dispatch with test mode)**
 
-Dispatch slack-courier with `mode: "bypassPermissions"` and a test prompt:
+Dispatch slack-courier with **mode: "bypassPermissions" 명시 (B19 규칙 필수)** and a test prompt:
 
-```
-slack-courier가 현재 tracker JSON을 읽어 가짜 슬랙 메시지를 조립만 하고 출력.
-실제 발송 금지 (DRY_RUN=1).
+```python
+Agent(
+  subagent_type="slack-courier",
+  mode="bypassPermissions",   # B19 — sub-agent는 defaultMode inherit 못 함
+  description="Dry-run 메시지 조립 검증",
+  prompt="slack-courier가 현재 tracker JSON을 읽어 가짜 슬랙 메시지를 조립만 하고 출력. 실제 발송 금지 (DRY_RUN=1)."
+)
 ```
 
 Expected: agent returns fully formatted message text including CLEAN 경고사항 section.
