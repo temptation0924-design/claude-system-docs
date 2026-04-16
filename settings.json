@@ -38,7 +38,8 @@
       "/Users/ihyeon-u/.claude",
       "/Users/ihyeon-u/.claude/docs",
       "/Users/ihyeon-u/.claude/docs/superpowers/specs",
-      "/Users/ihyeon-u/.claude/handoffs"
+      "/Users/ihyeon-u/.claude/handoffs",
+      "/Users/ihyeon-u/.claude/cache"
     ]
   },
   "hooks": {

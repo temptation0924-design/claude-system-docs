@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-04-16T16:52:00+09:00",
+  "session_end_check": true,
+  "top_5": [
+    {"rank": 1, "code": "B18", "violations": 1, "status": "unresolved"},
+    {"rank": 2, "code": "B16", "violations": 1, "status": "unresolved"},
+    {"rank": 3, "code": "B4", "violations": 1, "status": "unresolved"},
+    {"rank": 4, "code": "B9", "violations": 1, "status": "unresolved"},
+    {"rank": 5, "code": "B3", "violations": 1, "status": "unresolved"}
+  ],
+  "session_status": "CLEAN",
+  "violations_detected": 0,
+  "note": "B16 자동 훅 작동 확인 권장"
+}
