@@ -85,6 +85,64 @@ def is_excluded(event: dict, ignore: dict) -> bool:
     return False
 
 
+def find_tracker():
+    import glob
+    files = sorted(glob.glob("/tmp/claude-session-tracker-*.json"), key=os.path.getmtime, reverse=True)
+    return Path(files[0]) if files else None
+
+
+def mask_content(content: str, hits: list) -> str:
+    masked = content
+    for h in hits:
+        if h.get("severity") == "critical":
+            masked = masked.replace(h["match"], "***")
+        else:
+            masked = masked.replace(h["match"], mask_token(h["match"], h.get("severity", "medium")))
+    return masked[:80]
+
+
+def append_tracker(hits: list, tool: str, content: str) -> None:
+    path = find_tracker()
+    if not path:
+        return
+    try:
+        with path.open() as f:
+            tracker = json.load(f)
+    except Exception:
+        return
+    violations = tracker.setdefault("violations", [])
+    ts = datetime.now().astimezone().isoformat(timespec="seconds")
+    masked_hint = mask_content(content, hits)
+    for h in hits:
+        violations.append({
+            "code": "B11",
+            "pattern": h["name"],
+            "tool": tool,
+            "target_hint": masked_hint,
+            "timestamp": ts,
+            "severity": h["severity"],
+        })
+    try:
+        with path.open("w") as f:
+            json.dump(tracker, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        log_err(f"[B11-hook] tracker write error: {e}")
+
+
+def notify_notion_soft_warn() -> None:
+    script = CLAUDE_HOME / "hooks" / "ref-notion-feedback.sh"
+    if not script.exists():
+        return
+    try:
+        subprocess.Popen(
+            ["bash", str(script), "B11", "B11 soft_warn 감지"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as e:
+        log_err(f"[B11-hook] notion notify skipped: {e}")
+
+
 def mask_token(s: str, severity: str = "medium") -> str:
     """심각도별 차등 마스킹 — critical은 전체 ***, 나머지는 앞4+***+뒤4.
     임계 30자 (대부분 실제 토큰은 40자 이상)"""
@@ -130,12 +188,19 @@ def main() -> int:
         return 0
 
     behavior_hits = scan_patterns(content, patterns.get("behavior_patterns", []))
+    value_hits = scan_patterns(content, patterns.get("value_patterns", []))
+
+    all_hits = []
     if behavior_hits:
         emit_warning(behavior_hits, value_mask=False)
-
-    value_hits = scan_patterns(content, patterns.get("value_patterns", []))
+        all_hits.extend(behavior_hits)
     if value_hits:
         emit_warning(value_hits, value_mask=True)
+        all_hits.extend(value_hits)
+
+    if all_hits:
+        append_tracker(all_hits, tool, content)
+        notify_notion_soft_warn()
 
     return 0
 

@@ -18,12 +18,12 @@ run_test() {
   # Backup tracker
   TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
   [ -z "$TRACKER" ] && TRACKER="/tmp/claude-session-tracker-$$.json" && echo '{"violations":[]}' > "$TRACKER"
-  BEFORE=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER" 2>/dev/null || echo 0)
+  BEFORE=$(jq '[.violations[]? | select(type == "object" and .code=="B11")] | length' "$TRACKER" 2>/dev/null || echo 0)
 
   # Run hook
   OUTPUT=$(echo "$event_json" | $HOOK 2>&1)
 
-  AFTER=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER" 2>/dev/null || echo 0)
+  AFTER=$(jq '[.violations[]? | select(type == "object" and .code=="B11")] | length' "$TRACKER" 2>/dev/null || echo 0)
   DELTA=$((AFTER - BEFORE))
 
   # Check warn
