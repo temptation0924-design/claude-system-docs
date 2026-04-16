@@ -205,7 +205,7 @@
 | B8 | INTEGRATED.md 재빌드 누락 | Stop | hard_block | tracker: `pending_sync` |
 | B9 | 스킬 설치 후 skill-guide 미등록 | Stop | hard_block | tracker: `skills_dir + skill_guide` |
 | B10 | 메모리 상태 반영 누락 | Stop | hard_block | tracker: `memory_updated` |
-| B11 | 환경변수 토큰 채팅 노출 | — | 수동 | (stdout 패턴 감지 Phase 3) |
+| B11 | 환경변수 토큰 채팅 노출 | PreToolUse (Bash/Write/Edit) | soft_warn | `check_token_exposure.py` |
 | B12 | 복습카드 미생성 | Stop | hard_block | tracker: `review_card_sent` |
 | B13 | 에이전트 미dispatch | Stop | soft_warn | tracker: `agent_dispatched` |
 | B14 | Preflight Gate 미실시 | Stop | hard_block | tracker: `preflight_executed` (MODE 1 시) |

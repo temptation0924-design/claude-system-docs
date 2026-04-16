@@ -21,7 +21,10 @@
       "Bash(echo \"[$\\(date +%H:%M\\)] SESSION_START: \\(auto-created\\)\")",
       "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 1 전환 \\(SKILL.md 분할 기획\\)\")",
       "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 2 전환 \\(B1 hook 근본 개선\\)\")",
-      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: 서브에이전트 권한 거부 오진\\(誤診\\) → 실제는 B1 hook 차단\")"
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: 서브에이전트 권한 거부 오진\\(誤診\\) → 실제는 B1 hook 차단\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 → MODE 2 전환\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] TASK_START: slack-hub 신설 \\(6 task\\)\")",
+      "Edit(~/.claude/skills/system-docs-sync/**)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -95,6 +98,16 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Write",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Bash",
             "timeout": 5
           }
         ]

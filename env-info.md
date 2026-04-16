@@ -65,9 +65,9 @@
 | Session Tracker Init | `~/.claude/hooks/session-tracker-init.sh` |
 | Session Tracker Log | `~/.claude/hooks/session-tracker-log.sh` |
 | Session End Check | `~/.claude/hooks/session-end-check.sh` |
-| 활성 규칙 | **16개** (B1~B17, B11 제외) |
+| 활성 규칙 | **17개** (B1~B17 전원 활성) |
 | hard_block | 11개 (B1,B2,B3,B5,B8,B9,B10,B12,B14,B15,B17) |
-| soft_warn | 5개 (B4,B6,B7,B13,B16) |
+| soft_warn | 6개 (B4,B6,B7,B11,B13,B16) |
 | 우회 | `--force-Bx` (3회 이상 시 Slack 알림) |
 | 위반 DB | Notion `⚠️ 규칙 위반 기록` (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`) |
 

@@ -236,6 +236,21 @@
       "notion_page_id": null,
       "note": "세션 종료 시 규칙감시관+핸드오프작성관+노션기록관 필수 dispatch",
       "next_action": "세션 종료 에이전트 dispatch (규칙감시관+핸드오프작성관 필수 포함) 수행"
+    },
+    {
+      "code": "B11",
+      "name": "환경변수 토큰 채팅 노출",
+      "event": "PreToolUse",
+      "detector": {
+        "type": "script",
+        "path": "~/.claude/hooks/check_token_exposure.py",
+        "args": []
+      },
+      "severity": "soft_warn",
+      "enabled": true,
+      "override_flag": "--force-B11",
+      "notion_page_id": "33f7f080-9621-81ca-98fe-ee0fa11775b0",
+      "next_action": "환경변수 존재 체크는 명시적 if문. `${VAR:+x}${VAR:-y}` 콤보 금지. `echo $TOKEN` 대신 `[ -n \"$TOKEN\" ] && echo yes` 형식 사용."
     }
   ]
 }
