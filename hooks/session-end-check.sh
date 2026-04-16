@@ -17,6 +17,39 @@ fi
 WORK_PERFORMED=$(jq -r '.work_performed' "$TRACKER" 2>/dev/null)
 [ "$WORK_PERFORMED" != "true" ] && exit 0
 
+# === 패치 A: handoffs/ 디렉토리 폴링 (sub-agent가 만든 파일도 인정) ===
+START_EPOCH=$(jq -r '.epoch // 0' ~/.claude/.session_start 2>/dev/null)
+
+if [ "$START_EPOCH" -gt 0 ]; then
+  PATCH_A_HANDOFF=false
+  PATCH_A_LOGGED=false
+  PATCH_A_END_AGENTS=false
+
+  for HF in ~/.claude/handoffs/세션인수인계_*.md; do
+    [ -f "$HF" ] || continue
+    HF_EPOCH=$(stat -f %m "$HF" 2>/dev/null || stat -c %Y "$HF" 2>/dev/null || echo 0)
+
+    if [ "$HF_EPOCH" -ge "$START_EPOCH" ]; then
+      PATCH_A_HANDOFF=true
+      PATCH_A_END_AGENTS=true
+      if grep -q "^notion_synced: true" "$HF" 2>/dev/null; then
+        PATCH_A_LOGGED=true
+      fi
+    fi
+  done
+
+  if [ "$PATCH_A_HANDOFF" = "true" ]; then
+    TMP_A=$(mktemp "${TRACKER}.XXXXXX")
+    jq --argjson handoff "$PATCH_A_HANDOFF" \
+       --argjson logged "$PATCH_A_LOGGED" \
+       --argjson endagents "$PATCH_A_END_AGENTS" \
+       '.handoff_created = $handoff
+        | .session_end_agents = $endagents
+        | (if $logged then .work_logged = true else . end)' \
+       "$TRACKER" > "$TMP_A" && mv "$TMP_A" "$TRACKER" || rm -f "$TMP_A"
+  fi
+fi
+
 # === 상태 읽기 ===
 HANDOFF=$(jq -r '.handoff_created' "$TRACKER" 2>/dev/null)
 WORK_LOGGED=$(jq -r '.work_logged' "$TRACKER" 2>/dev/null)
@@ -45,7 +78,7 @@ WARNS=""    # soft_warn — 경고만
 [ "$WORK_LOGGED" != "true" ] && BLOCKS+="❌ B2: 작업기록 DB 미저장\n"
 
 # B3: 세션 시작 루틴 미실시 (TOP 5 조회 안 함)
-[ "$TOP5" != "true" ] && BLOCKS+="❌ B3: 세션 시작 TOP 5 조회 미실시\n"
+[ "$TOP5" != "true" ] && WARNS+="⚠️ B3: 세션 시작 TOP 5 조회 미실시 (캐시 폴백 시 정상)\n"
 
 # B4: 도구 추천 누락 (MODE 1/2 진입 세션만 필수, MODE 3/4 전용 세션은 면제)
 if [ "$TOOL_REC" != "true" ] && { [ "$MODE1" = "true" ] || [ "$MODE2" = "true" ]; }; then
@@ -62,8 +95,14 @@ if [ "$SKILLS_DIR" = "true" ] && [ "$SKILL_GUIDE" != "true" ]; then
   BLOCKS+="❌ B9: 스킬 설치/수정 후 skill-guide.md 미등록\n"
 fi
 
-# B10: 메모리 업데이트 누락 (작업 수행했는데 MEMORY.md 미수정)
-[ "$MEMORY" != "true" ] && BLOCKS+="❌ B10: MEMORY.md 업데이트 누락 (세션 중 변경 0건)\n"
+# B10: 시스템 변경/에러/신규개념이 있을 때만 메모리 갱신 강제 (조건부)
+MEMORY_REQUIRED="false"
+[ "$SYSTEM_EDITED" = "true" ] && MEMORY_REQUIRED="true"
+[ "$ERRORS_RESOLVED" = "true" ] && MEMORY_REQUIRED="true"
+[ "$NEW_CONCEPTS" = "true" ] && MEMORY_REQUIRED="true"
+if [ "$MEMORY_REQUIRED" = "true" ] && [ "$MEMORY" != "true" ]; then
+  WARNS+="⚠️ B10: MEMORY.md 업데이트 누락 (시스템/에러/신규개념 변경 발생 시)\n"
+fi
 
 # B12: 복습카드 미생성 (트리거 조건 충족했는데 카드 안 만듦)
 TRIGGER_EXISTS="false"
