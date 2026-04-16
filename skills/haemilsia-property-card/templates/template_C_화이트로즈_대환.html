@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>남양리 2027-10 대환대출 수익분석</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --accent: #A57971;
+    --accent-deep: #8B5F58;
+    --accent-soft: #E8D4D0;
+    --accent-bg: #FAF5F4;
+    --text-main: #1a1a1a;
+    --text-sub: #555;
+    --text-muted: #999;
+    --border: #ECE7E5;
+    --border-strong: #D8CFCC;
+    --negative: #C75A5A;
+    --positive: #5A9A6F;
+    --bg: #ffffff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    word-break: keep-all;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 480px; margin: 0 auto; background: var(--bg); }
+
+  /* ── 히어로 ── */
+  .hero {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 0.75;
+    overflow: hidden;
+    background: linear-gradient(135deg, #d6c4be 0%, #c4a89e 50%, #a8847a 100%);
+  }
+  .hero img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.92);
+  }
+  .hero-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 36px 24px 22px;
+    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.25) 55%, transparent 100%);
+  }
+  .hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 4px 12px; border-radius: 100px;
+    margin-bottom: 8px; letter-spacing: -0.02em;
+  }
+  .hero-title {
+    color: #fff; font-size: 24px; font-weight: 800;
+    line-height: 1.25; letter-spacing: -0.03em;
+  }
+  .hero-sub {
+    color: rgba(255,255,255,0.85);
+    font-size: 13px; margin-top: 5px; font-weight: 400;
+  }
+  .hero-specs {
+    display: flex; gap: 10px; margin-top: 7px;
+    font-size: 11px; color: rgba(255,255,255,0.75);
+  }
+  .hero-specs span::before { content: '•'; margin-right: 4px; color: var(--accent-soft); }
+
+  /* ── 핵심 전환 배너 ── */
+  .conversion-banner {
+    display: flex; align-items: center; justify-content: center;
+    gap: 16px; padding: 22px 24px;
+    background: var(--accent);
+    color: #fff;
+  }
+  .conv-box { text-align: center; }
+  .conv-box .conv-label {
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 4px;
+  }
+  .conv-box .conv-value {
+    font-size: 26px; font-weight: 900; color: #fff;
+    letter-spacing: -0.03em;
+  }
+  .conv-box .conv-value.negative { color: #FFD0D0; }
+  .conv-arrow {
+    font-size: 22px; color: #fff; font-weight: 900;
+    margin-top: 14px;
+  }
+
+  /* ── 섹션 ── */
+  .section { padding: 24px; }
+  .section-title {
+    font-size: 15px; font-weight: 800; color: var(--accent);
+    margin-bottom: 14px; padding-bottom: 9px;
+    border-bottom: 2px solid var(--accent-soft);
+    letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title .tag {
+    font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 4px;
+    letter-spacing: 0;
+  }
+  .tag-before { background: #f0eeed; color: var(--text-muted); }
+  .tag-after  { background: var(--accent-soft); color: var(--accent-deep); }
+
+  /* ── 대출구조 테이블 ── */
+  .loan-table {
+    width: 100%; border-collapse: collapse;
+  }
+  .loan-table tr {
+    border-bottom: 1px solid var(--border);
+  }
+  .loan-table td { padding: 11px 0; font-size: 13px; }
+  .loan-table .label { color: var(--text-sub); font-weight: 500; width: 32%; }
+  .loan-table .value {
+    text-align: right; font-weight: 700; color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+  }
+  .loan-table .arrow-cell {
+    text-align: center; width: 36px; color: var(--accent); font-weight: 800;
+    font-size: 15px;
+  }
+  .loan-table .value-after {
+    text-align: right; font-weight: 800; color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .loan-table tr.added td { color: var(--accent); }
+
+  /* ── 호실 테이블 ── */
+  .room-table {
+    width: 100%; border-collapse: collapse; font-size: 12px;
+  }
+  .room-table thead th {
+    background: var(--accent);
+    color: #fff; font-weight: 700;
+    padding: 10px 5px; text-align: center; font-size: 11px;
+  }
+  .room-table thead th:first-child { border-radius: 8px 0 0 0; }
+  .room-table thead th:last-child  { border-radius: 0 8px 0 0; }
+  .room-table tbody td {
+    padding: 10px 5px; text-align: center;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums; color: var(--text-sub);
+  }
+  .room-table tbody td.num {
+    text-align: right; font-weight: 600; padding-right: 8px; color: var(--text-main);
+  }
+  .room-table tbody tr:nth-child(even) { background: #FBF8F7; }
+  .room-table tbody tr.changed {
+    background: var(--accent-bg);
+  }
+  .room-table tbody tr.changed td { color: var(--accent-deep); }
+  .room-table tbody tr.changed td.num { color: var(--accent); font-weight: 800; }
+  .room-table tfoot td {
+    padding: 12px 5px;
+    background: var(--accent-soft);
+    font-weight: 800; text-align: center;
+    border-top: 2px solid var(--accent);
+    color: var(--accent-deep);
+  }
+  .room-table tfoot td.num { text-align: right; padding-right: 8px; }
+  .change-badge {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    background: var(--accent); color: #fff;
+    padding: 2px 6px; border-radius: 3px; margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── 수익비교 카드 ── */
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 40px 1fr;
+    gap: 0; margin-top: 16px; align-items: stretch;
+  }
+  .compare-card {
+    background: #FAFAFA;
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 14px;
+  }
+  .compare-card.after {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+  .compare-card .cc-title {
+    font-size: 11px; font-weight: 700; color: var(--text-muted);
+    margin-bottom: 12px; text-align: center;
+  }
+  .compare-card.after .cc-title { color: var(--accent); }
+  .compare-row {
+    display: flex; justify-content: space-between;
+    padding: 5px 0; font-size: 12px;
+  }
+  .compare-row .cr-label { color: var(--text-sub); }
+  .compare-row .cr-value { font-weight: 700; color: var(--text-main); font-variant-numeric: tabular-nums; }
+  .compare-row.total {
+    border-top: 1px solid var(--border-strong);
+    padding-top: 8px; margin-top: 4px;
+  }
+  .compare-card.after .compare-row.total { border-top-color: var(--accent); }
+  .compare-row.total .cr-value { font-size: 16px; font-weight: 900; }
+  .compare-row.total .cr-value.negative { color: var(--negative); }
+  .compare-row.total .cr-value.positive { color: var(--positive); }
+  .compare-arrow {
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent); font-size: 22px; font-weight: 900;
+  }
+
+  /* ── 요약 카드 ── */
+  .summary-cards {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    margin-top: 16px;
+  }
+  .summary-card {
+    background: #FAFAFA;
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px; text-align: center;
+  }
+  .summary-card .card-label {
+    font-size: 11px; color: var(--text-muted);
+    margin-bottom: 5px; font-weight: 500;
+  }
+  .summary-card .card-value {
+    font-size: 18px; font-weight: 800; color: var(--text-main);
+    letter-spacing: -0.03em;
+  }
+  .summary-card.highlight {
+    border-color: var(--accent);
+    background: var(--accent-bg);
+  }
+
+  .footer {
+    text-align: center; padding: 18px 24px 28px;
+    font-size: 10px; color: var(--text-muted); line-height: 1.6;
+  }
+
+  .divider {
+    height: 6px;
+    background: #F7F4F3;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ━━ 히어로 ━━ -->
+  <div class="hero">
+    <!-- 건물 이미지: src에 이미지 파일 경로 -->
+    <img src="building_2027-10.jpg" alt="남양리 2027-10"
+         onerror="this.style.display='none';">
+    <div class="hero-overlay">
+      <div class="hero-badge">대환대출 수익분석</div>
+      <div class="hero-title">남양리 2027-10번지</div>
+      <div class="hero-sub">경기도 화성시 남양읍</div>
+      <div class="hero-specs">
+        <span>4층</span>
+        <span>6세대</span>
+        <span>원룸 1 + 3룸 5</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ 핵심 전환 배너 ━━ -->
+  <div class="conversion-banner">
+    <div class="conv-box">
+      <div class="conv-label">현재 월수익</div>
+      <div class="conv-value negative">-37만</div>
+    </div>
+    <div class="conv-arrow">→</div>
+    <div class="conv-box">
+      <div class="conv-label">대환 후 월수익</div>
+      <div class="conv-value">+186만</div>
+    </div>
+  </div>
+
+  <!-- ━━ 대출구조 변경 ━━ -->
+  <div class="section">
+    <div class="section-title">대출구조 변경</div>
+    <table class="loan-table">
+      <tr>
+        <td class="label">기존 대출</td>
+        <td class="value">5억원</td>
+        <td class="arrow-cell">→</td>
+        <td class="value-after">8억원</td>
+      </tr>
+      <tr class="added">
+        <td class="label">추가 대출</td>
+        <td colspan="3" class="value-after">+3억원</td>
+      </tr>
+      <tr>
+        <td class="label">금리</td>
+        <td class="value" colspan="3">4.75%</td>
+      </tr>
+      <tr>
+        <td class="label">월 이자</td>
+        <td class="value">1,979,167원</td>
+        <td class="arrow-cell">→</td>
+        <td class="value-after">3,166,667원</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ━━ 추가대출 3억 사용 내역 ━━ -->
+  <div class="section" style="padding-bottom:14px;">
+    <div class="section-title">추가대출 3억 사용 내역</div>
+    <table class="loan-table">
+      <tr>
+        <td class="label">101호 보증금 반환</td>
+        <td class="value" colspan="3">50,000,000원</td>
+      </tr>
+      <tr>
+        <td class="label">202호 보증금 반환</td>
+        <td class="value" colspan="3">120,000,000원</td>
+      </tr>
+      <tr>
+        <td class="label">302호 보증금 반환</td>
+        <td class="value" colspan="3">130,000,000원</td>
+      </tr>
+      <tr style="border-top:2px solid var(--accent);">
+        <td class="label" style="color:var(--accent); font-weight:700;">합계</td>
+        <td class="value-after" colspan="3" style="font-size:15px;">300,000,000원</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ━━ 호실현황: 현재 ━━ -->
+  <div class="section" style="padding-bottom:10px;">
+    <div class="section-title">호실현황 <span class="tag tag-before">현재</span></div>
+    <table class="room-table">
+      <thead>
+        <tr>
+          <th>호실</th>
+          <th>층</th>
+          <th>타입</th>
+          <th>월세</th>
+          <th>보증금</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="changed"><td>101 <span class="change-badge">변경</span></td><td>1</td><td>원룸</td><td class="num">60,000</td><td class="num">50,000,000</td></tr>
+        <tr><td>201</td><td>2</td><td>3룸</td><td class="num">710,000</td><td class="num">50,000,000</td></tr>
+        <tr class="changed"><td>202 <span class="change-badge">변경</span></td><td>2</td><td>3룸</td><td class="num">110,000</td><td class="num">120,000,000</td></tr>
+        <tr><td>301</td><td>3</td><td>3룸</td><td class="num">520,000</td><td class="num">70,000,000</td></tr>
+        <tr class="changed"><td>302 <span class="change-badge">변경</span></td><td>3</td><td>3룸</td><td class="num">110,000</td><td class="num">130,000,000</td></tr>
+        <tr><td>401</td><td>4</td><td>3룸</td><td class="num">100,000</td><td class="num">120,000,000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3">합계</td><td class="num">1,610,000</td><td class="num">540,000,000</td></tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- ━━ 호실현황: 대환 후 ━━ -->
+  <div class="section" style="padding-top:6px;">
+    <div class="section-title">호실현황 <span class="tag tag-after">대환 후</span></div>
+    <table class="room-table">
+      <thead>
+        <tr>
+          <th>호실</th>
+          <th>층</th>
+          <th>타입</th>
+          <th>월세</th>
+          <th>보증금</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="changed"><td>101 <span class="change-badge">재임대</span></td><td>1</td><td>원룸</td><td class="num">700,000</td><td class="num">10,000,000</td></tr>
+        <tr><td>201</td><td>2</td><td>3룸</td><td class="num">710,000</td><td class="num">50,000,000</td></tr>
+        <tr class="changed"><td>202 <span class="change-badge">재임대</span></td><td>2</td><td>3룸</td><td class="num">1,500,000</td><td class="num">10,000,000</td></tr>
+        <tr><td>301</td><td>3</td><td>3룸</td><td class="num">520,000</td><td class="num">70,000,000</td></tr>
+        <tr class="changed"><td>302 <span class="change-badge">재임대</span></td><td>3</td><td>3룸</td><td class="num">1,500,000</td><td class="num">10,000,000</td></tr>
+        <tr><td>401</td><td>4</td><td>3룸</td><td class="num">100,000</td><td class="num">120,000,000</td></tr>
+      </tbody>
+      <tfoot>
+        <tr><td colspan="3">합계</td><td class="num">5,030,000</td><td class="num">270,000,000</td></tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ━━ 수익 비교 ━━ -->
+  <div class="section">
+    <div class="section-title">월 수익 비교</div>
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="cc-title">현재</div>
+        <div class="compare-row">
+          <span class="cr-label">월세 합계</span>
+          <span class="cr-value">161만</span>
+        </div>
+        <div class="compare-row">
+          <span class="cr-label">대출이자</span>
+          <span class="cr-value">198만</span>
+        </div>
+        <div class="compare-row total">
+          <span class="cr-label">순수익</span>
+          <span class="cr-value negative">-37만</span>
+        </div>
+      </div>
+      <div class="compare-arrow">→</div>
+      <div class="compare-card after">
+        <div class="cc-title">대환 후</div>
+        <div class="compare-row">
+          <span class="cr-label">월세 합계</span>
+          <span class="cr-value">503만</span>
+        </div>
+        <div class="compare-row">
+          <span class="cr-label">대출이자</span>
+          <span class="cr-value">317만</span>
+        </div>
+        <div class="compare-row total">
+          <span class="cr-label">순수익</span>
+          <span class="cr-value positive">+186만</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━ 요약 카드 ━━ -->
+  <div class="section" style="padding-top:0;">
+    <div class="summary-cards">
+      <div class="summary-card">
+        <div class="card-label">추가 대출</div>
+        <div class="card-value">3억원</div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">월세 증가</div>
+        <div class="card-value" style="color:var(--accent);">+342만</div>
+      </div>
+      <div class="summary-card">
+        <div class="card-label">이자 증가</div>
+        <div class="card-value" style="color:var(--negative);">+119만</div>
+      </div>
+      <div class="summary-card highlight">
+        <div class="card-label">순수익 개선</div>
+        <div class="card-value" style="color:var(--positive);">+223만</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    본 자료는 대환대출 검토용이며, 실제 수익은 임대 시장 상황에 따라 달라질 수 있습니다.<br>
+    경기도 화성시 남양읍 남양리 2027-10 · 2026년 4월 기준
+  </div>
+
+</div>
+</body>
+</html>
