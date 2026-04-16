@@ -7,3 +7,7 @@
 - [임대점검 3단 분류 체계](feedback_rental_3tier_classification_v1.md) — 2026-04-15 A(입력오류)/B(확인사항)/C(진행추적) 슬랙 섹션 분리 필수
 - [한글 별명 agent 등록 표준](feedback_agent_registration_v1.md) — 2026-04-15 frontmatter 표준 (name 영문, description 한글) + bypassPermissions로 권한 자동 승인
 - [C+ 팀 19명 전원 운영 가능](project_cplus_team_19_v1.md) — 2026-04-15 Phase 3 완료 — L1 5명 + L2 4명 + L3 5명 + Stage 1 4명, spec phases_completed 반영
+- [haemilsia-property-card 스킬 신설](project_haemilsia_property_card_skill_v1.md) — 2026-04-16 해밀시아 부동산 수익카드 (매매/대환 + 3테마 + HTML→PNG 카톡용)
+- [Agent dispatch 권한 - B1이 진짜 원인 (B19 v2)](feedback_agent_dispatch_mode_v1.md) — 2026-04-17 재조사: bypassPermissions 자동 상속됨, "권한 거부"는 대부분 B1 hook 차단
+- [REF v2.0 훅 false positive 패치](project_ref_hook_fp_fix_v1.md) — 2026-04-16 알림 14건/세션 → 0건 (A+B+C 풀세트, jq 단일화 + B-3 제거)
+- [B1 hook 시스템 파일 근본 개선](project_b1_hook_system_files_fix_v1.md) — 2026-04-17 ~/.claude/ 루트 자동 예외 + INTEGRATED.md 등록 + 테스트 9/9 PASS

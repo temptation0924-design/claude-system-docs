@@ -35,6 +35,8 @@ SYSTEM_FILES = {
     "MEMORY.md",      # Claude Code 내장 메모리 시스템 인덱스 (경로 하드코딩)
     "TODOS.md",       # gstack 규약 — 버전 안 붙는 고정 파일명
     "HANDOFF.json",   # gsd 규약 — 버전 안 붙는 고정 파일명
+    # 2026-04-17 4차 세션: 시스템 고정 파일 근본 해결
+    "INTEGRATED.md",  # GitHub 통합본 (claude-system-docs repo)
 }
 
 # 코드 확장자 (버전 불필요)
@@ -60,6 +62,14 @@ EXEMPT_DIRS = ["/node_modules/", "/.git/", "/hooks/", "/__pycache__/", "/skills/
                "/memory/", "/handoffs/", "/.claude/rules/", "/.claude/docs/"]
 if any(d in file_path for d in EXEMPT_DIRS):
     sys.exit(0)
+
+# 3.5. ~/.claude/ 루트 레벨 파일은 시스템 설정 파일로 간주 (하위 디렉토리 제외)
+# 2026-04-17: 시스템 고정 파일 근본 해결 — SYSTEM_FILES 수동 관리 부담 제거
+claude_root = os.path.expanduser("~/.claude/")
+if file_path.startswith(claude_root):
+    relative_path = file_path[len(claude_root):]
+    if "/" not in relative_path:
+        sys.exit(0)
 
 # 4. 코드 파일이면 통과
 _, ext = os.path.splitext(filename)
