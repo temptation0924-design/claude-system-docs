@@ -50,6 +50,41 @@ def scan_patterns(content: str, patterns: list) -> list:
     return hits
 
 
+def load_ignore() -> dict:
+    try:
+        with IGNORE_PATH.open() as f:
+            d = json.load(f)
+        d["path_prefixes"] = [os.path.expanduser(p) for p in d.get("path_prefixes", [])]
+        return d
+    except Exception:
+        return {"path_prefixes": [], "filename_patterns": [], "bash_command_prefixes": []}
+
+
+def is_excluded(event: dict, ignore: dict) -> bool:
+    tool = event.get("tool_name", "")
+    inp = event.get("tool_input", {})
+
+    if tool == "Bash":
+        cmd = inp.get("command", "").lstrip()
+        for prefix in ignore.get("bash_command_prefixes", []):
+            if cmd.startswith(prefix):
+                return True
+        return False
+
+    path = os.path.expanduser(inp.get("file_path", ""))
+    for prefix in ignore.get("path_prefixes", []):
+        if path.startswith(prefix):
+            return True
+    filename = os.path.basename(path)
+    for pat in ignore.get("filename_patterns", []):
+        try:
+            if re.search(pat, filename):
+                return True
+        except re.error:
+            continue
+    return False
+
+
 def mask_token(s: str, severity: str = "medium") -> str:
     """심각도별 차등 마스킹 — critical은 전체 ***, 나머지는 앞4+***+뒤4.
     임계 30자 (대부분 실제 토큰은 40자 이상)"""
@@ -78,6 +113,10 @@ def main() -> int:
 
     tool = event.get("tool_name", "")
     if tool not in ("Bash", "Write", "Edit"):
+        return 0
+
+    ignore = load_ignore()
+    if is_excluded(event, ignore):
         return 0
 
     try:
