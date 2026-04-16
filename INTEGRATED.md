@@ -3,7 +3,7 @@
 > **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-16 13:12 KST
+> 마지막 빌드: 2026-04-16 16:46 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -81,6 +81,8 @@
 ## 3. 업무 모드 시스템
 
 > **C+ 에이전트 시스템**: 모든 MODE 루틴은 `agent.md` v2.2의 19명 전문 팀원을 통해 병렬 dispatch됩니다. 세부 트리거는 `agent.md` 섹션 3 참조. 에이전트 프로필은 `~/.claude/agents/` 디렉토리 참조. CEO+ENG 리뷰는 **병렬 실행**.
+
+> **🚨 Agent dispatch 권한 규칙 (B19)**: 서브에이전트는 메인 세션의 `defaultMode: bypassPermissions`를 inherit 못 함. **모든 Agent 호출 시 `mode: "bypassPermissions"` 명시 필수**. 누락 시 sub-agent의 Edit/Write/Bash 권한 거부 발생 → 작업 실패 + 매니저 직접 재작업 필요. 예외: 읽기 전용 에이전트(memory-keeper, doc-librarian, rule-watcher 등)는 명시 불필요.
 
 모든 업무는 4가지 모드 중 하나로 자동 라우팅된다.
 
@@ -1414,4 +1416,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 13:12 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 16:46 KST | 원본: `~/.claude/*.md` (Git)*
