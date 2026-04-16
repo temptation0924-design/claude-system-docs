@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "path_prefixes": [
+    "~/.claude/docs/review-cards/",
+    "~/.claude/handoffs/",
+    "~/.claude/docs/superpowers/specs/",
+    "~/.claude/docs/superpowers/plans/",
+    "~/.claude/rules/token-patterns.json",
+    "~/.claude/rules/token-exposure-ignore.json"
+  ],
+  "filename_patterns": [
+    "\\.env(\\..*)?$",
+    "\\.secret$",
+    "\\.key$",
+    "\\.token$",
+    "\\.credentials$"
+  ],
+  "bash_command_prefixes": [
+    "grep ",
+    "rg ",
+    "git log",
+    "git show",
+    "git diff",
+    "git blame"
+  ]
+}
