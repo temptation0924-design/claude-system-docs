@@ -197,22 +197,29 @@ exit 0 (항상)
 }
 ```
 
-### 4.4 `settings.json` 훅 등록 (추가)
+### 4.4 `settings.json` 훅 등록 (ref-dispatcher 통합)
 
+**2026-04-17 revision (ENG P0.1 반영)**: B1~B17과 동일하게 `ref-dispatcher.sh` 경유. 직접 hook 등록 대신 기존 dispatcher PreToolUse 배열에 **Bash matcher 블록만 추가**.
+
+기존 구조:
 ```jsonc
 "PreToolUse": [
-  // 기존 ref-dispatcher 유지
   {
-    "matcher": "Bash|Write|Edit",
-    "hooks": [
-      {
-        "type": "command",
-        "command": "python3 ~/.claude/hooks/check_token_exposure.py"
-      }
-    ]
+    "matcher": "Write|Edit",
+    "hooks": [{ "type": "command", "command": "bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Write", "timeout": 5 }]
   }
 ]
 ```
+
+추가할 블록:
+```jsonc
+{
+  "matcher": "Bash",
+  "hooks": [{ "type": "command", "command": "bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Bash", "timeout": 5 }]
+}
+```
+
+dispatcher가 `event==PreToolUse` 조건으로 enforcement.json의 B11 entry를 매칭 → B11 `detector` 실행. `--force-B11` 우회는 dispatcher 공통 로직(Step 6 user_message regex)이 담당.
 
 ### 4.5 `rules.md` B11 행 수정
 
@@ -221,22 +228,29 @@ exit 0 (항상)
 + | B11 | 환경변수 토큰 채팅 노출 | PreToolUse:Bash/Write/Edit | soft_warn | `check_token_exposure.py` |
 ```
 
-### 4.6 `rules/enforcement.json` B11 entry (신규 추가)
+### 4.6 `rules/enforcement.json` B11 entry (B1 표준 포맷)
+
+**2026-04-17 revision (Preflight W1 반영)**: 기존 B1~B17과 동일한 `detector{}` + `override_flag` 키명.
 
 ```json
 {
   "code": "B11",
   "name": "환경변수 토큰 채팅 노출",
-  "severity": "soft_warn",
   "event": "PreToolUse",
-  "matcher": "Bash|Write|Edit",
-  "hook": "check_token_exposure.py",
+  "detector": {
+    "type": "script",
+    "path": "~/.claude/hooks/check_token_exposure.py",
+    "args": []
+  },
+  "severity": "soft_warn",
+  "enabled": true,
+  "override_flag": "--force-B11",
   "notion_page_id": "33f7f080-9621-81ca-98fe-ee0fa11775b0",
-  "next_action": "환경변수 존재 체크는 명시적 if문 사용. `${VAR:+x}${VAR:-y}` 콤보 금지.",
-  "bypass_flag": "--force-B11",
-  "enabled": true
+  "next_action": "환경변수 존재 체크는 명시적 if문. `${VAR:+x}${VAR:-y}` 콤보 금지. `echo $TOKEN` 대신 `[ -n \"$TOKEN\" ] && echo yes` 형식 사용."
 }
 ```
+
+**dispatcher 동작**: `ref-dispatcher.sh`는 detector 결과가 `exit 2 + JSON reason`일 때만 block 처리. B11 훅은 soft_warn이므로 **항상 exit 0** → dispatcher pass. dispatcher는 pass 시 `ref-notion-feedback.sh`를 호출하지 **않으므로** Notion 반복횟수 카운트는 **훅이 직접** 비동기 호출한다 (§4.1 `notify_notion_soft_warn`). `--force-B11` 우회는 dispatcher Step 6의 user_message regex 매칭으로 처리되어 B11 검출기 자체가 실행되지 않음.
 
 ## 5. 데이터 플로우
 

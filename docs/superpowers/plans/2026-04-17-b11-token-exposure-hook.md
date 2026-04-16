@@ -188,7 +188,6 @@ run_test() {
   local event_json="$2"
   local expect_warn="$3"   # yes / no
   local expect_tracker="$4" # yes / no / skip
-  local force_flag="${5:-}"
 
   # Backup tracker
   TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
@@ -196,11 +195,7 @@ run_test() {
   BEFORE=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER" 2>/dev/null || echo 0)
 
   # Run hook
-  if [ -n "$force_flag" ]; then
-    OUTPUT=$(echo "$event_json" | FORCE_B11=1 $HOOK 2>&1)
-  else
-    OUTPUT=$(echo "$event_json" | $HOOK 2>&1)
-  fi
+  OUTPUT=$(echo "$event_json" | $HOOK 2>&1)
 
   AFTER=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER" 2>/dev/null || echo 0)
   DELTA=$((AFTER - BEFORE))
@@ -267,14 +262,10 @@ run_test "T8_git_log_exempt" \
   '{"tool_name":"Bash","tool_input":{"command":"git log --oneline | head"}}' \
   no skip
 
-# T9. Bash echo $TOKEN + FORCE_B11=1 → 경고는 유지, tracker 스킵
-run_test "T9_force_bypass" \
-  '{"tool_name":"Bash","tool_input":{"command":"echo $API_TOKEN"}}' \
-  yes skip \
-  force
+# T9. (제거) --force-B11 우회는 dispatcher가 user_message에서 감지 — 훅 유닛 테스트 범위 외
+#     dispatcher 통합 테스트로 별도 분리 (Task 12 Step 2에서 확인)
 
-# T10. 패턴 파일 손상 시 일반 ls → 통과 (fail-open, 별도 테스트)
-# Task 8에서 구현 (패턴 파일을 일시 손상 후 복원)
+# T10. 패턴 파일 손상 시 일반 ls → 통과 (fail-open, Task 9에서 구현)
 
 # T11. 일반 코드: def foo(): return 42 → 통과 (오탐 없음)
 run_test "T11_no_false_positive" \
@@ -407,6 +398,7 @@ def load_json(path: Path) -> dict:
         return json.load(f)
 
 def extract_content(event: dict) -> str:
+    """Bash=command / Write=content / Edit=old+new 모두 스캔 (CEO H2 반영)"""
     tool = event.get("tool_name", "")
     inp = event.get("tool_input", {})
     if tool == "Bash":
@@ -414,18 +406,21 @@ def extract_content(event: dict) -> str:
     if tool == "Write":
         return inp.get("content", "")
     if tool == "Edit":
-        return inp.get("new_string", "")
+        # Edit은 교체 전·후 둘 다 스캔 (토큰 교체 시 old_string 놓치지 않기)
+        return (inp.get("old_string", "") or "") + "\n" + (inp.get("new_string", "") or "")
     return ""
 
 def scan_patterns(content: str, patterns: list) -> list:
+    """복수 매치 모두 수집 (ENG 리뷰 P1 반영 — re.search → re.finditer)"""
+    # 대용량 content 안전장치 — 200KB 초과 시 앞부분만 스캔
+    content_scan = content if len(content) <= 200_000 else content[:200_000]
     hits = []
     for p in patterns:
         try:
-            m = re.search(p["regex"], content)
+            for m in re.finditer(p["regex"], content_scan):
+                hits.append({"name": p["name"], "desc": p["desc"], "severity": p["severity"], "match": m.group(0)})
         except re.error:
             continue
-        if m:
-            hits.append({"name": p["name"], "desc": p["desc"], "severity": p["severity"], "match": m.group(0)})
     return hits
 
 def emit_warning(hits: list) -> None:
@@ -517,10 +512,14 @@ EOF
 
 Edit `hooks/check_token_exposure.py`:
 
-Add helper function (after `scan_patterns`):
+Add helper function (after `scan_patterns`). **ENG 보안 역효과 반영**: critical severity는 전체 마스킹, medium은 부분 마스킹.
 ```python
-def mask_token(s: str) -> str:
-    if len(s) <= 20:
+def mask_token(s: str, severity: str = "medium") -> str:
+    """심각도별 차등 마스킹 — critical은 전체, medium은 앞4/뒤4.
+    임계 30자 (대부분 실제 토큰은 40자 이상)"""
+    if severity == "critical":
+        return "***"  # critical 전체 가림
+    if len(s) <= 30:
         return "***"
     return f"{s[:4]}***{s[-4:]}"
 ```
@@ -531,7 +530,7 @@ def emit_warning(hits: list, value_mask: bool = False) -> None:
     for h in hits:
         snippet = h["match"]
         if value_mask:
-            snippet = mask_token(snippet)
+            snippet = mask_token(snippet, h.get("severity", "medium"))
         log_err(f"⚠️  B11: {h['name']} 감지 ({h['severity']}) — {h['desc']}")
         log_err(f"    스니펫: {snippet[:80]}")
 ```
@@ -747,21 +746,35 @@ EOF
 
 ---
 
-## Task 8: --force-B11 + tracker 기록 + Notion 피드백 (T9 통과)
+## Task 8: tracker 기록 (target_hint 마스킹) — dispatcher 통합 모델
+
+**ENG P0.2 반영**: tracker `target_hint`에 원문 저장 시 훅 자체가 유출 경로가 됨 → 마스킹 필수.
+**ENG P0.1 반영**: `--force-B11` 우회는 dispatcher가 user_message에서 처리. 훅은 force 모르고 매번 동작.
+**Notion 피드백**: dispatcher는 block(exit 2) 시만 `ref-notion-feedback.sh` 호출 → soft_warn은 훅이 직접 호출.
 
 **Files:**
 - Modify: `hooks/check_token_exposure.py`
 
-- [ ] **Step 1: tracker append + force bypass 로직 추가**
+- [ ] **Step 1: tracker append (마스킹된 target_hint) + Notion 피드백 추가**
 
 Edit `hooks/check_token_exposure.py`:
 
 Add helpers (after `load_ignore`):
 ```python
-def find_tracker() -> Path | None:
+def find_tracker() -> "Path | None":
     import glob
     files = sorted(glob.glob("/tmp/claude-session-tracker-*.json"), key=os.path.getmtime, reverse=True)
     return Path(files[0]) if files else None
+
+def mask_content(content: str, hits: list) -> str:
+    """content에서 감지된 토큰 값을 마스킹 후 80자로 자름"""
+    masked = content
+    for h in hits:
+        if h.get("severity") == "critical":
+            masked = masked.replace(h["match"], "***")
+        else:
+            masked = masked.replace(h["match"], mask_token(h["match"], h.get("severity", "medium")))
+    return masked[:80]
 
 def append_tracker(hits: list, tool: str, content: str) -> None:
     path = find_tracker()
@@ -774,12 +787,13 @@ def append_tracker(hits: list, tool: str, content: str) -> None:
         return
     violations = tracker.setdefault("violations", [])
     ts = datetime.now().astimezone().isoformat(timespec="seconds")
+    masked_hint = mask_content(content, hits)  # 🔒 target_hint는 반드시 마스킹
     for h in hits:
         violations.append({
             "code": "B11",
             "pattern": h["name"],
             "tool": tool,
-            "target_hint": content[:80],
+            "target_hint": masked_hint,
             "timestamp": ts,
             "severity": h["severity"],
         })
@@ -789,25 +803,22 @@ def append_tracker(hits: list, tool: str, content: str) -> None:
     except Exception as e:
         log_err(f"[B11-hook] tracker write error: {e}")
 
-def notify_notion() -> None:
-    """ref-notion-feedback.sh B11 호출 (비동기 백그라운드)"""
+def notify_notion_soft_warn() -> None:
+    """soft_warn은 dispatcher가 호출 안 하므로 훅이 직접 ref-notion-feedback.sh B11 호출"""
     script = CLAUDE_HOME / "hooks" / "ref-notion-feedback.sh"
     if not script.exists():
         return
     try:
         subprocess.Popen(
-            ["bash", str(script), "B11"],
+            ["bash", str(script), "B11", "B11 soft_warn 감지"],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
             start_new_session=True,
         )
     except Exception as e:
         log_err(f"[B11-hook] notion notify skipped: {e}")
-
-def force_flag_active() -> bool:
-    return os.environ.get("FORCE_B11", "") in ("1", "true", "yes")
 ```
 
-In `main()`, after collecting all hits, replace the bottom part with:
+In `main()`, replace the bottom part with:
 ```python
     all_hits = []
     if behavior_hits:
@@ -817,48 +828,38 @@ In `main()`, after collecting all hits, replace the bottom part with:
         emit_warning(value_hits, value_mask=True)
         all_hits.extend(value_hits)
 
-    if all_hits and not force_flag_active():
+    if all_hits:
         append_tracker(all_hits, tool, content)
-        notify_notion()
-    elif all_hits and force_flag_active():
-        log_err("[B11-hook] FORCE_B11 감지 — tracker 기록 스킵 (경고는 유지)")
+        notify_notion_soft_warn()
 
     return 0
 ```
 
-- [ ] **Step 2: T1 실행 후 tracker 기록 확인**
+- [ ] **Step 2: T1 실행 후 tracker 기록 + 마스킹 확인**
 
 Run:
 ```bash
 TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
 [ -z "$TRACKER" ] && TRACKER="/tmp/claude-session-tracker-$$.json" && echo '{"violations":[]}' > "$TRACKER"
 BEFORE=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER")
-echo '{"tool_name":"Bash","tool_input":{"command":"echo $NOTION_API_TOKEN"}}' | python3 ~/.claude/hooks/check_token_exposure.py 2>&1
+echo '{"tool_name":"Write","tool_input":{"file_path":"/tmp/x.py","content":"key = \"ntn_abcdefghijklmnopqrstuvwxyz01234567890123\""}}' | python3 ~/.claude/hooks/check_token_exposure.py 2>&1
 AFTER=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER")
-echo "BEFORE=$BEFORE AFTER=$AFTER"
+LAST_HINT=$(jq -r '[.violations[] | select(.code=="B11")] | .[-1].target_hint' "$TRACKER")
+echo "BEFORE=$BEFORE AFTER=$AFTER HINT=$LAST_HINT"
 ```
-Expected: `AFTER = BEFORE + 1` (최소 1개 증가, echo_token_var 하나 추가)
+Expected: `AFTER = BEFORE + 1`, `HINT`에 `ntn_abc...0123` 같은 원문 토큰이 **포함되지 않음** (전체 `***` 또는 `ntn_***` 형태)
 
-- [ ] **Step 3: T9 FORCE_B11 실행 — 경고 유지, tracker 스킵**
-
-Run:
-```bash
-BEFORE=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER")
-echo '{"tool_name":"Bash","tool_input":{"command":"echo $API_TOKEN"}}' | FORCE_B11=1 python3 ~/.claude/hooks/check_token_exposure.py 2>&1
-AFTER=$(jq '[.violations[]? | select(.code=="B11")] | length' "$TRACKER")
-echo "BEFORE=$BEFORE AFTER=$AFTER"
-```
-Expected: 경고 출력 보임 + `[B11-hook] FORCE_B11 감지 ...` + `AFTER == BEFORE` (증가 없음)
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
 cd ~/.claude && git add hooks/check_token_exposure.py && git commit -m "$(cat <<'EOF'
-feat(hook): B11 tracker 기록 + FORCE_B11 bypass + Notion 피드백
+feat(hook): B11 tracker 기록 (target_hint 마스킹) + Notion 피드백
 
-- tracker JSON violations[] append (code, pattern, tool, target_hint, ts, severity)
-- FORCE_B11=1 환경변수 시 경고 유지 + tracker 스킵
-- ref-notion-feedback.sh B11 비동기 호출 (반복횟수 +1)
+- append_tracker: violations[] append with mask_content (훅 자체가 유출 경로 방지)
+- notify_notion_soft_warn: dispatcher가 soft_warn은 호출 안 하므로 훅이 직접
+- --force-B11 우회는 dispatcher user_message 감지에 위임 (본 훅 무관)
+
+ENG 리뷰 P0.1/P0.2 반영.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
@@ -935,76 +936,80 @@ EOF
 
 ---
 
-## Task 10: settings.json + rules.md + rules/enforcement.json 등록
+## Task 10: dispatcher 통합 등록 (settings.json + rules.md + enforcement.json)
+
+**ENG P0.1 핵심 반영**: B1과 동일 포맷으로 dispatcher 경유. settings.json 신규 훅 블록 만들지 않고, 기존 dispatcher matcher를 확장. enforcement.json B11 entry는 `detector{}` + `override_flag` 표준 포맷.
 
 **Files:**
 - Modify: `settings.json`
 - Modify: `rules.md`
 - Modify: `rules/enforcement.json`
+- Modify: `env-info.md`
 
-- [ ] **Step 1: `settings.json` PreToolUse 훅 등록**
+- [ ] **Step 1: `settings.json` Bash matcher 블록 추가 (기존 Write|Edit dispatcher 유지)**
 
-기존 `"hooks"` → `"PreToolUse"` 배열에 항목 추가. 먼저 현재 구조 확인:
+기존 `PreToolUse` 배열에 Bash matcher 블록 1개 추가 (jq로 안전 편집):
 
-Run: `jq '.hooks.PreToolUse' ~/.claude/settings.json`
-
-기존 항목 뒤에 아래 JSON 객체 추가 (`jq --argjson` 사용 또는 직접 편집):
-
-New entry (추가):
-```json
-{
-  "matcher": "Bash|Write|Edit",
+```bash
+jq '.hooks.PreToolUse += [{
+  "matcher": "Bash",
   "hooks": [
     {
       "type": "command",
-      "command": "python3 ~/.claude/hooks/check_token_exposure.py"
+      "command": "bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Bash",
+      "timeout": 5
     }
   ]
-}
+}]' ~/.claude/settings.json > /tmp/settings.json.new && mv /tmp/settings.json.new ~/.claude/settings.json
 ```
 
-직접 편집 (Edit tool) 예시 — `"PreToolUse":` 섹션 내 기존 마지막 항목 `]` 앞에 삽입.
+검증: `jq '.hooks.PreToolUse | length' ~/.claude/settings.json` → 기존 +1 (예: 1 → 2)
+추가 검증: `jq . ~/.claude/settings.json > /dev/null && echo ok`
 
-검증: `jq . ~/.claude/settings.json > /dev/null && echo ok`
+**이유**: dispatcher는 `$2=Bash`를 받아 `EVENT_KEY="PreToolUse:Bash"` 생성. enforcement.json B11 entry의 `event="PreToolUse"`가 jq의 `split(":")[0]` 매치 조건으로 걸림 → B11 검출기 실행.
 
 - [ ] **Step 2: `rules.md` B11 행 수정**
 
-Find in `rules.md`:
+Find:
 ```markdown
 | B11 | 환경변수 토큰 채팅 노출 | — | 수동 | (stdout 패턴 감지 Phase 3) |
 ```
 
 Replace with:
 ```markdown
-| B11 | 환경변수 토큰 채팅 노출 | PreToolUse:Bash/Write/Edit | soft_warn | `check_token_exposure.py` |
+| B11 | 환경변수 토큰 채팅 노출 | PreToolUse (Bash/Write/Edit) | soft_warn | `check_token_exposure.py` |
 ```
 
-- [ ] **Step 3: `rules/enforcement.json` B11 entry 추가**
+- [ ] **Step 3: `rules/enforcement.json` B11 entry 추가 (B1 표준 포맷)**
 
-Run: `jq '.rules | length' ~/.claude/rules/enforcement.json` — 기존 rules 개수 확인
-
-Add new entry (rules 배열 끝에):
-```json
-{
+```bash
+jq '.rules += [{
   "code": "B11",
   "name": "환경변수 토큰 채팅 노출",
-  "severity": "soft_warn",
   "event": "PreToolUse",
-  "matcher": "Bash|Write|Edit",
-  "hook": "check_token_exposure.py",
+  "detector": {
+    "type": "script",
+    "path": "~/.claude/hooks/check_token_exposure.py",
+    "args": []
+  },
+  "severity": "soft_warn",
+  "enabled": true,
+  "override_flag": "--force-B11",
   "notion_page_id": "33f7f080-9621-81ca-98fe-ee0fa11775b0",
-  "next_action": "환경변수 존재 체크는 명시적 if문. `${VAR:+x}${VAR:-y}` 콤보 금지.",
-  "bypass_flag": "FORCE_B11",
-  "enabled": true
-}
+  "next_action": "환경변수 존재 체크는 명시적 if문. `${VAR:+x}${VAR:-y}` 콤보 금지. `echo $TOKEN` 대신 `[ -n \"$TOKEN\" ] && echo yes` 형식 사용."
+}]' ~/.claude/rules/enforcement.json > /tmp/enforcement.json.new && mv /tmp/enforcement.json.new ~/.claude/rules/enforcement.json
 ```
 
-검증: `jq empty ~/.claude/rules/enforcement.json && jq '.rules[] | select(.code=="B11")' ~/.claude/rules/enforcement.json`
-Expected: B11 entry 출력
+검증:
+```bash
+jq empty ~/.claude/rules/enforcement.json
+jq '.rules[] | select(.code=="B11")' ~/.claude/rules/enforcement.json
+```
+Expected: B11 entry 구조 출력 + `override_flag: "--force-B11"` + `detector.path`
 
 - [ ] **Step 4: `env-info.md` 활성 규칙 개수 업데이트**
 
-Find in `env-info.md`:
+Find:
 ```markdown
 | 활성 규칙 | **16개** (B1~B17, B11 제외) |
 ```
@@ -1014,27 +1019,40 @@ Replace with:
 | 활성 규칙 | **17개** (B1~B17 전원 활성) |
 ```
 
-- [ ] **Step 5: 실전 Bash 통합 테스트 — 훅이 settings.json 통해 트리거되는지**
+- [ ] **Step 5: dispatcher 경유 통합 테스트 (실전 호출 시뮬레이션)**
 
-Run (새 셸에서):
+Run:
 ```bash
-# Claude Code 세션 내에서 Bash 도구 호출 시 훅이 자동 실행되는지 시뮬레이션
-echo '{"tool_name":"Bash","tool_input":{"command":"echo $NOTION_API_TOKEN"}}' \
-  | python3 ~/.claude/hooks/check_token_exposure.py
-# settings.json 수동 검증은 실세션 재시작 후 가능 (다음 세션에서 확인)
+# dispatcher → enforcement.json의 B11 → check_token_exposure.py 체인 검증
+printf '{"tool_name":"Bash","tool_input":{"command":"echo $NOTION_API_TOKEN"}}' \
+  | bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Bash
+echo "dispatcher_exit=$?"
 ```
-Expected: 경고 출력 + exit 0
+Expected: stderr에 `⚠️  B11: echo_token_var 감지 ...` 출력 + `dispatcher_exit=0` (soft_warn이므로 block 안 됨)
+
+추가 — `--force-B11` 우회 검증:
+```bash
+printf '{"tool_name":"Bash","tool_input":{"command":"echo $TOKEN"},"user_message":"테스트 --force-B11 명시"}' \
+  | bash ~/.claude/hooks/ref-dispatcher.sh PreToolUse Bash
+echo "bypass_exit=$?"
+```
+Expected: 훅이 호출되지 않음 (dispatcher가 override_flag 매치로 continue) + `bypass_exit=0`
 
 - [ ] **Step 6: Commit**
 
 ```bash
 cd ~/.claude && git add settings.json rules.md rules/enforcement.json env-info.md && git commit -m "$(cat <<'EOF'
-feat(enforcement): B11 활성화 — PreToolUse 훅 + 규칙 등록
+feat(enforcement): B11 활성화 — ref-dispatcher 통합 + 표준 포맷
 
-- settings.json: PreToolUse Bash|Write|Edit 훅 추가
+ENG 리뷰 P0.1 반영. B1~B17과 동일 dispatcher 경유 방식으로 일관성 확보.
+
+- settings.json: PreToolUse 배열에 Bash matcher 블록 추가 (기존 Write|Edit 유지)
+- rules/enforcement.json: B11 entry 표준 포맷 (detector{}, override_flag)
 - rules.md: B11 수동 → soft_warn + check_token_exposure.py
-- rules/enforcement.json: B11 entry 신규 (bypass_flag=FORCE_B11)
-- env-info.md: 활성 규칙 16 → 17개
+- env-info.md: 활성 규칙 16 → 17
+
+--force-B11 우회는 dispatcher 공통 로직으로 위임.
+soft_warn이므로 dispatcher block 아닌 pass — stderr 경고는 훅이 직접 출력.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
@@ -1120,6 +1138,92 @@ Expected: 빈 출력 (또는 submodule `m skills/gstack`만)
 
 Run: `cd ~/.claude && git log --oneline -12`
 Expected: Task 1~11에 해당하는 12개+ commit 표시
+
+---
+
+## Task 14: slack-courier B11 섹션 상세화 (CEO E2 반영)
+
+**CEO 확장 제안 반영**: 현재 plan은 tracker 기록만 → 세션 종료 Slack 알림에 B11 건수만 숫자로 표시. Task 14는 **pattern별 집계 + 마스킹 스니펫**을 경고 섹션에 포함.
+
+**Files:**
+- Modify: `agents/slack-courier.md`
+
+- [ ] **Step 1: B11 집계 로직 섹션 추가**
+
+Edit `agents/slack-courier.md` — 섹션 5(경고 섹션 조립) 뒤에 B11 전용 집계 블록 추가:
+
+```markdown
+#### 5.1 B11 상세화 (2026-04-17 신설 — CEO E2 반영)
+
+일반 경고 섹션이 위반 **코드별**로 묶이는 반면, B11(soft_warn)은 같은 코드 안에서도 **패턴·tool별 분포**가 중요하다. 따라서 B11 위반 ≥1건일 때 위 경고 섹션 아래에 **서브섹션**으로 표시한다.
+
+~~~
+*🔍 B11 상세* ({N}건)
+• `{pattern_name}` × {count} ({tool}) — `{masked_snippet}`
+• ...
+~~~
+
+**집계 Bash**:
+~~~bash
+TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
+B11_DETAIL=$(jq -r '
+  [.violations[] | select(.code=="B11")]
+  | group_by(.pattern)
+  | map({pattern: .[0].pattern, count: length, tools: ([.[].tool] | unique | join(",")), sample: .[0].target_hint})
+  | .[]
+  | "• `\(.pattern)` × \(.count) (\(.tools)) — `\(.sample)`"
+' "$TRACKER" 2>/dev/null)
+~~~
+
+- `target_hint`는 훅에서 이미 `mask_content`로 마스킹됨 → Slack 메시지에 그대로 노출 가능
+- 마스킹 실패 시(예: 훅 구버전) — 슬랙 배달 전 재확인 패턴: `echo "$B11_DETAIL" | grep -E "ntn_[A-Za-z0-9]{20,}" && ...경보`
+- B11 건수 0 → 서브섹션 생략
+```
+
+- [ ] **Step 2: 드라이런 검증**
+
+Run:
+```bash
+# 가상 tracker 생성
+cat > /tmp/claude-session-tracker-test.json <<'EOF'
+{
+  "violations": [
+    {"code":"B11","pattern":"echo_token_var","tool":"Bash","target_hint":"echo $NOTION_API_TOKEN","timestamp":"2026-04-17T20:00:00+09:00","severity":"high"},
+    {"code":"B11","pattern":"echo_token_var","tool":"Bash","target_hint":"echo $SLACK_TOKEN","timestamp":"2026-04-17T20:01:00+09:00","severity":"high"},
+    {"code":"B11","pattern":"notion_token","tool":"Write","target_hint":"key = \"***\"","timestamp":"2026-04-17T20:02:00+09:00","severity":"critical"}
+  ]
+}
+EOF
+
+TRACKER=/tmp/claude-session-tracker-test.json
+jq -r '
+  [.violations[] | select(.code=="B11")]
+  | group_by(.pattern)
+  | map({pattern: .[0].pattern, count: length, tools: ([.[].tool] | unique | join(",")), sample: .[0].target_hint})
+  | .[]
+  | "• `\(.pattern)` × \(.count) (\(.tools)) — `\(.sample)`"
+' "$TRACKER"
+rm "$TRACKER"
+```
+Expected:
+```
+• `echo_token_var` × 2 (Bash) — `echo $NOTION_API_TOKEN`
+• `notion_token` × 1 (Write) — `key = "***"`
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+cd ~/.claude && git add agents/slack-courier.md && git commit -m "$(cat <<'EOF'
+feat(slack-courier): B11 상세 섹션 추가 (CEO E2 반영)
+
+세션 종료 Slack 경고에 B11 pattern별 집계 + tool + 마스킹 스니펫 서브섹션.
+jq group_by + map 활용으로 훅 수정 없이 tracker 기반 조립.
+
+Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
 
 ---
 
