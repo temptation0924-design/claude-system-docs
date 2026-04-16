@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-16 20:12 KST
+> 마지막 빌드: 2026-04-16 20:24 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -375,7 +375,7 @@
 | B8 | INTEGRATED.md 재빌드 누락 | Stop | hard_block | tracker: `pending_sync` |
 | B9 | 스킬 설치 후 skill-guide 미등록 | Stop | hard_block | tracker: `skills_dir + skill_guide` |
 | B10 | 메모리 상태 반영 누락 | Stop | hard_block | tracker: `memory_updated` |
-| B11 | 환경변수 토큰 채팅 노출 | — | 수동 | (stdout 패턴 감지 Phase 3) |
+| B11 | 환경변수 토큰 채팅 노출 | PreToolUse (Bash/Write/Edit) | soft_warn | `check_token_exposure.py` |
 | B12 | 복습카드 미생성 | Stop | hard_block | tracker: `review_card_sent` |
 | B13 | 에이전트 미dispatch | Stop | soft_warn | tracker: `agent_dispatched` |
 | B14 | Preflight Gate 미실시 | Stop | hard_block | tracker: `preflight_executed` (MODE 1 시) |
@@ -569,9 +569,9 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 | Session Tracker Init | `~/.claude/hooks/session-tracker-init.sh` |
 | Session Tracker Log | `~/.claude/hooks/session-tracker-log.sh` |
 | Session End Check | `~/.claude/hooks/session-end-check.sh` |
-| 활성 규칙 | **16개** (B1~B17, B11 제외) |
+| 활성 규칙 | **17개** (B1~B17 전원 활성) |
 | hard_block | 11개 (B1,B2,B3,B5,B8,B9,B10,B12,B14,B15,B17) |
-| soft_warn | 5개 (B4,B6,B7,B13,B16) |
+| soft_warn | 6개 (B4,B6,B7,B11,B13,B16) |
 | 우회 | `--force-Bx` (3회 이상 시 Slack 알림) |
 | 위반 DB | Notion `⚠️ 규칙 위반 기록` (`27c13aa7-9e91-49d3-bb30-0e81b38189e4`) |
 
@@ -1531,4 +1531,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 20:12 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 20:24 KST | 원본: `~/.claude/*.md` (Git)*
