@@ -1,11 +1,11 @@
 ---
 name: system-docs-sync
 description: >
-  시스템 문서(CLAUDE.md, rules.md, session.md, checklist.md, env-info.md, skill-guide.md, agent.md)를
+  시스템 문서(CLAUDE.md, rules.md, session.md, env-info.md, skill-guide.md, agent.md, briefing.md, slack.md)를
   수정하고, 연쇄 영향 파일을 자동 처리한 뒤, 통합본(INTEGRATED.md)을 GitHub에 재빌드하는 스킬.
   Notion 개별 페이지 동기화는 2026-04-12 폐기됨 — GitHub raw URL만 사용.
   반드시 이 스킬을 사용할 것:
-  "CLAUDE.md 수정", "session.md 수정", "checklist.md 수정", "env-info.md 수정",
+  "CLAUDE.md 수정", "session.md 수정", "env-info.md 수정",
   "skill-guide.md 수정", "rules.md 수정", "agent.md 수정", "시스템 문서 수정",
   "지침 수정", "원칙 추가", "세션 루틴 변경", "환경 정보 변경", "MCP 추가", "도구 추가",
   "체크리스트 수정", "스킬 목록 수정", "운영 지침 동기화", "통합본 재빌드",
@@ -21,23 +21,24 @@ Git 리포지토리(`~/.claude/`)가 **유일한 원본**. 로컬 파일 수정 
 
 ---
 
-## 관리 대상: 7개 시스템 문서
+## 관리 대상: 8개 시스템 문서
 
 | # | 파일 | 내용 |
 |---|------|------|
 | 1 | `~/.claude/CLAUDE.md` | 핵심 원칙 + 역할 + 도구 계층 + 파일 라우팅 |
 | 2 | `~/.claude/rules.md` | 하위원칙 + 자주 실수 패턴 |
 | 3 | `~/.claude/session.md` | 세션 시작/종료 루틴 + 기록 규칙 |
-| 4 | `~/.claude/checklist.md` | 업무 체크리스트 + 오류 대응표 |
-| 5 | `~/.claude/env-info.md` | MCP·환경·Notion ID·명령어 |
-| 6 | `~/.claude/skill-guide.md` | 전체 스킬 목록 + 추천 규칙 |
-| 7 | `~/.claude/agent.md` | 에이전트 레지스트리 + 계획 시스템 |
+| 4 | `~/.claude/env-info.md` | MCP·환경·Notion ID·명령어 |
+| 5 | `~/.claude/skill-guide.md` | 전체 스킬 목록 + 추천 규칙 |
+| 6 | `~/.claude/agent.md` | 에이전트 레지스트리 + 계획 시스템 |
+| 7 | `~/.claude/briefing.md` | 쉬운 설명 브리핑 (원라이너/3줄/풀) |
+| 8 | `~/.claude/slack.md` | 슬랙 운영 허브 (채널 지도 + 로드맵) |
 
 ### 통합본 — GitHub raw URL 방식
 
 | 항목 | 값 |
 |------|-----|
-| **원본 파일** | `~/.claude/INTEGRATED.md` (1~7번 자동 concat) |
+| **원본 파일** | `~/.claude/INTEGRATED.md` (1~8번 자동 concat) |
 | **빌드 스크립트** | `~/.claude/code/build-integrated_v1.sh` |
 | **GitHub raw URL** | `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` |
 | **Claude.ai 열람 방식** | GitHub raw URL을 웹 fetch로 직접 읽음 |
@@ -68,7 +69,6 @@ Git 리포지토리(`~/.claude/`)가 **유일한 원본**. 로컬 파일 수정 
 CLAUDE.md (중심 허브)
 ├── 원칙 변경 → rules.md (하위원칙 갱신)
 ├── 원칙 변경 → session.md (루틴에 원칙 참조)
-├── 원칙 변경 → checklist.md (체크리스트에 반영)
 ├── 도구 추가/삭제 → env-info.md (환경 정보 갱신)
 └── 스킬 참조 변경 → skill-guide.md (스킬 규칙 갱신)
 
@@ -78,11 +78,11 @@ rules.md
 
 session.md
 ├── 기록 DB 변경 → env-info.md (Notion ID 갱신)
-└── 루틴 변경 → checklist.md (체크리스트 항목 갱신)
+└── 루틴 변경 → (상위 원칙 연쇄 대상 없음)
 
 env-info.md
 ├── MCP 추가/삭제 → CLAUDE.md (도구 역할표 갱신)
-└── 배포 인프라 변경 → checklist.md (배포 체크리스트 갱신)
+└── 배포 인프라 변경 → (상위 원칙 연쇄 대상 없음)
 
 skill-guide.md
 └── 스킬 추가/삭제 → CLAUDE.md (스킬 참조 원칙 갱신 가능)
@@ -98,14 +98,14 @@ agent.md
 
 ### Step 3: 통합본 재빌드 + GitHub push
 
-1~7번 중 **어느 하나라도 수정**되면 빌드 스크립트 실행:
+1~8번 중 **어느 하나라도 수정**되면 빌드 스크립트 실행:
 
 ```bash
 ~/.claude/code/build-integrated_v1.sh --push
 ```
 
 **스크립트 동작**:
-1. 7개 원본 파일 존재 검증
+1. 8개 원본 파일 존재 검증
 2. 순서대로 concat → `INTEGRATED.md` 생성
 3. `git add INTEGRATED.md` → commit → push
 4. 변경 없으면 push 생략
