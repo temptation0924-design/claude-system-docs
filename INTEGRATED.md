@@ -1,9 +1,9 @@
 # 🤖 Claude 운영 지침 v4.2 (통합본)
 
-> **이 파일은 6개 시스템 문서의 자동 빌드 통합본입니다.**
+> **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-16 18:50 KST
+> 마지막 빌드: 2026-04-16 19:52 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -12,6 +12,8 @@
 4. **env-info.md** — 환경/MCP/Notion ID/배포 인프라
 5. **skill-guide.md** — 전체 스킬 목록 + 추천 규칙
 6. **agent.md** — 팀 에이전트 레지스트리
+7. **briefing.md** — 쉬운 설명 브리핑
+8. **slack.md** — 슬랙 운영 허브
 
 ---
 
@@ -51,7 +53,7 @@
 |------|------------|
 | Claude Code | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
 | Cowork | `~/.claude/CLAUDE.md` (Git repo — **원본**) |
-| Claude.ai | **GitHub raw URL 통합본** — `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` (7개 md 자동 concat, 5분 캐시) |
+| Claude.ai | **GitHub raw URL 통합본** — `https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md` (8개 md 자동 concat, 5분 캐시) |
 
 > **원본**: Git 리포지토리(`~/.claude/`)가 유일한 원본. 수정 시 → Git 파일 먼저 수정 → `build-integrated_v1.sh --push`로 GitHub 통합본 재빌드 (~10초). Notion 개별 백업 7페이지는 2026-04-12 폐기 (비효율). Notion은 DB 기록 전용 (작업기록/에러로그/규칙위반).
 
@@ -74,6 +76,7 @@
 | "업무하자" | MODE 1~4 선택 질문 | 모드 선택 후 진입 |
 | "quick", "빠르게", "간단히" | /gsd-quick | 간소화 모드 |
 | "설명해줘", "쉽게 풀어줘", "쉽게 설명해줘", "비유로 설명", "무슨 말이야?", "다시 설명" | `briefing.md` | 쉬운 설명 브리핑 (수동 재설명) |
+| "슬랙", "slack", "채널", "브리핑 채널" | `slack.md` | 슬랙 운영 허브 (채널 지도 + 로드맵) |
 | 항상 (기본) | `CLAUDE.md` | 이 지침의 로컬 버전 |
 
 ---
@@ -1414,4 +1417,119 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 18:50 KST | 원본: `~/.claude/*.md` (Git)*
+# 📘 8. slack.md — 슬랙 운영 허브
+
+# slack.md — 슬랙 운영 허브
+
+**버전**: v1 | **업데이트**: 2026-04-16
+**적용**: Claude Code + Claude.ai + haemilsia-bot (Railway)
+
+> **라우팅 허브**. 슬랙 관련 자산 4곳 + 채널 지도 + 방향성 + 확장 로드맵을 한 눈에.
+
+---
+
+## 1. 개요
+
+- **사용 철학**: 수신(알림) · 발신(명령) · 공유(학습) · 수집(정보) 4축
+- **허브 역할**: 라우팅 + 채널 지도 + 방향성 + 확장 로드맵
+- **원본 위치**: 4곳 — 이 허브는 링크만 (§4 참조)
+
+---
+
+## 2. 채널 지도
+
+| 채널 | ID | 종류 | 방향 | 용도 | 담당 에이전트 | 발송 트리거 |
+|---|---|---|---|---|---|---|
+| #general-mode | `C0AEM5EJ0ES` | private | 봇→대표 | 작업일지 | slack-courier | 세션 종료 / 에러 해결 |
+| #claude-study | `C0AEM59BCKY` | public | 봇→대표 | 복습 카드 | 복습카드관 → slack-courier | task-routine 트리거 |
+| *(해밀시아)* | *예약* | — | 봇→대표 | rental-inspection 결과 | haemilsia-bot | 일일 cron (외부) |
+| #news-realestate | *예약* | — | 봇→대표 | 부동산 뉴스 | *Phase 1 미정* | 매일 cron |
+| #news-tech | *예약* | — | 봇→대표 | IT 뉴스 | *Phase 1 미정* | 매일 cron |
+| #bot-commands | *예약* | — | 양방향 | 원격 명령 I/O | haemilsia-bot | 대표님 명령 시 |
+
+**방향 범례**: `봇→대표`(자동 알림) · `대표→봇`(수동 명령) · `양방향`(명령/응답 루프)
+
+---
+
+## 3. 📱 모바일 수신 허브 (Phase 0 — 상시)
+
+외부에서도 업무 흐름 파악 가능하도록 슬랙 모바일 알림 가이드.
+
+- `#general-mode`: 모든 메시지 알림 (작업 완료/에러 즉시 확인)
+- `#claude-study`: 멘션+키워드만 (학습은 여유 시)
+- 업무 외 시간: "방해 금지" 스케줄 활성화
+- 위젯: 홈 화면 "Direct Messages" 위젯 추가
+- Phase 2 원격 명령 연결 시 자연스러운 진입점
+
+---
+
+## 4. 현재 운영 항목 (링크만)
+
+| 항목 | 1줄 설명 | 상세 링크 |
+|---|---|---|
+| 작업일지 | 세션 종료 → #general-mode | `docs/rules/slack-worklog.md` |
+| 복습 카드 | task 사이클 완료 → #claude-study | `docs/rules/task-routine.md` |
+| 에러 알림 | 에러 → Notion + 슬랙 공지 | `docs/rules/error-handling.md` |
+| 슬랙배달관 | v2 신호등 포맷 배달자 | `agents/slack-courier.md` |
+| 브리핑 빌더 | 일일 정보 브리핑 봇 템플릿 | `skills/slack-info-briefing-builder/` |
+| 브리핑 포맷 | 원라이너/3줄/풀 (쉬운 설명) | `briefing.md` |
+
+---
+
+## 5. 포맷 참조
+
+포맷 예시는 원본에 이미 존재 — 허브는 "어디 있나"만:
+- v2 신호등 → `agents/slack-courier.md`
+- 복습 카드 → `docs/rules/task-routine.md`
+- 에러 알림 → `docs/rules/error-handling.md`
+- 브리핑 → `briefing.md`
+
+---
+
+## 6. 금지 패턴
+
+- 이모지 과남용 (섹션당 3개 이내)
+- 봇 스팸: 세션당 5건 초과 시 묶어 발송 (임계치 튜닝 중)
+- 원본 내용 허브에 복사 금지 (링크만)
+
+---
+
+## 7. 🔮 확장 로드맵
+
+**Phase 이관 규칙**: 별도 스펙으로 분리되어 본격 구현되면 허브에는 **1줄 요약 + 링크만**.
+
+### Phase 1: 매일 뉴스 브리핑 (부동산 + IT)
+- **목표**: 매일 09:00 부동산/IT 뉴스 자동 전송
+- **활용**: `slack-info-briefing-builder` 스킬 + `haemilsia-bot` Railway cron
+- **채널**: `#news-realestate`, `#news-tech`
+- **상태**: 아이디어 단계 (허브 완성 후 별도 스펙)
+
+### Phase 2: 슬랙 → Claude Code 원격 명령
+- **목표**: 슬랙 `@봇 임대점검 돌려줘` → Claude Code 자동 실행 → 슬랙 응답
+- **스케치**:
+  ```
+  Slack 명령 → haemilsia-bot (Bolt)
+             → Claude Agent SDK / RemoteTrigger
+             → Claude Code 세션 실행 → 결과 → 슬랙 채널 응답
+  ```
+- **이슈**: 인증, 명령 화이트리스트, 응답 채널, 타임아웃
+- **상태**: 아이디어 단계 (Phase 1 완료 후)
+
+---
+
+## 오픈 이슈
+
+- 업무 시간 외 발송 금지 시간대 (초안: 23:00~08:00) — 운영 데이터 누적 후 결정
+- "세션당 5건" 임계치 적정성 — Phase 1 전 조정
+- 세션 경계 측정 주체 (slack-courier 인지 방법) — 제한 구현 시
+- 해밀시아 rental-inspection 알림 현재 채널 — 확인 필요
+- 허브 분할 임계점: **400줄 초과 시** `docs/slack/` 분할 검토
+
+---
+
+*~/.claude/slack.md | 2026-04-16 | v1 — 신설*
+
+
+---
+
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 19:52 KST | 원본: `~/.claude/*.md` (Git)*
