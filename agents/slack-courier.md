@@ -52,7 +52,7 @@ VIOLATIONS=$(jq -c '.violations // []' "$TRACKER" 2>/dev/null)
 각 위반 코드(B1~B17)에 대해 `enforcement.json`의 `notion_page_id`를 찾아 Notion 페이지 fetch:
 
 - `mcp__claude_ai_Notion__notion-fetch` 사용
-- 응답의 `properties.반복횟수.number` 추출
+- 응답의 `properties.반복횟수` 추출 (MCP가 flat number 반환 — `.number` 경로 아님)
 - 조회 실패 시 `?` 로 표기 (폴백)
 
 #### 3. 이모지 매핑 (Q2=B 관대한 임계값)
