@@ -2,7 +2,7 @@
 
 **업데이트**: 2026-04-11
 **카테고리**: 10개 (업무 영역 기준) + 모드별 핵심 스킬
-**등록 스킬**: 73개 (Haemilsia/Gstack) + 60개 (GSD) + Superpowers
+**등록 스킬**: 74개 (Haemilsia/Gstack) + 60개 (GSD) + Superpowers
 
 ---
 
@@ -73,16 +73,17 @@
 > **대표님이 직접 만든 스킬 모음.** 가장 자주 쓰는 스킬이므로 최상단에 배치.
 > 기존 카테고리(1~10)에도 중복 표시되어 있음 — 어느 쪽에서 찾아도 OK.
 
-### 🏢 해밀시아 패키지 (4개)
+### 🏢 해밀시아 패키지 (5개)
 
-해밀시아 임대 운영 전체 파이프라인. **임대점검 → 봇 개발 → 봇 배포 → Railway/Notion 연동**.
+해밀시아 임대 운영 전체 파이프라인. **임대점검 → 봇 개발 → 봇 배포 → Railway/Notion 연동 → 부동산 수익카드**.
 
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| haemilsia-rental-inspection | 임대점검, 일일점검, 간편점검, 빡센점검, DB점검, 점검보고서, 검증해줘 | `~/.claude/skills/haemilsia-rental-inspection/SKILL.md` |
-| haemilsia-bot-dev | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
-| haemilsia-bot-deploy | bot 배포, bot 업데이트, Railway 배포, 환경변수 수정 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
-| railway-notion-connect | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
+| 스킬명 | 한글명 | 트리거 키워드 | 경로 |
+|--------|--------|-------------|------|
+| haemilsia-rental-inspection | **임대점검** (7DB×Notion) | 임대점검, 일일점검, 간편점검, 빡센점검, DB점검, 점검보고서, 검증해줘 | `~/.claude/skills/haemilsia-rental-inspection/SKILL.md` |
+| haemilsia-bot-dev | **해밀봇 개발** (명령어/Block Kit) | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
+| haemilsia-bot-deploy | **해밀봇 배포** (Railway) | bot 배포, bot 업데이트, Railway 배포, 환경변수 수정 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
+| railway-notion-connect | **Railway↔Notion 연동** | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
+| haemilsia-property-card | **부동산 수익카드** (매매/대환→카톡PNG) | 물건현황표, 수익분석 카드, 수익률 자료, 대환대출 자료, 은행제출용, 카톡용 물건자료 | `~/.claude/skills/haemilsia-property-card/SKILL.md` |
 
 **💡 임대점검 2중 체계 (v2.0):**
 - **간편점검 (v1.0)** — Railway 봇이 매일 07:30 KST 자동 실행 (실행 확인 위주)
@@ -103,6 +104,12 @@
 | skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천 | `~/.claude/skills/skill-manager/SKILL.md` |
 | file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
 
+### 🏢 부동산 자료 (1개)
+
+| 스킬명 | 한글명 | 트리거 키워드 | 경로 |
+|--------|--------|-------------|------|
+| haemilsia-property-card | **부동산 수익카드** (매매/대환 분석 → 카톡PNG) | 물건현황표, 수익분석 카드, 수익률 자료, 대환대출 자료, 은행제출용 수익, 부동산 카드, 카톡용 물건자료, 임대수익 분석표, 다가구 수익률, 보증금/월세 표 | `~/.claude/skills/haemilsia-property-card/SKILL.md` |
+
 ### 🎨 개인화/편의 (3개)
 
 | 스킬명 | 트리거 키워드 | 경로 |
@@ -111,7 +118,7 @@
 | petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
 | travel-meal-planner | 여행 맛집, 식사 플랜, 맛집 찾아줘, travel meal plan | `~/.claude/skills/travel-meal-planner/SKILL.md` |
 
-**총 12개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
+**총 13개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
 
 ---
 
