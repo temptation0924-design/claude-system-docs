@@ -85,6 +85,32 @@ notion_synced: false
 - `mode`: .session_worklog의 MODE 엔트리에서 추출. 없으면 대화 맥락에서 판단.
 - `work_type`: 코드 변경=코딩, 문서 변경=문서화, 배포=배포, 기획=기획 등
 - `notion_synced`: 항상 false
+- `violations`: tracker JSON의 violations 배열 복사 (2026-04-16 추가, slack 알림 통일)
+
+### violations 필드 추출 (2026-04-16 추가)
+
+tracker JSON의 `violations` 배열을 frontmatter에 그대로 복사한다. notion-writer가 이 값을 읽어 Notion 작업기록 DB 경고사항 필드로 싱크한다.
+
+**읽기**:
+```bash
+# 최신 tracker 파일 자동 탐지 (session_id 변수 없어도 동작)
+TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
+VIOLATIONS=$(jq -c '.violations // []' "$TRACKER" 2>/dev/null)
+```
+
+**frontmatter 기록 예시**:
+```yaml
+---
+violations:
+  - "❌ B2: 인수인계 파일 미생성"
+  - "⚠️ B4: 도구 추천 한 줄 명시 누락"
+---
+```
+
+**규칙**:
+- 위반 0건: `violations: []` (빈 배열)
+- tracker 파일 없거나 파싱 실패: `violations: []` + 파일 본문에 "⚠️ tracker 파싱 실패" 주석 추가
+- 문자열 값은 반드시 쌍따옴표로 감싸 YAML 이스케이프 (이모지 포함이므로)
 
 ### 주의사항
 - 한국어로 작성
