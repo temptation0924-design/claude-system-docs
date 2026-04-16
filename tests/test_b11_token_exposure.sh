@@ -91,7 +91,23 @@ run_test "T8_git_log_exempt" \
 # T9. (제거) --force-B11 우회는 dispatcher가 user_message에서 감지 — 훅 유닛 테스트 범위 외
 #     dispatcher 통합 테스트로 별도 분리 (Task 12 Step 2에서 확인)
 
-# T10. 패턴 파일 손상 시 일반 ls → 통과 (fail-open, Task 9에서 구현)
+# T10. 패턴 파일 손상 시에도 exit 0 유지 (fail-open)
+T10_NAME="T10_fail_open_patterns_corrupted"
+BACKUP=$(mktemp)
+cp ~/.claude/rules/token-patterns.json "$BACKUP"
+echo "{not json" > ~/.claude/rules/token-patterns.json
+OUT=$(echo '{"tool_name":"Bash","tool_input":{"command":"ls"}}' | $HOOK 2>&1)
+EC=$?
+cp "$BACKUP" ~/.claude/rules/token-patterns.json
+rm "$BACKUP"
+if [ $EC -eq 0 ]; then
+  echo "✅ $T10_NAME"
+  PASS=$((PASS+1))
+else
+  echo "❌ $T10_NAME (exit=$EC)"
+  RESULTS+=("$T10_NAME")
+  FAIL=$((FAIL+1))
+fi
 
 # T11. 일반 코드: def foo(): return 42 → 통과 (오탐 없음)
 run_test "T11_no_false_positive" \

@@ -206,4 +206,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except Exception as e:
+        log_err(f"[B11-hook] unexpected error (fail-open): {e}")
+        sys.exit(0)
