@@ -96,6 +96,32 @@ jq -r --arg code "$CODE" '.rules[] | select(.code == $code) | .next_action // ""
 - `next_action`이 전부 누락된 경우 `*💡 권장 행동*` 섹션 자체 생략 (graceful)
 - 규칙명은 Notion 페이지 `위반내용` 필드 또는 `enforcement.json`의 `name` 사용
 
+#### 5.1 B11 상세화 (2026-04-17 신설 — CEO E2 반영)
+
+일반 경고 섹션이 위반 **코드별**로 묶이는 반면, B11(soft_warn)은 같은 코드 안에서도 **패턴·tool별 분포**가 중요하다. 따라서 B11 위반 ≥1건일 때 위 경고 섹션 아래에 **서브섹션**으로 표시한다.
+
+~~~
+*🔍 B11 상세* ({N}건)
+• `{pattern_name}` × {count} ({tool}) — `{masked_snippet}`
+• ...
+~~~
+
+**집계 Bash**:
+~~~bash
+TRACKER=$(ls -t /tmp/claude-session-tracker-*.json 2>/dev/null | head -1)
+B11_DETAIL=$(jq -r '
+  [.violations[] | select(type == "object" and .code=="B11")]
+  | group_by(.pattern)
+  | map({pattern: .[0].pattern, count: length, tools: ([.[].tool] | unique | join(",")), sample: .[0].target_hint})
+  | .[]
+  | "• `\(.pattern)` × \(.count) (\(.tools)) — `\(.sample)`"
+' "$TRACKER" 2>/dev/null)
+~~~
+
+- `target_hint`는 훅에서 이미 `mask_content`로 마스킹됨 → Slack 메시지에 그대로 노출 가능
+- 마스킹 실패 시(예: 훅 구버전) — 슬랙 배달 전 재확인 패턴: `echo "$B11_DETAIL" | grep -E "ntn_[A-Za-z0-9]{20,}" && ...경보`
+- B11 건수 0 → 서브섹션 생략
+
 #### 6. 최종 메시지 포맷 (2026-04-17 v2.1 — Slack mrkdwn + 섹션 구분선)
 
 ~~~
