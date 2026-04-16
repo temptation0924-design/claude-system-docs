@@ -114,7 +114,8 @@ while IFS= read -r RULE; do
   # detector 타입 체크
   TYPE=$(printf '%s' "$RULE" | jq -r '.detector.type // "script"')
 
-  # tracker_check 타입은 dispatcher에서 스킵
+  # tracker_check 타입은 Stop 이벤트 → session-end-check.sh가 전담 처리
+  # PreToolUse에서 tracker_check는 해당 없으므로 스킵
   [ "$TYPE" = "tracker_check" ] && continue
 
   # script 타입 실행

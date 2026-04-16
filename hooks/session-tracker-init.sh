@@ -33,7 +33,7 @@ for PREV in /tmp/claude-session-tracker-*.json; do
 done
 [ -n "$REMINDER" ] && REMINDER="⚠️ 전회 세션 미완료: ${REMINDER%, }\\n"
 
-# jq -n으로 JSON-safe 생성 (REF Phase 1: pending_sync 배열 추가)
+# jq -n으로 JSON-safe 생성 (REF v2.0: Phase 2+3 통합 필드 추가)
 jq -n --arg sid "$SESSION_ID" --arg ts "$(date +%Y-%m-%dT%H:%M:%S)" '{
   session_id: $sid,
   started_at: $ts,
@@ -43,7 +43,25 @@ jq -n --arg sid "$SESSION_ID" --arg ts "$(date +%Y-%m-%dT%H:%M:%S)" '{
   handoff_created: false,
   work_performed: false,
   warning_sent: false,
-  pending_sync: []
+  pending_sync: [],
+  top5_queried: false,
+  tool_recommended: false,
+  memory_updated: false,
+  review_card_sent: false,
+  agent_dispatched: false,
+  skill_installed_no_guide: false,
+  notion_unauthorized: false,
+  system_files_edited: false,
+  errors_resolved: false,
+  new_concepts_introduced: false,
+  skills_dir_changed: false,
+  skill_guide_edited: false,
+  mode1_entered: false,
+  mode2_entered: false,
+  preflight_executed: false,
+  ceo_eng_review_executed: false,
+  session_start_agents: false,
+  session_end_agents: false
 }' > "$TRACKER"
 
 echo "{\"additionalContext\": \"${REMINDER}[세션 종료 자가점검 의무] 세션 종료 시 반드시 확인:\\n1. 에러 발생했으면 → 에러로그 DB 기록했는가?\\n2. 규칙 위반 있었으면 → 규칙위반 DB 기록했는가?\\n3. 작업기록 DB 저장했는가?\\n4. 인수인계 파일 생성했는가?\\n5. Slack 알림 발송했는가?\\n이 체크리스트는 세션 종료 훅에서 자동 검증됩니다.\"}"
