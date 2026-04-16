@@ -50,9 +50,21 @@ def scan_patterns(content: str, patterns: list) -> list:
     return hits
 
 
-def emit_warning(hits: list) -> None:
+def mask_token(s: str, severity: str = "medium") -> str:
+    """심각도별 차등 마스킹 — critical은 전체 ***, 나머지는 앞4+***+뒤4.
+    임계 30자 (대부분 실제 토큰은 40자 이상)"""
+    if severity == "critical":
+        return "***"
+    if len(s) <= 30:
+        return "***"
+    return f"{s[:4]}***{s[-4:]}"
+
+
+def emit_warning(hits: list, value_mask: bool = False) -> None:
     for h in hits:
         snippet = h["match"]
+        if value_mask:
+            snippet = mask_token(snippet, h.get("severity", "medium"))
         log_err(f"⚠️  B11: {h['name']} 감지 ({h['severity']}) — {h['desc']}")
         log_err(f"    스니펫: {snippet[:80]}")
 
@@ -78,9 +90,13 @@ def main() -> int:
     if not content:
         return 0
 
-    hits = scan_patterns(content, patterns.get("behavior_patterns", []))
-    if hits:
-        emit_warning(hits)
+    behavior_hits = scan_patterns(content, patterns.get("behavior_patterns", []))
+    if behavior_hits:
+        emit_warning(behavior_hits, value_mask=False)
+
+    value_hits = scan_patterns(content, patterns.get("value_patterns", []))
+    if value_hits:
+        emit_warning(value_hits, value_mask=True)
 
     return 0
 
