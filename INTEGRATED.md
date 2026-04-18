@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 01:54 KST
+> 마지막 빌드: 2026-04-19 01:55 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -834,50 +834,28 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 
 ## 모드별 핵심 스킬 (자동 호출)
 
-### MODE 1: 기획 스킬
-| 스킬 | 출처 | 트리거 |
-|------|------|--------|
-| office-hours | Gstack | "아이디어 있어", 브레인스토밍 |
-| brainstorming | Superpowers | 기획 모드 자동 invoke |
-| plan-ceo-review | Gstack | "전략 리뷰", "더 크게 생각해" |
-| plan-eng-review | Gstack | "아키텍처 리뷰", "구조 확인" |
-| plan-design-review | Gstack | "디자인 리뷰", "UI 계획 검토" |
-| writing-plans | Superpowers | 계획 승인 후 자동 |
-| preflight-check | Haemilsia | "검증", 실행 전 자동 |
-| autoplan | Gstack | "auto review", "결정 대신 해줘" |
+> 각 모드 핵심 스킬 요약. 상세 트리거/설명은 아래 카테고리 1~10 참조. 트리거 상세 검색은 `skill-manager` 스킬.
 
-### MODE 2: 실행 스킬
-| 스킬 | 출처 | 트리거 |
-|------|------|--------|
-| subagent-driven-dev | Superpowers | 팀 에이전트 실행 시 자동 |
-| test-driven-dev | Superpowers | 코드 작업 시 자동 |
-| executing-plans | Superpowers | 계획 실행 시 자동 |
-| gsd-quick | GSD | "빠르게", "간단히", quick |
-| gsd-execute-phase | GSD | 계획된 phase 실행 |
-| ship | Gstack | "ship", "deploy", "push" |
-| land-and-deploy | Gstack | "merge", "프로덕션 배포" |
+### MODE 1: 기획 (8개)
+- `office-hours` / `brainstorming` / `writing-plans` — 아이디어 → 설계 → 분해 (자동)
+- `plan-ceo-review` / `plan-eng-review` / `plan-design-review` — 병렬 리뷰
+- `preflight-check` / `autoplan` — 자동 사전검증 + 결정 위임
 
-### MODE 3: 검증 스킬
-| 스킬 | 출처 | 트리거 |
-|------|------|--------|
-| qa / qa-only | Gstack | "QA", "테스트해줘", "버그 찾아줘" |
-| review | Gstack | "PR 리뷰", "코드 검토" |
-| canary | Gstack | "배포 후 모니터링" |
-| cso | Gstack | "보안 감사", "security audit" |
-| benchmark | Gstack | "성능 측정", "page speed" |
-| investigate | Gstack | "디버그", "왜 안 돼" |
-| gsd-verify-work | GSD | 실행 완료 후 자동 |
-| retro | Gstack | "회고", "이번 주 뭐 했어" |
+### MODE 2: 실행 (7개)
+- `subagent-driven-dev` / `test-driven-dev` / `executing-plans` — 자동 실행 (Superpowers)
+- `gsd-quick` / `gsd-execute-phase` — GSD 간소/정식 실행
+- `ship` / `land-and-deploy` — 배포 (로컬/프로덕션)
 
-### MODE 4: 운영 스킬
-| 스킬 | 출처 | 트리거 |
-|------|------|--------|
-| system-docs-sync | Haemilsia | 시스템 문서 수정 시 |
-| haemilsia-rental-inspection | Haemilsia | "임대점검", "일일점검", "간편점검", "빡센점검", "DB점검", "점검보고서", "검증해줘" |
-| skill-manager | Haemilsia | "스킬 목록", "어떤 스킬 써야해?" |
-| gsd-pause-work | GSD | 세션 종료 시 자동 |
-| gsd-resume-work | GSD | 세션 시작 시 이전 컨텍스트 복원 |
-| careful/freeze/guard | Gstack | "조심해줘", "freeze", 프로덕션 보호 |
+### MODE 3: 검증 (8개)
+- `qa` / `qa-only` / `review` / `investigate` — 테스트·리뷰·디버그
+- `canary` / `benchmark` — 배포 후 모니터링/성능
+- `cso` / `retro` — 보안 감사 / 회고
+
+### MODE 4: 운영 (6개)
+- `system-docs-sync` / `skill-manager` — 시스템 문서/스킬 관리
+- `haemilsia-rental-inspection` — 임대점검 (간편/빡센)
+- `gsd-pause-work` / `gsd-resume-work` — 세션 종료/재개
+- `careful` / `freeze` / `guard` — 프로덕션 보호
 
 ---
 
@@ -1532,4 +1510,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:54 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:55 KST | 원본: `~/.claude/*.md` (Git)*
