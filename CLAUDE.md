@@ -140,4 +140,4 @@
 
 ---
 
-*Haemilsia AI operations | 2026.04.11 | v4.2.2 — handoffs/ 디렉토리 신설 + .claude/ 루트 정리 + #general-mode private_channel ID 명시*
+*Haemilsia AI operations | 2026.04.19 | v4.2.3 — B8 자동화 v2 (debounce_sync.sh + 시크릿 게이트 + SKIP_B8_AUTOSYNC kill-switch)*

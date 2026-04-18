@@ -162,8 +162,13 @@
 1. Git 파일 수정 (`~/.claude/*.md`)
 2. `build-integrated_v1.sh --push` → GitHub `INTEGRATED.md` 재빌드 (~10초)
 
-**B8 체크리스트 (간소화)**
-- [ ] GitHub `INTEGRATED.md` 재빌드 + push 완료
+**B8 체크리스트 (자동화됨 v2 — 2026-04-19)**
+- ✅ `debounce_sync.sh`가 수정 30초 후 자동 빌드+push
+- ✅ 시크릿 스캔 게이트 (토큰 패턴 발견 시 push 차단)
+- ✅ Stop 훅 fallback (debounce 못 돈 케이스 동기 실행)
+- ✅ `override_flag: --force-B8` 제거 (뒷문 차단)
+- ⚡ 긴급 우회: `SKIP_B8_AUTOSYNC=1` 환경변수 (로그 필수 기록)
+- ⚠️ 실패 시만 수동: `bash ~/.claude/code/build-integrated_v1.sh --push`
 
 ### A8. 에이전트 디스패치 원칙 (2026-04-12 C+ 시스템 신설)
 
