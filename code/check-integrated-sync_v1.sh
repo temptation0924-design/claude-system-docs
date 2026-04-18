@@ -37,44 +37,22 @@ for f in "${FILES[@]}"; do
   fi
 done
 
-# --- 3) 내용 drift 검사 (가상 재빌드 후 sha256 비교) ---
-# 원본 md 안에 `---` 구분자가 흔하므로 섹션 분리 방식은 비신뢰. 대신
-# 빌드 스크립트와 동일 로직으로 임시 빌드 후 현 INTEGRATED.md와 sha256 비교.
+# --- 3) 내용 drift 검사 (임시 빌드 후 sha256 byte-equal 비교) ---
+# build-integrated_v1.sh가 OUTPUT 환경변수를 지원하므로 임시 파일에 빌드해서
+# 현 INTEGRATED.md와 byte-equal 비교. 헤더의 빌드 시각만 다르므로 그 1줄만 무시.
 DRIFT_CONTENT=()
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 TMP_BUILD="$TMPDIR/INTEGRATED.candidate.md"
 
-# build-integrated_v1.sh와 동일한 concat 로직 (헤더/푸터 제외, 본문만 비교)
-{
-  for f in "${FILES[@]}"; do
-    cat "$CLAUDE_DIR/$f"
-    printf '\n\n---\n'
-  done
-} > "$TMP_BUILD"
+OUTPUT="$TMP_BUILD" "$BUILD_SCRIPT" > /dev/null 2>&1
 
-# 현 INTEGRATED.md에서도 동일한 본문 구간 추출 (헤더 종료 + 푸터 시작 사이)
-# 본문 시작: 첫 "# 📘 1. CLAUDE.md —" 이후
-# 본문 종료: 푸터 "*자동 빌드:" 직전
-awk '
-  /^# 📘 1\. CLAUDE\.md —/ { in_body = 1; next }
-  /^\*자동 빌드:/ { in_body = 0 }
-  in_body { print }
-' "$INTEGRATED" > "$TMPDIR/INTEGRATED.body.md"
-
-# 현 INTEGRATED 본문은 각 섹션 헤더(`# 📘 N. ...`)를 포함하므로 그것을 제거하고
-# 본문만 추출해서 비교 (헤더 라인 + 다음 빈 줄 1개 제거)
-awk '
-  /^# 📘 [0-9]+\. [a-zA-Z._-]+\.md —/ { skip_blank = 1; next }
-  skip_blank && /^$/ { skip_blank = 0; next }
-  { skip_blank = 0; print }
-' "$TMPDIR/INTEGRATED.body.md" > "$TMPDIR/INTEGRATED.content.md"
-
-CUR_HASH=$(shasum -a 256 "$TMPDIR/INTEGRATED.content.md" | awk '{print $1}')
-NEW_HASH=$(shasum -a 256 "$TMP_BUILD" | awk '{print $1}')
+# 빌드 시각 라인 (`> 마지막 빌드: ...` + `*자동 빌드: ...`) 만 제거하고 비교
+CUR_HASH=$(grep -v "^> 마지막 빌드:\|^\*자동 빌드:" "$INTEGRATED" | shasum -a 256 | awk '{print $1}')
+NEW_HASH=$(grep -v "^> 마지막 빌드:\|^\*자동 빌드:" "$TMP_BUILD" | shasum -a 256 | awk '{print $1}')
 
 if [ "$CUR_HASH" != "$NEW_HASH" ]; then
-  DRIFT_CONTENT+=("INTEGRATED.md 본문이 8개 원본 concat 결과와 불일치")
+  DRIFT_CONTENT+=("INTEGRATED.md ≠ 새 빌드 결과 (빌드 시각 제외)")
 fi
 
 # --- 4) 결과 보고 ---

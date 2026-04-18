@@ -22,7 +22,7 @@
 set -euo pipefail
 
 CLAUDE_DIR="$HOME/.claude"
-OUTPUT="$CLAUDE_DIR/INTEGRATED.md"
+OUTPUT="${OUTPUT:-$CLAUDE_DIR/INTEGRATED.md}"  # detector가 임시 빌드용으로 override 가능
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M KST')
 
 # 8개 원본 파일: "filename|section_title" 형식
