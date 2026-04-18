@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 02:24 KST
+> 마지막 빌드: 2026-04-19 03:02 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -457,12 +457,22 @@ Claude Code(매니저)가 세션 중 다음 이벤트 발생 시 `~/.claude/.ses
 | 이벤트 | 기록 내용 | 방법 |
 |--------|----------|------|
 | MODE 전환 | `[HH:MM] MODE: MODE X → MODE Y 전환` | Bash append |
+| **에러 발생** (신규) | `[HH:MM] ERROR: {에러 1줄 요약} \| {태그}` | Bash append |
 | 에러 해결 완료 | `[HH:MM] ERROR_RESOLVED: {에러 요약}` | Bash append |
+
+**에러 정의** (rules.md A2 참조):
+- **L1 Exception/Crash**: tool 호출 실패, script 비정상 종료, hook block 등 즉시 가시
+- **L2 진단 오류**: 표면 에러를 잘못된 원인으로 결론 비약 (이번 세션 노션기록관 사례)
+- **L3 시스템 결함**: 핵심 파일/스크립트 버그 (이번 세션 memory_patcher 5버그 사례)
+- **L4 외부 의존성 실패**: API 504, MCP 미응답, Notion 502 등 (단순 재시도로 복구 가능 시 제외)
+
+→ L1~L3는 **반드시** worklog에 ERROR append + 세션 종료 시 노션기록관(2) 자동 dispatch.
 
 **방어 로직**: 파일 없으면 자동 생성 후 append.
 ```bash
 [ ! -f ~/.claude/.session_worklog ] && echo "[$(date +%H:%M)] SESSION_START: (auto-created)" > ~/.claude/.session_worklog
 echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_worklog
+echo "[$(date +%H:%M)] ERROR: 노션기록관 큐 재시도 오진단 | MCP,Notion" >> ~/.claude/.session_worklog
 ```
 
 ---
@@ -1393,4 +1403,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 02:24 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 03:02 KST | 원본: `~/.claude/*.md` (Git)*
