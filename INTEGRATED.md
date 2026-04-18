@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 02:00 KST
+> 마지막 빌드: 2026-04-19 02:23 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -351,6 +351,17 @@
 - **상세 규칙**: `docs/rules/agent-dispatch.md` 참조
 - **에이전트 레지스트리**: `agent.md` v2.0 참조
 - **에이전트 프로필**: `~/.claude/agents/*.md` (19개)
+
+### A9. MEMORY.md 줄 수 한도 (2026-04-19 v1.8 신설)
+
+- **한도**: MEMORY.md 80줄 이하 유지
+- **근거**: 시스템 truncation 한도 200줄의 40% 마진 + 한 화면 가독성
+- **초과 시 archive 절차**:
+  1. project 섹션에서 완료 항목 식별 (description "완료" + 후속 작업 키워드 없음)
+  2. `~/.claude/projects/-Users-ihyeon-u/memory/archive/`로 mv
+  3. MEMORY.md 인덱스에서 해당 줄 삭제
+- **(no desc) 줄 금지**: 메모리 파일 추가 시 frontmatter description 필수 + MEMORY.md 인덱스도 동기 채우기
+- **세션 종료 시 자동 점검**: 핸드오프작성관이 MEMORY.md 줄 수 측정 → 80줄 초과 시 다음 세션 인계사항에 "MEMORY archive 필요" 기록
 
 ---
 
@@ -1381,4 +1392,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 02:00 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 02:23 KST | 원본: `~/.claude/*.md` (Git)*
