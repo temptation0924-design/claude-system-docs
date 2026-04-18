@@ -48,10 +48,11 @@
 
 **DB 생성 전 중복 확인**: `notion-search`로 유사 DB 존재 여부 반드시 확인
 
-**페이지 업데이트 시 MCP 버그 우회** (2026-04-12 v1.5 정정)
-- 원인: `replace_content`에 동일 URL prefix 중복 파싱 버그
-- 대응: **`replace_content` 연속 3회 실패 시 → `update_content` + `old_str`/`new_str`로 우회**
-- 근거: `feedback_notion_mcp_parser_bug_v1.md` (실전 경험 기록)
+**Notion MCP 알려진 버그 2종 회피** (2026-04-18 v1.7 매뉴얼화)
+- Bug 1: `replace_content` 동일 8글자 URL prefix 중복 파싱 → `update_content` 우회
+- Bug 2: `update_properties` relation single-value 거부 → 전체 null → 재입력
+- **사전 차단 패턴 + 즉시 우회 절차**: [`docs/rules/notion-mcp-bugs.md`](docs/rules/notion-mcp-bugs.md) 참조
+- 근거: `feedback_notion_mcp_parser_bug_v1.md`, `feedback_notion_relation_validation_bug_v1.md`
 
 ### A3. 스킬 적용 규칙
 
