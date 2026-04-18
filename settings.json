@@ -24,7 +24,38 @@
       "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: 서브에이전트 권한 거부 오진\\(誤診\\) → 실제는 B1 hook 차단\")",
       "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 → MODE 2 전환\")",
       "Bash(echo \"[$\\(date +%H:%M\\)] TASK_START: slack-hub 신설 \\(6 task\\)\")",
-      "Edit(~/.claude/skills/system-docs-sync/**)"
+      "Edit(~/.claude/skills/system-docs-sync/**)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 2 → MODE 4 \\(배포 완료, 세션 종료 진입\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] DEPLOY: push 8e003d2..54d7d6d \\(15 commits, Phase 3.3~3.6 + 가독성\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 → MODE 2 → MODE 3 전환 \\(기획→실행→검증→배포\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] DEPLOY: haemilsia-bot 간편점검 점검보고서 등록 기능 배포 완료\")",
+      "Edit(~/.claude/skills/marketing-design-planner/**)",
+      "Edit(~/.claude/skills/haemilsia-D2-test/**)",
+      "Edit(~/.claude/skills/haemilsia-D3-test/**)",
+      "Edit(~/.claude/skills/haemilsia-D0-test/**)",
+      "mcp__claude_ai_Figma__whoami",
+      "mcp__claude_ai_Figma__create_new_file",
+      "mcp__claude_ai_Figma__use_figma",
+      "mcp__claude_ai_Figma__get_screenshot",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 2 — D0-test 실전 테스트 \\(Stage 1→2→3 풀코스\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] WORK: Figma MCP 레이아웃 생성 + 한글 폰트 이슈 수정\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] WORK: HTML 변환 + 실사 이미지 배경 적용 + 폰트 비교\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] WORK: 크리스탈 블루 팔레트 추출 + Figma 적용 + 흰색 배경\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] WORK: D0-test 스킬 v0.9.1 업데이트 \\(실전 검증 규칙 반영\\)\")",
+      "Edit(/.claude/skills/api-key-manager/**)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 → MODE 2 전환 \\(Preflight PROCEED 92%\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: detector content drift false positive \\(awk 섹션 분리 → 임시 빌드 byte-equal로 전환\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] TASK_COMPLETED: 통합본 정합성 점검 + 자동 재동기화 \\(drift 2건 → 복구 완료, GitHub push 성공\\)\")",
+      "Bash(mkdir -p ~/.claude/_archive)",
+      "Bash(mv ~/.claude/env-info.md.backup_20260415 ~/.claude/_archive/)",
+      "Bash(mv ~/.claude/settings_20260411_220649_pre-REF_v1.json ~/.claude/_archive/)",
+      "Bash(mv ~/.claude/settings_20260411_hooks-removed-backup_v1.json ~/.claude/_archive/)",
+      "Bash(mv ~/.claude/backup_v3.1_20260405 ~/.claude/_archive/)",
+      "Bash(mkdir -p ~/.claude/_archive/memory)",
+      "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v3_v1.md ~/.claude/_archive/memory/)",
+      "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v31_v1.md ~/.claude/_archive/memory/)",
+      "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v32_v1.md ~/.claude/_archive/memory/)",
+      "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v34_v1.md ~/.claude/_archive/memory/)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -42,7 +73,12 @@
       "/Users/ihyeon-u/.claude/docs",
       "/Users/ihyeon-u/.claude/docs/superpowers/specs",
       "/Users/ihyeon-u/.claude/handoffs",
-      "/Users/ihyeon-u/.claude/cache"
+      "/Users/ihyeon-u/.claude/cache",
+      "/Users/ihyeon-u/.claude/docs/review-cards",
+      "/Users/ihyeon-u/.claude/skills",
+      "/Users/ihyeon-u/.claude/skills/marketing-design-planner",
+      "/Users/ihyeon-u/.claude/skills/haemilsia-D3",
+      "/Users/ihyeon-u/.claude/skills/haemilsia-D3-test"
     ]
   },
   "hooks": {
@@ -77,7 +113,7 @@
           {
             "type": "command",
             "command": "bash ~/.claude/hooks/api-key-health-check.sh",
-            "timeout": 6
+            "timeout": 12
           }
         ]
       },
@@ -213,6 +249,6 @@
       }
     }
   },
-  "effortLevel": "medium",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "max"
 }

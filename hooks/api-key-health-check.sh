@@ -14,5 +14,5 @@ LIB="$HOME/.claude/code/api-key-lib_v1.sh"
 MANAGER="$HOME/.claude/code/api-key-manager_v1.sh"
 [[ -x "$MANAGER" ]] || exit 0
 
-# 5초 타임아웃 (Notion API 지연 방지)
-exec bash -c "timeout 5 bash '$MANAGER' health-check 2>/dev/null || echo '🔐 API 키 상태: (건강 체크 타임아웃, 나중에 재시도)'"
+# 10초 타임아웃 (Keychain 첫 access + Notion API 지연 대비; 2026-04-18 5→10)
+exec bash -c "timeout 10 bash '$MANAGER' health-check 2>/dev/null || echo '🔐 API 키 상태: (건강 체크 타임아웃, 나중에 재시도)'"
