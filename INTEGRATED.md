@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 01:37 KST
+> 마지막 빌드: 2026-04-19 01:38 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -404,7 +404,7 @@
 
 # session.md — 세션 루틴 + 기록 규칙
 
-업데이트: 2026-04-12 | v5.1 — 작업기록 자동화 (frontmatter + .session_worklog + Notion 자동 싱크)
+업데이트: 2026-04-19 | v5.2 — 3중 기억시스템 v2.0 (MEMORY queue 패턴 + 훅 D/E + Notion 전문 저장)
 
 ---
 
@@ -1555,4 +1555,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:37 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:38 KST | 원본: `~/.claude/*.md` (Git)*
