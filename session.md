@@ -95,6 +95,7 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 2. **mkdir-lock(`~/.claude/.memory.lock.d`) 획득 → `memory_patcher.py` 실행**:
    - MEMORY.md 🟢 최근 완료 / 🔴 할 일 / ⚡ 반복 위반 TOP 3 동시 갱신
 3. **실패 시 queue 저장** (`~/.claude/queue/pending_memory_*.json`) — 세션 종료 **차단 없음** (B2 방지)
+4. **MEMORY.md 줄 수 점검** (rules.md A9): `wc -l` > 80 시 다음 세션 인계사항에 "MEMORY archive 필요" 기록
 
 **노션기록관 Stage 2 확장 동작**:
 1. handoff frontmatter → Notion DB 메타 저장 (기존)
