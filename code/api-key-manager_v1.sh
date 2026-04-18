@@ -279,15 +279,21 @@ cmd_railway_sync() {
   util_log "railway-sync: project=$project"
 
   # 노션에서 railway = $project 태그 달린 키 추출
+  # (notion_list_active_keys가 에러 시 util_err로 stderr에 사유 출력 → 그대로 터미널로 흘러나옴)
   local meta_file
   meta_file=$(mktemp)
-  notion_list_active_keys "$db" > "$meta_file"
+  if ! notion_list_active_keys "$db" > "$meta_file"; then
+    util_err "railway-sync: 노션 장부 조회 실패"
+    util_err "  👉 원인 진단: 'bash ~/.claude/code/api-key-manager_v1.sh diagnose'"
+    rm -f "$meta_file"
+    return 1
+  fi
 
-  # 간이 필터: project CSV 에 "$project" 포함
+  # 간이 필터: project CSV 에 "$project" 포함 (null/빈줄 내성)
   local targets
   targets=$(jq -r --arg p "$project" '
-    select(.project | split(",") | index($p)) | .name
-  ' "$meta_file")
+    select(.project // "" | split(",") | index($p)) | .name // empty
+  ' "$meta_file" 2>/dev/null || true)
 
   if [[ -z "$targets" ]]; then
     util_log "  ⏭️  $project 에 연결된 키 없음"
