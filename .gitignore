@@ -16,8 +16,11 @@
 !slack.md
 !GSTACK.md
 !INTEGRATED.md
+!CLAUDE-core.md
 
 # === Whitelist: folders ===
+!on-demand/
+!on-demand/**
 !rules/
 !rules/**
 !skills/
