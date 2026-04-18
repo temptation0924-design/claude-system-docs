@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-16 20:24 KST
+> 마지막 빌드: 2026-04-18 11:48 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -874,6 +874,7 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 | haemilsia-bot-deploy | **해밀봇 배포** (Railway) | bot 배포, bot 업데이트, Railway 배포, 환경변수 수정 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
 | railway-notion-connect | **Railway↔Notion 연동** | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
 | haemilsia-property-card | **부동산 수익카드** (매매/대환→카톡PNG) | 물건현황표, 수익분석 카드, 수익률 자료, 대환대출 자료, 은행제출용, 카톡용 물건자료 | `~/.claude/skills/haemilsia-property-card/SKILL.md` |
+| haemilsia-D0-test | **마케팅 디자인 기획** (테스트중 v0.9.1) | 디자인 기획, 마케팅 자료, 랜딩페이지 기획, 블로그 이미지, 카피, 컨셉, SNS 콘텐츠, 브리프 | `~/.claude/skills/haemilsia-D0-test/SKILL.md` |
 
 **💡 임대점검 2중 체계 (v2.0):**
 - **간편점검 (v1.0)** — Railway 봇이 매일 07:30 KST 자동 실행 (실행 확인 위주)
@@ -1531,4 +1532,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-16 20:24 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-18 11:48 KST | 원본: `~/.claude/*.md` (Git)*
