@@ -83,12 +83,12 @@ prefix 공유한 두 child page 중 한쪽만 인식. 다른 쪽은 "would delet
 
 ---
 
-## §5. Anthropic 공식 이슈 (보고 진행)
+## §5. Anthropic 공식 이슈 (보고 완료)
 
 | Bug | Issue URL | 상태 |
 |-----|-----------|------|
-| Bug 1 (parser) | _Task 5 결과로 채움_ | 진행 |
-| Bug 2 (relation) | _Task 5 결과로 채움_ | 진행 |
+| Bug 1 (parser) | https://github.com/anthropics/claude-code/issues/50260 | 제출 완료 (2026-04-18) |
+| Bug 2 (relation) | https://github.com/anthropics/claude-code/issues/50261 | 제출 완료 (2026-04-18) |
 
 이슈 본문 원본: `~/.claude/docs/superpowers/issues/2026-04-18-mcp-*.md`
 
