@@ -59,3 +59,7 @@ skills/Skill/**
 *.credentials
 .DS_Store
 .gstack/
+
+# === Memory: cwd-별 분리 폴더 추적 해제 (2026-04-18, symlink 통합) ===
+projects/-Users-ihyeon-u--claude/memory
+projects/-Users-ihyeon-u/memory
