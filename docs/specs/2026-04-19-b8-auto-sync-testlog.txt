@@ -1,0 +1,7 @@
+[00:50:30] TRIGGER CLAUDE.md ts=1776527430319735040 session=test-secret
+[00:50:33] SECRET_GATE_BLOCK files= CLAUDE.md — push 차단
+✅ INTEGRATED.md 빌드 완료
+   경로: /var/folders/vx/7mm1r62x4zsbv6q8sdvvry_00000gn/T/tmp.s5bSbDjPyj/.claude/INTEGRATED.md
+   크기: 79136 bytes
+   줄 수: 1538 lines
+   빌드 시각: 2026-04-19 00:50 KST
