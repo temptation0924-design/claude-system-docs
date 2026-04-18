@@ -30,7 +30,7 @@ description: Haemilsia API 키 관리 시스템. macOS Keychain(haemilsia-api-ke
 ## 코어 도구
 
 - **CLI 엔트리**: `~/.claude/code/api-key-manager_v1.sh`
-- **서브커맨드**: `add` / `list` / `rotate` / `delete` / `railway-sync` / `health-check`
+- **서브커맨드**: `add` / `list` / `rotate` / `delete` / `railway-sync` / `health-check` / `diagnose`
 - **라이브러리**: `~/.claude/code/api-key-lib_v1.sh`
 - **마이그레이션**: `~/.claude/code/api-key-migrate_v1.sh`
 - **롤백**: `~/.claude/code/api-key-rollback_v1.sh`
@@ -72,6 +72,14 @@ bash ~/.claude/code/api-key-manager_v1.sh list
 bash ~/.claude/code/api-key-manager_v1.sh health-check
 ```
 하루 1회 제한 있음 — 오늘 이미 돌았으면 스킵 메시지.
+
+### "진단해줘 / 뭐 문제야 / 노션 장부 안 보여"
+```
+bash ~/.claude/code/api-key-manager_v1.sh diagnose
+```
+6 스텝 전수 진단: Keychain · .zshrc · NOTION_API_TOKEN · DB 접근 · 대체 토큰 후보 · state.json.
+`railway-sync` 실패, `list`에 "(노션 장부 없음)" 대량 발생 시 **첫 번째로 실행**.
+노션 API 에러 발생 시 원인 + 해결 안내(integration 공유)를 직접 출력.
 
 ### "윈도우에 내보내줘"
 **Phase 2** (아직 구현 안 됨). 대표님이 요청하면 "아직 Phase 2 기능입니다. 필요하시면 지금 추가 구현할까요?" 로 안내.
