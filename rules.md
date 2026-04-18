@@ -182,6 +182,17 @@
 - **에이전트 레지스트리**: `agent.md` v2.0 참조
 - **에이전트 프로필**: `~/.claude/agents/*.md` (19개)
 
+### A9. MEMORY.md 줄 수 한도 (2026-04-19 v1.8 신설)
+
+- **한도**: MEMORY.md 80줄 이하 유지
+- **근거**: 시스템 truncation 한도 200줄의 40% 마진 + 한 화면 가독성
+- **초과 시 archive 절차**:
+  1. project 섹션에서 완료 항목 식별 (description "완료" + 후속 작업 키워드 없음)
+  2. `~/.claude/projects/-Users-ihyeon-u/memory/archive/`로 mv
+  3. MEMORY.md 인덱스에서 해당 줄 삭제
+- **(no desc) 줄 금지**: 메모리 파일 추가 시 frontmatter description 필수 + MEMORY.md 인덱스도 동기 채우기
+- **세션 종료 시 자동 점검**: 핸드오프작성관이 MEMORY.md 줄 수 측정 → 80줄 초과 시 다음 세션 인계사항에 "MEMORY archive 필요" 기록
+
 ---
 
 ## B. 자주 실수 패턴 (Notion DB 이관 완료)
