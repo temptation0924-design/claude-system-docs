@@ -62,3 +62,86 @@ Read, Glob, Bash (find/mv — rm 금지), Write (archive manifest)
 ## 에스컬레이션
 실패 시: Sonnet → Opus
 타임아웃: 25초
+
+---
+
+## v2.0 추가 책임 (2026-04-19)
+
+### A. 🟢 최근 완료 7일 롤링 (MEMORY.md)
+
+매일 첫 세션에 MEMORY.md 🟢 최근 완료 섹션에서 7일 초과 줄 삭제:
+
+```bash
+source ~/.claude/code/mkdir_lock.sh
+MEMORY=~/.claude/projects/-Users-ihyeon-u/memory/MEMORY.md
+LOCK_DIR=~/.claude/.memory.lock.d
+CUTOFF=$(date -v-7d +%Y-%m-%d)
+
+with_lock "$LOCK_DIR" bash -c "
+  awk -v cutoff='$CUTOFF' '
+    /^## 🟢 최근 완료/ { in_section=1; print; next }
+    /^## 🔴/ { in_section=0 }
+    in_section && /^- [0-9]{4}-/ {
+      date = substr(\$0, 3, 10)
+      if (date < cutoff) next
+    }
+    { print }
+  ' '$MEMORY' > '$MEMORY.tmp' && mv '$MEMORY.tmp' '$MEMORY'
+"
+```
+
+### B. handoffs/ 30일 archive
+
+```bash
+cd ~/.claude/handoffs
+find . -maxdepth 1 -type f -name "*.md" -mtime +30 | while read f; do
+  MONTH=$(stat -f "%Sm" -t "%Y-%m" "$f")
+  mkdir -p "archive/$MONTH"
+  mv "$f" "archive/$MONTH/"
+done
+```
+
+오늘 날짜 파일 건드리지 않음 (기존 동시성 원칙 유지).
+
+### C. memory/*.md 2-source 미참조 판정 (ENG 권고)
+
+```bash
+cd ~/.claude/projects/-Users-ihyeon-u/memory
+mkdir -p archive
+for card in *.md; do
+  [[ "$card" == "MEMORY.md" || "$card" == *"_backup_"* ]] && continue
+
+  # MEMORY.md + handoffs/ 양쪽 grep
+  MEM_REF=$(grep -c "$card" MEMORY.md)
+  HANDOFF_REF=$(grep -rl "$card" ~/.claude/handoffs/ 2>/dev/null | wc -l)
+
+  if [ "$MEM_REF" = "0" ] && [ "$HANDOFF_REF" = "0" ]; then
+    MTIME=$(stat -f "%m" "$card")
+    AGE_DAYS=$(( ($(date +%s) - MTIME) / 86400 ))
+    if [ "$AGE_DAYS" -gt 30 ]; then
+      mv "$card" archive/
+      echo "archived: $card (age: ${AGE_DAYS}d, refs: 0/0)"
+    fi
+  fi
+done
+```
+
+### D. queue 재시도 (세션 시작)
+
+```bash
+# ~/.claude/queue/pending_memory_*.json 재시도
+for q in ~/.claude/queue/pending_memory_*.json; do
+  [ -f "$q" ] || continue
+  HANDOFF=$(jq -r '.handoff' "$q")
+  if [ -f "$HANDOFF" ]; then
+    python3 ~/.claude/code/memory_patcher.py \
+      --handoff "$HANDOFF" \
+      --memory ~/.claude/projects/-Users-ihyeon-u/memory/MEMORY.md \
+    && rm "$q" && echo "✅ queue 재시도 성공: $q"
+  fi
+done
+```
+
+### 동시성 보호
+- MEMORY.md 수정 시 `mkdir_lock.sh` 활용 필수
+- 오늘 날짜 파일 건드리지 않음 (기존 원칙 유지)

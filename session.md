@@ -1,12 +1,16 @@
 # session.md — 세션 루틴 + 기록 규칙
 
-업데이트: 2026-04-12 | v5.1 — 작업기록 자동화 (frontmatter + .session_worklog + Notion 자동 싱크)
+업데이트: 2026-04-19 | v5.2 — 3중 기억시스템 v2.0 (MEMORY queue 패턴 + 훅 D/E + Notion 전문 저장)
 
 ---
 
 ## 세션 시작
 
 > **🤖 자동 처리 (SessionStart 훅)**: 세션 시작 시 `~/.claude/.session_start` 파일에 시작 시각 자동 기록 (epoch + human time JSON). `~/.claude/.session_worklog` 초기화.
+>
+> **🆕 v2.0 SessionStart 훅 (2026-04-19)**:
+> - **훅 D** (`violation-prevention-inject.sh`): MEMORY.md TOP 3 위반 + 최근 handoff 미완료 키워드 매칭 → 해당 규칙 경고 주입
+> - **훅 E** (`drift-detector.sh`): 최근 handoff `commits` 필드 ↔ git log 커밋 수 비교 → 차이 >2 시 🚨 표시
 
 ### C+ 하이브리드 루틴 (매니저 직접 + Agent dispatch)
 
@@ -83,6 +87,19 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 > **B2 위반 방지**: 핸드오프작성관이 Stage 1에 필수 포함 → 시스템 구조상 인수인계 누락 불가
 > **수동 오버라이드**: "순차로 해" → 위 팀원 순서대로 실행
 > **에스컬레이션**: 팀원 실패 시 자동 승급 (agent.md 섹션 5 참조)
+
+### 🆕 v2.0 MEMORY 동시 패치 (2026-04-19)
+
+**핸드오프작성관 Stage 1 확장 동작**:
+1. `.session_worklog` 참조 → `handoffs/세션인수인계_*.md` 생성
+2. **mkdir-lock(`~/.claude/.memory.lock.d`) 획득 → `memory_patcher.py` 실행**:
+   - MEMORY.md 🟢 최근 완료 / 🔴 할 일 / ⚡ 반복 위반 TOP 3 동시 갱신
+3. **실패 시 queue 저장** (`~/.claude/queue/pending_memory_*.json`) — 세션 종료 **차단 없음** (B2 방지)
+
+**노션기록관 Stage 2 확장 동작**:
+1. handoff frontmatter → Notion DB 메타 저장 (기존)
+2. **handoff 본문 → page child blocks append (신규)** — 2000자 분할, 3 req/sec
+3. 전체 성공 → `notion_synced: true` / 일부 실패 → `notion_synced: partial` + `blocks_created: N`
 
 ---
 

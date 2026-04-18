@@ -64,7 +64,15 @@
       "Bash(rmdir /tmp/claude-session-tracker-lock.d)",
       "Bash(rm -f /tmp/claude-b8-debounce.log /tmp/claude-b8-debounce-trigger)",
       "Bash(git commit *)",
-      "Bash(rm -f /Users/ihyeon-u/.claude/settings.json.bak.b8)"
+      "Bash(rm -f /Users/ihyeon-u/.claude/settings.json.bak.b8)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 1 전환 \\(문서 다이어트 기획\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 재진입 - B안 \\(on-demand fetch\\) 재설계\")",
+      "Bash(touch ~/.claude/handoffs/세션인수인계_20260418_7차_v1.md)",
+      "Bash(~/.claude/hooks/violation-prevention-inject.sh)",
+      "Bash(~/.claude/hooks/drift-detector.sh)",
+      "Bash(cp ~/.claude/settings.json ~/.claude/settings.json.backup_20260419)",
+      "Bash(jq '.hooks.SessionStart += [ *)",
+      "Bash(mv /tmp/settings.json ~/.claude/settings.json)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -89,7 +97,8 @@
       "/Users/ihyeon-u/.claude/skills/haemilsia-D3",
       "/Users/ihyeon-u/.claude/skills/haemilsia-D3-test",
       "/Users/ihyeon-u/.claude/docs/rules",
-      "/Users/ihyeon-u/.claude/docs/superpowers"
+      "/Users/ihyeon-u/.claude/docs/superpowers",
+      "/Users/ihyeon-u/.claude/plans"
     ]
   },
   "hooks": {
@@ -134,6 +143,24 @@
             "type": "command",
             "command": "bash ~/.claude/hooks/session-start-worklog.sh",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/violation-prevention-inject.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/drift-detector.sh",
+            "timeout": 3
           }
         ]
       }
@@ -264,6 +291,5 @@
       }
     }
   },
-  "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true
 }

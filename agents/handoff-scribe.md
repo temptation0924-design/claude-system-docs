@@ -120,3 +120,43 @@ violations:
 ## 에스컬레이션
 실패 시: Sonnet → Opus
 타임아웃: 25초
+
+---
+
+## v2.0 — MEMORY.md 동시 패치 (2026-04-19 추가)
+
+### 쓰기 순서 (handoff-first + MEMORY best-effort)
+
+**핸드오프작성관은 handoff.md 생성 직후 반드시 이 단계를 추가 수행**:
+
+```bash
+# 1. handoff.md 이미 생성 완료 (위 기존 로직)
+HANDOFF_PATH=~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md
+
+# 2. mkdir-lock 획득 (5초 타임아웃) → MEMORY.md 패치
+source ~/.claude/code/mkdir_lock.sh
+MEMORY_PATH=~/.claude/projects/-Users-ihyeon-u/memory/MEMORY.md
+LOCK_DIR=~/.claude/.memory.lock.d
+
+if with_lock "$LOCK_DIR" python3 ~/.claude/code/memory_patcher.py \
+     --handoff "$HANDOFF_PATH" --memory "$MEMORY_PATH"; then
+  echo "✅ MEMORY.md 패치 완료"
+else
+  # 3. 실패 시 queue 저장 (세션 종료 차단 없음 — B2 유발 방지)
+  TS=$(date +%s)
+  mkdir -p ~/.claude/queue
+  echo "{\"handoff\":\"$HANDOFF_PATH\",\"timestamp\":$TS}" \
+    > ~/.claude/queue/pending_memory_${TS}.json
+  echo "⚠️ MEMORY 패치 실패 → queue 저장. 다음 세션 시작 시 재시도."
+fi
+```
+
+### 패치 내용 (memory_patcher.py 자동 처리)
+- 🟢 최근 완료: 상단 1줄 추가 (`- YYYY-MM-DD <title> → [session_id](path)`)
+- 🔴 할 일: handoff 미완료 테이블 → P1/P2/P3 추출 후 섹션 통째 교체
+- ⚡ 반복 위반 TOP 3: 지난 7일 handoffs 집계 → 재작성
+
+### 실패 처리 원칙
+- **세션 종료 차단 없음** — B2(인수인계 누락) 유발 방지
+- queue 파일(`~/.claude/queue/pending_memory_*.json`) 저장 → 다음 세션 시작 시 재시도
+- memory_patcher 내부 atomic write로 부분 실패 방지

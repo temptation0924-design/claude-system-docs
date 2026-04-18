@@ -108,3 +108,55 @@ violations:
 
 ## 에스컬레이션
 실패 시: Haiku → Sonnet → Opus / 타임아웃: 10초
+
+---
+
+## v2.0 — handoff 전문 저장 (2026-04-19)
+
+### Stage 2 확장 동작
+
+기존 메타데이터 저장(frontmatter → DB 필드)에 이어, **handoff md 본문을 Notion page의 child blocks로 append**:
+
+1. handoff 파일 본문 파싱 (frontmatter 제외한 markdown):
+   - `#` / `##` / `###` → `heading_1` / `heading_2` / `heading_3`
+   - `|...|` 테이블 → `table` 블록 (또는 paragraph로 fallback)
+   - 일반 텍스트 문단 → `paragraph` (2000자 초과 시 분할)
+   - 리스트(`- `, `1. `) → `bulleted_list_item` / `numbered_list_item`
+
+2. Notion API `blocks/children/append` 호출:
+   - 배치 크기: 100개/req (API 제한)
+   - Rate limit: 3 req/sec → 블록 append 후 350ms sleep
+
+3. 성공/실패 기록:
+   - 전체 성공 → 페이지 필드 `notion_synced: true`, `blocks_created: N`
+   - 일부 실패 → `notion_synced: partial`, `blocks_created: M` (M<N) → 다음 세션 재시도 대상
+
+### 2000자 분할 규칙 (paragraph)
+
+```python
+def split_paragraph(text: str, max_chars: int = 2000):
+    """문단을 2000자 이하 블록으로 분할"""
+    blocks = []
+    while len(text) > max_chars:
+        # 공백 기준으로 절단 (단어 중간 자르지 않음)
+        cut = text.rfind(" ", 0, max_chars)
+        if cut == -1:
+            cut = max_chars
+        blocks.append(text[:cut])
+        text = text[cut:].lstrip()
+    if text:
+        blocks.append(text)
+    return blocks
+```
+
+### partial 재시도 (세션 시작 시)
+
+매니저가 세션 시작 시 Notion DB에서 `notion_synced = partial` 쿼리:
+```
+filter: {"property": "notion_synced", "select": {"equals": "partial"}}
+```
+
+각 partial 레코드에 대해:
+1. `blocks_created` 필드 조회
+2. 해당 handoff 파일의 `blocks_created` 인덱스 이후부터 append 재시도
+3. 전체 완료 시 `notion_synced: true`로 업데이트
