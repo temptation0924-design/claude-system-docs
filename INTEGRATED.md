@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 02:23 KST
+> 마지막 빌드: 2026-04-19 02:24 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -510,6 +510,7 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 2. **mkdir-lock(`~/.claude/.memory.lock.d`) 획득 → `memory_patcher.py` 실행**:
    - MEMORY.md 🟢 최근 완료 / 🔴 할 일 / ⚡ 반복 위반 TOP 3 동시 갱신
 3. **실패 시 queue 저장** (`~/.claude/queue/pending_memory_*.json`) — 세션 종료 **차단 없음** (B2 방지)
+4. **MEMORY.md 줄 수 점검** (rules.md A9): `wc -l` > 80 시 다음 세션 인계사항에 "MEMORY archive 필요" 기록
 
 **노션기록관 Stage 2 확장 동작**:
 1. handoff frontmatter → Notion DB 메타 저장 (기존)
@@ -1392,4 +1393,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 02:23 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 02:24 KST | 원본: `~/.claude/*.md` (Git)*
