@@ -184,9 +184,10 @@ Edit `~/.claude/code/api-key-manager_v1.sh` — 기존 다음 블록:
 
 ```bash
   # 노션에서 railway = $project 태그 달린 키 추출
+  # (notion_list_active_keys가 에러 시 util_err로 stderr에 사유 출력 → 그대로 터미널로 흘러나옴)
   local meta_file
   meta_file=$(mktemp)
-  if ! notion_list_active_keys "$db" > "$meta_file" 2>/dev/null; then
+  if ! notion_list_active_keys "$db" > "$meta_file"; then
     util_err "railway-sync: 노션 장부 조회 실패"
     util_err "  👉 원인 진단: 'bash ~/.claude/code/api-key-manager_v1.sh diagnose'"
     rm -f "$meta_file"
