@@ -89,7 +89,7 @@ echo $(( ($(date +%s) - $(jq -r '.epoch' ~/.claude/.session_start)) / 60 ))
 
 ## 관련 파일
 
-- [`session.md`](../session.md) — 세션 종료 루틴 L8 (이 파일 참조)
+- [`session.md`](../../session.md) — 세션 종료 루틴 L8 (이 파일 참조)
 - [`rules/task-routine.md`](task-routine.md) — 학습 카드 (`#claude-study` 채널, 별도 포맷)
 - [`rules/notion-logging.md`](notion-logging.md) — Notion 작업기록 DB 저장 규칙
 - [`rules/error-handling.md`](error-handling.md) — 에러 해결 후 발송 흐름

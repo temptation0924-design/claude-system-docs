@@ -30,7 +30,7 @@ Notion 작업기록 DB
 | 다음세션인계 | 다음 세션에서 이어갈 내용 |
 
 ## 세션 루틴
-→ 세션 시작/종료 순서 및 상세 절차는 [`session.md`](../session.md) 참조 (단일 원본)
+→ 세션 시작/종료 순서 및 상세 절차는 [`session.md`](../../session.md) 참조 (단일 원본)
 - 이 파일은 **노션 기록의 저장 방식 스펙만** 담당 (DB 판단 + 기록 형식)
 - 슬랙 알림 형식은 [`rules/slack-worklog.md`](slack-worklog.md) 참조 (`#general-mode` 채널 · 상세 작업일지 포맷)
 
