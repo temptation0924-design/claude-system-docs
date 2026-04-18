@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 01:40 KST
+> 마지막 빌드: 2026-04-19 01:53 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -883,56 +883,33 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 
 ## ⭐ 이현우 대표님 제작 스킬 (최우선)
 
-> **대표님이 직접 만든 스킬 모음.** 가장 자주 쓰는 스킬이므로 최상단에 배치.
-> 기존 카테고리(1~10)에도 중복 표시되어 있음 — 어느 쪽에서 찾아도 OK.
+> 대표님 직접 제작 스킬. 최우선 참조. (기존 카테고리 1~10에도 중복 표시)
 
-### 🏢 해밀시아 패키지 (5개)
+### 🏢 해밀시아 (6개)
+- `haemilsia-rental-inspection` — 임대점검, 일일점검, DB점검, 점검보고서, 검증해줘
+- `haemilsia-bot-dev` — 해밀봇 기능 추가, 명령어 추가, Block Kit, 드릴다운
+- `haemilsia-bot-deploy` — 봇 배포, Railway 배포, 환경변수 수정
+- `railway-notion-connect` — Railway↔Notion 연동, 503/401/404 디버깅
+- `haemilsia-property-card` — 부동산 수익카드, 매매/대환 분석, 카톡PNG
+- `haemilsia-D0-test` — 마케팅 디자인 기획 (v0.9.1 테스트)
 
-해밀시아 임대 운영 전체 파이프라인. **임대점검 → 봇 개발 → 봇 배포 → Railway/Notion 연동 → 부동산 수익카드**.
-
-| 스킬명 | 한글명 | 트리거 키워드 | 경로 |
-|--------|--------|-------------|------|
-| haemilsia-rental-inspection | **임대점검** (7DB×Notion) | 임대점검, 일일점검, 간편점검, 빡센점검, DB점검, 점검보고서, 검증해줘 | `~/.claude/skills/haemilsia-rental-inspection/SKILL.md` |
-| haemilsia-bot-dev | **해밀봇 개발** (명령어/Block Kit) | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
-| haemilsia-bot-deploy | **해밀봇 배포** (Railway) | bot 배포, bot 업데이트, Railway 배포, 환경변수 수정 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
-| railway-notion-connect | **Railway↔Notion 연동** | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
-| haemilsia-property-card | **부동산 수익카드** (매매/대환→카톡PNG) | 물건현황표, 수익분석 카드, 수익률 자료, 대환대출 자료, 은행제출용, 카톡용 물건자료 | `~/.claude/skills/haemilsia-property-card/SKILL.md` |
-| haemilsia-D0-test | **마케팅 디자인 기획** (테스트중 v0.9.1) | 디자인 기획, 마케팅 자료, 랜딩페이지 기획, 블로그 이미지, 카피, 컨셉, SNS 콘텐츠, 브리프 | `~/.claude/skills/haemilsia-D0-test/SKILL.md` |
-
-**💡 임대점검 2중 체계 (v2.0):**
-- **간편점검 (v1.0)** — Railway 봇이 매일 07:30 KST 자동 실행 (실행 확인 위주)
-- **빡센점검 (v2.0)** — Claude Code에서 "임대점검해줘" / "검증해줘" 수동 실행 (29항목 체크리스트 + 95% 스코어링)
+**💡 임대점검 2중 체계**: 간편(v1.0, Railway 07:30 자동) + 빡센(v2.0, 29항목 수동)
 
 ### 🤖 자동화 (2개)
+- `slack-info-briefing-builder` — 슬랙 브리핑, RSS 봇
+- `landing-page-deploy` — 랜딩페이지 Netlify + Notion 연동
 
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| slack-info-briefing-builder | 슬랙 브리핑, 매일 정보 받기, RSS 봇, haemilsia-bot 브리핑 추가 | `~/.claude/skills/slack-info-briefing-builder/SKILL.md` |
-| landing-page-deploy | 랜딩페이지, 홈페이지 배포, Netlify, 상담폼 Notion 연동 | `~/.claude/skills/landing-page-deploy/SKILL.md` |
+### 📋 시스템 (3개)
+- `system-docs-sync` — 시스템 문서 수정
+- `skill-manager` — 스킬 관리 (목록/검색/추가/삭제)
+- `file-organizer` — 파일 정리, 다운로드 정돈
 
-### 📋 시스템/메타 (4개)
+### 🎨 개인화 (3개)
+- `screenshot-check` — 스크린샷 확인
+- `petitlynn-color` — 쁘띠린 색상 시스템
+- `travel-meal-planner` — 여행 맛집 기획
 
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정 | `~/.claude/skills/system-docs-sync/SKILL.md` |
-| skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천 | `~/.claude/skills/skill-manager/SKILL.md` |
-| file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
-
-### 🏢 부동산 자료 (1개)
-
-| 스킬명 | 한글명 | 트리거 키워드 | 경로 |
-|--------|--------|-------------|------|
-| haemilsia-property-card | **부동산 수익카드** (매매/대환 분석 → 카톡PNG) | 물건현황표, 수익분석 카드, 수익률 자료, 대환대출 자료, 은행제출용 수익, 부동산 카드, 카톡용 물건자료, 임대수익 분석표, 다가구 수익률, 보증금/월세 표 | `~/.claude/skills/haemilsia-property-card/SKILL.md` |
-
-### 🎨 개인화/편의 (3개)
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| screenshot-check | 스크린샷 찍었어, 스샷 확인, 캡처 찍었어, 방금 찍은 스크린샷 | `~/.claude/skills/screenshot-check/SKILL.md` |
-| petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
-| travel-meal-planner | 여행 맛집, 식사 플랜, 맛집 찾아줘, travel meal plan | `~/.claude/skills/travel-meal-planner/SKILL.md` |
-
-**총 13개** | 이 스킬들은 아래 기존 카테고리(1~10)에도 중복 표시되어 있음.
+**총 14개** | 트리거 상세 검색은 `skill-manager` 스킬 호출.
 
 ---
 
@@ -1555,4 +1532,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:40 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:53 KST | 원본: `~/.claude/*.md` (Git)*
