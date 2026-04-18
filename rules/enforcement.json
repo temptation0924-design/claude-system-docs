@@ -117,9 +117,8 @@
       },
       "severity": "hard_block",
       "enabled": true,
-      "override_flag": "--force-B8",
       "notion_page_id": "3407f080-9621-81a7-a294-f6489722906f",
-      "next_action": "bash ~/.claude/code/build-integrated_v1.sh --push 실행해 INTEGRATED.md 재빌드"
+      "next_action": "자동: debounce_sync.sh가 30초 후 실행. 긴급 우회: SKIP_B8_AUTOSYNC=1 환경변수 (로그 필수 기록)"
     },
     {
       "code": "B9",
