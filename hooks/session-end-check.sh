@@ -85,9 +85,36 @@ if [ "$TOOL_REC" != "true" ] && { [ "$MODE1" = "true" ] || [ "$MODE2" = "true" ]
   WARNS+="⚠️ B4: 도구 추천 한 줄 명시 누락\n"
 fi
 
-# B8: INTEGRATED.md 재빌드 누락 (시스템 파일 수정했는데 pending_sync 남아있음)
+# B8: INTEGRATED.md 재빌드 누락 — fallback 동기 실행 (debounce 못 돈 케이스, 시크릿 검증 포함)
 if [ -n "$PENDING_SYNC" ] && [ "$PENDING_SYNC" -gt 0 ] 2>/dev/null; then
-  BLOCKS+="❌ B8: INTEGRATED.md 재빌드 누락 (미동기화: ${PENDING_FILES})\n"
+  B8_LOG=/tmp/claude-b8-debounce.log
+  echo "[$(date '+%H:%M:%S')] B8_FALLBACK_START pending=${PENDING_FILES}" >> "$B8_LOG"
+
+  # 시크릿 스캔 (debounce_sync.sh와 동일 로직)
+  SECRET_PATTERNS='sk-ant-|ghp_|gho_|ghu_|ghs_|xoxb-|xoxp-|AKIA|AIza|glpat-'
+  cd "$HOME/.claude" 2>/dev/null
+  SECRET_FOUND=""
+  for DOC in CLAUDE.md rules.md session.md env-info.md skill-guide.md agent.md briefing.md slack.md; do
+    [ -f "$DOC" ] && grep -lE "$SECRET_PATTERNS" "$DOC" >/dev/null 2>&1 && SECRET_FOUND="${SECRET_FOUND} ${DOC}"
+  done
+
+  if [ -n "$SECRET_FOUND" ]; then
+    echo "[$(date '+%H:%M:%S')] B8_FALLBACK_SECRET_BLOCK files=${SECRET_FOUND}" >> "$B8_LOG"
+    BLOCKS+="❌ B8: 시크릿 의심 패턴 발견 (${SECRET_FOUND}). 수동 점검 후 bash ~/.claude/code/build-integrated_v1.sh --push\n"
+  elif bash code/build-integrated_v1.sh --push >> "$B8_LOG" 2>&1; then
+    echo "[$(date '+%H:%M:%S')] B8_FALLBACK_SUCCESS" >> "$B8_LOG"
+    if [ -n "$TRACKER" ] && [ -f "$TRACKER" ]; then
+      TMPFILE=$(mktemp)
+      if jq '.pending_sync = [] | .system_files_edited = false' "$TRACKER" > "$TMPFILE" 2>/dev/null; then
+        mv "$TMPFILE" "$TRACKER"
+      else
+        rm -f "$TMPFILE"
+      fi
+    fi
+  else
+    echo "[$(date '+%H:%M:%S')] B8_FALLBACK_FAILED" >> "$B8_LOG"
+    BLOCKS+="❌ B8: INTEGRATED.md 자동 재빌드 실패 (미동기화: ${PENDING_FILES}). 수동 실행: bash ~/.claude/code/build-integrated_v1.sh --push\n"
+  fi
 fi
 
 # B9: 스킬 디렉토리 변경했는데 skill-guide 미수정
