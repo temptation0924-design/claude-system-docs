@@ -39,6 +39,7 @@ Subcommands:
   delete <NAME>                 키 삭제 (Keychain 휴지통 이동, 노션 archived)
   railway-sync <PROJECT>        특정 Railway 프로젝트의 환경변수에 밀어넣기
   health-check                  Keychain ↔ .zshrc ↔ 노션 일관성 검증
+  diagnose                      환경 + Notion 접근 심층 진단 (문제 해결용)
   help                          이 메시지
 EOF
 }
@@ -392,6 +393,81 @@ cmd_health_check() {
   state_set .last_health_check_date "\"$today\""
 }
 
+cmd_diagnose() {
+  printf '\n🔍 api-key-manager diagnose\n\n'
+
+  # [1/6] Keychain
+  local kc_keys kc_count
+  kc_keys=$(kc_list)
+  kc_count=$(printf '%s\n' "$kc_keys" | grep -c '.' || true)
+  if [[ "$kc_count" -gt 0 ]]; then
+    printf '[1/6] Keychain: ✅ %d개 등록 (네임스페이스: %s)\n' "$kc_count" "$KC_SERVICE"
+  else
+    printf '[1/6] Keychain: ❌ 0개 — kc_list 실패 또는 접근 권한 문제\n'
+  fi
+
+  # [2/6] .zshrc 블록
+  if [[ -f "$ZSHRC_FILE" ]] && zshrc_block_has "$ZSHRC_FILE"; then
+    local zshrc_count
+    zshrc_count=$(grep -c '^_load_key ' "$ZSHRC_FILE" || true)
+    printf '[2/6] .zshrc 블록: ✅ %d개 _load_key 라인\n' "$zshrc_count"
+  else
+    printf '[2/6] .zshrc 블록: ❌ 블록 없음 — add 실행 시 자동 생성\n'
+  fi
+
+  # [3/6] NOTION_API_TOKEN
+  if [[ -n "${NOTION_API_TOKEN:-}" ]]; then
+    printf '[3/6] NOTION_API_TOKEN: ✅ 설정됨 (%s)\n' "$(util_mask_secret "$NOTION_API_TOKEN")"
+  else
+    printf '[3/6] NOTION_API_TOKEN: ❌ 환경변수 없음 — .zshrc 블록 로딩 확인 필요\n'
+  fi
+
+  # [4/6] 노션 DB 접근
+  local db
+  db=$(state_get .notion_db_id)
+  if [[ -z "$db" ]]; then
+    printf '[4/6] 노션 DB: ⏭️  state.json에 notion_db_id 미설정\n'
+  elif [[ -z "${NOTION_API_TOKEN:-}" ]]; then
+    printf '[4/6] 노션 DB: ⏭️  NOTION_API_TOKEN 없어서 테스트 스킵\n'
+  else
+    local headers=() response obj code msg
+    while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
+    response=$(curl -sS -X POST "$NOTION_API_BASE/databases/$db/query" \
+      "${headers[@]}" --data '{"page_size":1}' 2>/dev/null)
+    obj=$(printf '%s' "$response" | jq -r '.object // ""')
+    if [[ "$obj" == "list" ]]; then
+      local row_count
+      row_count=$(printf '%s' "$response" | jq -r '.results | length')
+      printf '[4/6] 노션 DB: ✅ 접근 가능 (DB ID: %s, 프리뷰 %d행)\n' "$db" "$row_count"
+    else
+      code=$(printf '%s' "$response" | jq -r '.code // "unknown"')
+      msg=$(printf '%s' "$response" | jq -r '.message // ""')
+      printf '[4/6] 노션 DB: ❌ %s\n       사유: %s\n' "$code" "$msg"
+      printf '       👉 해결: Notion UI → DB 페이지 → ••• → Connections → 해당 integration 추가\n'
+    fi
+  fi
+
+  # [5/6] 대체 Notion 토큰 후보
+  printf '[5/6] 대체 Notion 토큰 후보 (Keychain 내 존재 여부):\n'
+  for alt in NOTION_API_TOKEN_CLAUDE NOTION_API_TOKEN_HOMEPAGE REF_NOTION_TOKEN; do
+    if kc_exists "$alt"; then
+      printf '       - %s: ✅ Keychain에 존재\n' "$alt"
+    else
+      printf '       - %s: ⏭️  미존재\n' "$alt"
+    fi
+  done
+
+  # [6/6] state.json
+  printf '[6/6] state.json:\n'
+  if [[ -f "$STATE_FILE" ]]; then
+    printf '       '
+    jq -c '{notion_db_id, managed_count, last_sync_at, last_health_check_date}' "$STATE_FILE"
+  else
+    printf '       ⏭️  %s 없음\n' "$STATE_FILE"
+  fi
+  printf '\n'
+}
+
 case "$SUBCOMMAND" in
   add)          cmd_add "$@" ;;
   list)         cmd_list "$@" ;;
@@ -399,6 +475,7 @@ case "$SUBCOMMAND" in
   delete)       cmd_delete "$@" ;;
   railway-sync) cmd_railway_sync "$@" ;;
   health-check) cmd_health_check "$@" ;;
+  diagnose)     cmd_diagnose "$@" ;;
   help|--help|-h) cmd_help ;;
   *) util_err "unknown subcommand: $SUBCOMMAND"; usage; exit 1 ;;
 esac
