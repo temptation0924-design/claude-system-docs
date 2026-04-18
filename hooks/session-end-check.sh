@@ -85,6 +85,15 @@ if [ "$TOOL_REC" != "true" ] && { [ "$MODE1" = "true" ] || [ "$MODE2" = "true" ]
   WARNS+="⚠️ B4: 도구 추천 한 줄 명시 누락\n"
 fi
 
+# === kill-switch guard (doc-diet 2026-04-19, ENG C1 대응) ===
+# SKIP_B8_AUTOSYNC=1이면 session-end fallback도 차단 (debounce_sync.sh와 동일 정책)
+if [ "${SKIP_B8_AUTOSYNC:-0}" = "1" ] && [ -n "$PENDING_SYNC" ] && [ "$PENDING_SYNC" -gt 0 ] 2>/dev/null; then
+  B8_LOG=/tmp/claude-b8-debounce.log
+  echo "[$(date '+%H:%M:%S')] B8_FALLBACK_SKIPPED_BY_KILLSWITCH pending=${PENDING_FILES}" >> "$B8_LOG"
+  PENDING_SYNC=0
+fi
+# === /kill-switch guard ===
+
 # B8: INTEGRATED.md 재빌드 누락 — fallback 동기 실행 (debounce 못 돈 케이스, 시크릿 검증 포함)
 if [ -n "$PENDING_SYNC" ] && [ "$PENDING_SYNC" -gt 0 ] 2>/dev/null; then
   B8_LOG=/tmp/claude-b8-debounce.log
