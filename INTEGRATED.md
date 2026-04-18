@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 03:34 KST
+> 마지막 빌드: 2026-04-19 03:35 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -507,7 +507,7 @@ echo "[$(date +%H:%M)] ERROR: 노션기록관 큐 재시도 오진단 | MCP,Noti
    - → 예상 소요: **5~8초**
 
 3. **Stage 2 — 매니저가 결과 병합 후 2명 dispatch** (순차, Stage 1 결과 필요):
-   - `[노션기록관 Haiku]` — handoffs/ frontmatter 파싱 → Notion 작업기록 DB 자동 싱크 → `notion_synced: true` 마킹
+   - `[노션기록관 Haiku]` — handoffs/ frontmatter 파싱 → 사전 체크 로직(CREATE/UPDATE/SKIP) → Notion 작업기록 DB 싱크 → `notion_synced: true` + `notion_page_id` + `notion_synced_at` 3필드 갱신
    - `[슬랙배달관 Haiku]` — #general-mode 작업일지 + #claude-study 학습 카드 (해당 시)
    - → 예상 소요: **3~5초**
 
@@ -1411,4 +1411,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 03:34 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 03:35 KST | 원본: `~/.claude/*.md` (Git)*
