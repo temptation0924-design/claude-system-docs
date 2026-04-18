@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 00:52 KST
+> 마지막 빌드: 2026-04-19 01:36 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -487,6 +487,19 @@ echo "[$(date +%H:%M)] MODE: MODE 1 → MODE 2 전환" >> ~/.claude/.session_wor
 > **B2 위반 방지**: 핸드오프작성관이 Stage 1에 필수 포함 → 시스템 구조상 인수인계 누락 불가
 > **수동 오버라이드**: "순차로 해" → 위 팀원 순서대로 실행
 > **에스컬레이션**: 팀원 실패 시 자동 승급 (agent.md 섹션 5 참조)
+
+### 🆕 v2.0 MEMORY 동시 패치 (2026-04-19)
+
+**핸드오프작성관 Stage 1 확장 동작**:
+1. `.session_worklog` 참조 → `handoffs/세션인수인계_*.md` 생성
+2. **mkdir-lock(`~/.claude/.memory.lock.d`) 획득 → `memory_patcher.py` 실행**:
+   - MEMORY.md 🟢 최근 완료 / 🔴 할 일 / ⚡ 반복 위반 TOP 3 동시 갱신
+3. **실패 시 queue 저장** (`~/.claude/queue/pending_memory_*.json`) — 세션 종료 **차단 없음** (B2 방지)
+
+**노션기록관 Stage 2 확장 동작**:
+1. handoff frontmatter → Notion DB 메타 저장 (기존)
+2. **handoff 본문 → page child blocks append (신규)** — 2000자 분할, 3 req/sec
+3. 전체 성공 → `notion_synced: true` / 일부 실패 → `notion_synced: partial` + `blocks_created: N`
 
 ---
 
@@ -1538,4 +1551,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 00:52 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:36 KST | 원본: `~/.claude/*.md` (Git)*
