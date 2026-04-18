@@ -344,22 +344,34 @@ notion_archive_row() {
 }
 
 # notion_list_active_keys <db_id>  →  stdout: 각 줄 JSON {name, usage, project, provider, status}
+# 에러 시 stderr에 사유 출력하고 exit 1
 notion_list_active_keys() {
   local db="$1"
-  local payload
+  local payload response
   payload=$(jq -n '{
     filter: { property: "상태", select: { equals: "active" } },
     page_size: 100
   }')
   local headers=()
   while IFS= read -r line; do headers+=("$line"); done < <(notion_headers)
-  curl -sS -X POST "$NOTION_API_BASE/databases/$db/query" \
+  response=$(curl -sS -X POST "$NOTION_API_BASE/databases/$db/query" \
     "${headers[@]}" \
-    --data "$payload" \
-  | jq -c '.results[] | {
+    --data "$payload")
+
+  local obj_type
+  obj_type=$(printf '%s' "$response" | jq -r '.object // ""')
+  if [[ "$obj_type" == "error" ]]; then
+    local code msg
+    code=$(printf '%s' "$response" | jq -r '.code // "unknown"')
+    msg=$(printf '%s' "$response" | jq -r '.message // ""')
+    util_err "Notion API 에러 ($code): $msg"
+    return 1
+  fi
+
+  printf '%s' "$response" | jq -c '.results[]? | {
       name:   (.properties["이름"].title[0].plain_text // ""),
       usage:  (.properties["용도"].rich_text[0].plain_text // ""),
-      project: ([.properties["프로젝트"].multi_select[].name] | join(",")),
+      project: ([.properties["프로젝트"].multi_select[]?.name] | join(",")),
       provider: (.properties["서비스 제공자"].select.name // ""),
       status: (.properties["상태"].select.name // "")
     }'
