@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """MEMORY.md 3개 섹션 패치 (🟢 최근 완료, 🔴 할 일, ⚡ 반복 위반 TOP 3)
 
-v2.0 — handoff-first + MEMORY best-effort + queue 재시도 패턴
+v2.1 — 5개 버그 종합 수정 (2026-04-19)
+  - 중복 누적 방지 (session_id 기준 dedup)
+  - 7일 롤링 cleanup 구현
+  - silent fail 제거 (주석 유무 무관 동작)
+  - handoff_rel 검증
+  - phase_completed fallback chain (projects → "작업 요약 없음")
 
 Usage:
     python3 memory_patcher.py --handoff <path> --memory <path>
@@ -21,8 +26,10 @@ except ImportError:
     sys.exit(1)
 
 
+SECTION_END_LOOKAHEAD = r"(?=\n##|\n<!--|\Z)"
+
+
 def parse_frontmatter(content: str) -> dict:
-    """handoff.md의 frontmatter (--- YAML ---) 파싱"""
     if "---" not in content:
         return {}
     parts = content.split("---", 2)
@@ -35,22 +42,16 @@ def parse_frontmatter(content: str) -> dict:
 
 
 def extract_todos_from_handoff(handoff: str, handoff_path: str, session_id: str) -> str:
-    """handoff 본문의 '미완료/보류 항목' 테이블 파싱 → P1/P2/P3 포맷"""
-    # '미완료' 섹션 찾기
-    section_match = re.search(
-        r"##[^\n]*미완료[^#]*", handoff, flags=re.DOTALL
-    )
+    section_match = re.search(r"##[^\n]*미완료[^#]*", handoff, flags=re.DOTALL)
     if not section_match:
         return "- (미완료 항목 없음)"
     section = section_match.group(0)
 
-    # 테이블 행 추출 (헤더/구분선 제외)
     rows = [
         line for line in section.split("\n")
         if line.strip().startswith("|") and not line.strip().startswith("|---")
     ]
-    data_rows = rows[1:4] if len(rows) > 1 else []  # 헤더 제외 최대 3개
-
+    data_rows = rows[1:4] if len(rows) > 1 else []
     handoff_rel = Path(handoff_path).name
 
     todos = []
@@ -66,7 +67,6 @@ def extract_todos_from_handoff(handoff: str, handoff_path: str, session_id: str)
 
 
 def aggregate_violations_last_7days() -> str:
-    """handoffs/*.md 중 mtime > -7일인 파일의 frontmatter violations 집계 → TOP 3"""
     cutoff_ts = (datetime.now() - timedelta(days=7)).timestamp()
     counter: Counter = Counter()
 
@@ -90,49 +90,109 @@ def aggregate_violations_last_7days() -> str:
     return "\n".join(f"- {rule}: × {count}회" for rule, count in top3)
 
 
+def _find_section(memory: str, header_pattern: str):
+    """섹션 (header, optional comment, body) 매치. 다음 ## 또는 <!-- 또는 EOF까지."""
+    full_pattern = re.compile(
+        rf"({header_pattern}[^\n]*\n)"
+        r"((?:<!--[^\n]*-->\n)?)"
+        rf"((?:.*\n)*?)"
+        rf"{SECTION_END_LOOKAHEAD}"
+    )
+    return full_pattern.search(memory)
+
+
+def update_recent_completed(memory: str, new_line: str, session_id: str) -> str:
+    """🟢 최근 완료: 중복 제거 + 7일 롤링 + 새 줄 맨 위 삽입."""
+    m = _find_section(memory, r"## 🟢 최근 완료")
+    if not m:
+        sys.stderr.write("⚠️ 🟢 최근 완료 섹션 없음\n")
+        return memory
+
+    header, comment, body = m.group(1), m.group(2), m.group(3)
+    existing = [l for l in body.split("\n") if l.strip().startswith("-")]
+
+    # session_id 중복 제거
+    existing = [l for l in existing if f"[{session_id}]" not in l]
+
+    # 새 줄을 맨 위에 추가
+    all_lines = [new_line] + existing
+
+    # 7일 롤링 (날짜 파싱 가능한 줄만 필터)
+    cutoff = datetime.now() - timedelta(days=7)
+    filtered = []
+    for l in all_lines:
+        date_m = re.match(r"- (\d{4}-\d{2}-\d{2})", l)
+        if date_m:
+            try:
+                d = datetime.strptime(date_m.group(1), "%Y-%m-%d")
+                if d >= cutoff:
+                    filtered.append(l)
+            except ValueError:
+                filtered.append(l)
+        else:
+            filtered.append(l)
+
+    new_body = "\n".join(filtered) + "\n" if filtered else "- (최근 완료 없음)\n"
+    return memory[:m.start()] + header + comment + new_body + memory[m.end():]
+
+
+def update_todos(memory: str, todos: str) -> str:
+    """🔴 할 일: 통째 교체 (주석 유무 무관)."""
+    m = _find_section(memory, r"## 🔴 할 일")
+    if not m:
+        sys.stderr.write("⚠️ 🔴 할 일 섹션 없음\n")
+        return memory
+
+    header, comment = m.group(1), m.group(2)
+    return memory[:m.start()] + header + comment + todos + "\n" + memory[m.end():]
+
+
+def update_violations(memory: str, top3: str) -> str:
+    """⚡ 반복 위반 TOP 3: 통째 교체 (주석 유무 무관)."""
+    m = _find_section(memory, r"## ⚡ 반복 위반 TOP 3")
+    if not m:
+        sys.stderr.write("⚠️ ⚡ 반복 위반 TOP 3 섹션 없음\n")
+        return memory
+
+    header, comment = m.group(1), m.group(2)
+    return memory[:m.start()] + header + comment + top3 + "\n" + memory[m.end():]
+
+
 def patch_memory(handoff_path: str, memory_path: str) -> None:
     handoff = Path(handoff_path).read_text()
     fm = parse_frontmatter(handoff)
     memory = Path(memory_path).read_text()
 
-    session_id = fm.get("session", Path(handoff_path).stem)
-    date = fm.get("date", datetime.now().strftime("%Y-%m-%d"))
-    phase = fm.get("phase_completed") or ["작업 요약 없음"]
-    phase_title = (phase[0] if isinstance(phase, list) else str(phase))[:80]
+    session_id = fm.get("session") or Path(handoff_path).stem
+    date = fm.get("date") or datetime.now().strftime("%Y-%m-%d")
+
+    # phase_completed → projects → fallback chain
+    phase_src = fm.get("phase_completed") or fm.get("projects") or ["작업 요약 없음"]
+    phase_title = (phase_src[0] if isinstance(phase_src, list) else str(phase_src))[:80]
+
     handoff_rel = Path(handoff_path).name
+    if not handoff_rel.endswith(".md"):
+        sys.stderr.write(f"⚠️ invalid handoff path (확장자 누락): {handoff_path}\n")
+        sys.exit(2)
 
-    # 1. 🟢 최근 완료: 상단 1줄 추가
-    new_line = f"- {date} {phase_title} → [{session_id}](../../../handoffs/{handoff_rel})"
-    memory = re.sub(
-        r"(## 🟢 최근 완료[^\n]*\n<!--[^\n]*-->\n)",
-        rf"\1{new_line}\n",
-        memory, count=1,
+    new_line = (
+        f"- {date} {phase_title} → "
+        f"[{session_id}](../../../handoffs/{handoff_rel})"
     )
 
-    # 2. 🔴 할 일: 섹션 통째 교체
+    memory = update_recent_completed(memory, new_line, session_id)
     todos = extract_todos_from_handoff(handoff, handoff_path, session_id)
-    memory = re.sub(
-        r"(## 🔴 할 일[^\n]*\n<!--[^\n]*-->\n)(?:-[^\n]*\n)*",
-        rf"\1{todos}\n",
-        memory,
-    )
-
-    # 3. ⚡ 반복 위반 TOP 3: 재집계
+    memory = update_todos(memory, todos)
     top3 = aggregate_violations_last_7days()
-    memory = re.sub(
-        r"(## ⚡ 반복 위반 TOP 3[^\n]*\n<!--[^\n]*-->\n)(?:-[^\n]*\n)*",
-        rf"\1{top3}\n",
-        memory,
-    )
+    memory = update_violations(memory, top3)
 
-    # atomic write (tmp → mv)
     tmp = Path(memory_path).with_suffix(".md.tmp")
     tmp.write_text(memory)
     tmp.replace(memory_path)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MEMORY.md 3개 섹션 패치")
+    parser = argparse.ArgumentParser(description="MEMORY.md 3개 섹션 패치 v2.1")
     parser.add_argument("--handoff", required=True, help="handoff.md 경로")
     parser.add_argument("--memory", required=True, help="MEMORY.md 경로")
     args = parser.parse_args()
