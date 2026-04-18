@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 00:49 KST
+> 마지막 빌드: 2026-04-19 00:52 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -161,7 +161,7 @@
 
 ---
 
-*Haemilsia AI operations | 2026.04.11 | v4.2.2 — handoffs/ 디렉토리 신설 + .claude/ 루트 정리 + #general-mode private_channel ID 명시*
+*Haemilsia AI operations | 2026.04.19 | v4.2.3 — B8 자동화 v2 (debounce_sync.sh + 시크릿 게이트 + SKIP_B8_AUTOSYNC kill-switch)*
 
 
 ---
@@ -332,8 +332,13 @@
 1. Git 파일 수정 (`~/.claude/*.md`)
 2. `build-integrated_v1.sh --push` → GitHub `INTEGRATED.md` 재빌드 (~10초)
 
-**B8 체크리스트 (간소화)**
-- [ ] GitHub `INTEGRATED.md` 재빌드 + push 완료
+**B8 체크리스트 (자동화됨 v2 — 2026-04-19)**
+- ✅ `debounce_sync.sh`가 수정 30초 후 자동 빌드+push
+- ✅ 시크릿 스캔 게이트 (토큰 패턴 발견 시 push 차단)
+- ✅ Stop 훅 fallback (debounce 못 돈 케이스 동기 실행)
+- ✅ `override_flag: --force-B8` 제거 (뒷문 차단)
+- ⚡ 긴급 우회: `SKIP_B8_AUTOSYNC=1` 환경변수 (로그 필수 기록)
+- ⚠️ 실패 시만 수동: `bash ~/.claude/code/build-integrated_v1.sh --push`
 
 ### A8. 에이전트 디스패치 원칙 (2026-04-12 C+ 시스템 신설)
 
@@ -1533,4 +1538,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 00:49 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 00:52 KST | 원본: `~/.claude/*.md` (Git)*
