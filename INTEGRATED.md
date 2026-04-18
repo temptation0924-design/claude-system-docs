@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 03:02 KST
+> 마지막 빌드: 2026-04-19 03:03 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -494,7 +494,7 @@ echo "[$(date +%H:%M)] ERROR: 노션기록관 큐 재시도 오진단 | MCP,Noti
 2. **Stage 1 — 매니저가 필수 2명 + 조건부 2명 dispatch** (병렬):
    - `[규칙감시관 Haiku]` — TOP 5 자체점검 + 위반 발견 시 DB update (반복횟수 +1)
    - `[핸드오프작성관 Sonnet]` — `.session_worklog` 참조 → `~/.claude/handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 생성 (frontmatter 포함) → `.session_worklog` 삭제
-   - `[노션기록관 Haiku(2)]` — ⚡ **에러 발생 시에만** 에러로그 DB 저장 (없으면 스킵)
+   - `[노션기록관 Haiku(2)]` — ⚡ **자동 트리거**: `.session_worklog`에 `ERROR:` 라인 1건 이상 → 강제 dispatch (skip 금지). 0건이면 스킵
    - `[복습카드관 Opus]` — ⚡ **트리거 조건 충족 시에만** 학습 카드 생성 (없으면 스킵)
    - → 예상 소요: **5~8초**
 
@@ -1403,4 +1403,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 03:02 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 03:03 KST | 원본: `~/.claude/*.md` (Git)*
