@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 01:55 KST
+> 마지막 빌드: 2026-04-19 01:58 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -893,172 +893,43 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 
 ## 일상 스킬 (모드 무관 — 키워드 매칭)
 
-### 1. 문서 생성
+> 💡 트리거 키워드 상세 검색은 `skill-manager` 스킬 호출. 아래는 스킬명 + 핵심 키워드만.
 
-파일을 새로 만들거나 변환하는 모든 작업.
+### 1. 문서 생성 (8개)
+`docx` / `pdf` / `pptx` / `xlsx` / `pdf-to-knowledge` / `land-investment-brochure` / `document-release` / `frontend-slides` — Word/PDF/슬라이드/엑셀/브로셔/HTML 발표자료
 
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| docx | Word, 워드, .docx, 보고서, 레터 | `~/.claude/skills/docx/SKILL.md` |
-| pdf | PDF 만들기, PDF 생성, 워터마크, 암호화 | `~/.claude/skills/pdf/SKILL.md` |
-| pptx | 프레젠테이션, 슬라이드, 발표자료, 덱 | `~/.claude/skills/pptx/SKILL.md` |
-| xlsx | 스프레드시트, 엑셀, .csv, 표 만들기 | `~/.claude/skills/xlsx/SKILL.md` |
-| pdf-to-knowledge | PDF→마크다운, 프로젝트 지식, 용량 줄이기 | `~/.claude/skills/pdf-to-knowledge/SKILL.md` |
-| land-investment-brochure | 토지 투자 제안서, 브로셔, A4 가로 8페이지 | `~/.claude/skills/land-investment-brochure/SKILL.md` |
-| document-release | 문서 업데이트, docs 싱크, 배포 후 문서, post-ship docs | `~/.claude/skills/document-release/SKILL.md` |
-| frontend-slides | HTML 프레젠테이션, 브라우저 발표, 슬라이드형 HTML, 애니메이션 슬라이드 | `~/.claude/skills/frontend-slides/SKILL.md` |
+### 2. 문서 읽기 (2개)
+`file-reading` / `pdf-reading` — 업로드 파일 / PDF 텍스트·OCR
 
----
+### 3. 디자인 (14개)
+- 기본: `frontend-design` / `design-consultation` / `design-review` / `design-shotgun` / `plan-design-review`
+- 컬러·스타일: `petitlynn-color` / `taste-skill` / `soft-skill` / `minimalist-skill`
+- Supanova 랜딩 패키지 (5): `supanova-design-engine` / `supanova-premium-aesthetic` / `supanova-redesign-engine` / `supanova-full-output` / `supanova-report`
 
-## 2. 문서 읽기
+### 4. 웹 / 배포 (8개)
+`landing-page-deploy` / `haemilsia-bot-deploy` / `haemilsia-bot-dev` / `railway-notion-connect` / `ship` / `land-and-deploy` / `setup-deploy` / `canary`
 
-파일 내용을 읽고 추출하는 작업.
+### 5. 자동화 (8개)
+`slack-info-briefing-builder` / `terminal-runner` / `browse` / `gstack` / `connect-chrome` / `setup-browser-cookies` / `loop` / `schedule`
 
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| file-reading | 업로드 파일, /mnt/user-data/uploads, 파일 열기 | `~/.claude/skills/file-reading/SKILL.md` |
-| pdf-reading | PDF 읽기, PDF 텍스트 추출, 스캔 OCR | `~/.claude/skills/pdf-reading/SKILL.md` |
+### 6. 품질관리 (9개)
+`preflight-check` / `qa` / `qa-only` / `review` / `benchmark` / `investigate` / `cso` / `codex` / `simplify`
 
----
+### 7. 시스템 / 메타 (13개)
+- 스킬 관리: `skill-manager` / `skill-creator` / `system-docs-sync`
+- 파일·화면: `file-organizer` / `screenshot-check`
+- 안전 모드: `freeze` / `unfreeze` / `careful` / `guard`
+- 기타: `product-self-knowledge` / `claude-api` / `hook-pack` / `api-key-manager`
 
-## 3. 디자인
+### 8. 기획 / 전략 (6개)
+`office-hours` / `plan-ceo-review` / `plan-eng-review` / `retro` / `autoplan` / `gstack-upgrade`
 
-UI, 이미지, 브랜드, 가상인테리어 관련 작업.
+### 9. 마케팅 / 광고 (2개)
+`claude-ads` / `ai-marketing-claude` — 광고 감사 / 마케팅 전략·카피·퍼널
 
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| frontend-design | 웹 UI, 랜딩페이지 디자인, 컴포넌트, CSS | `~/.claude/skills/frontend-design/SKILL.md` |
-| design-consultation | 디자인 시스템, brand guidelines, DESIGN.md 만들어줘 | `~/.claude/skills/design-consultation/SKILL.md` |
-| design-review | 디자인 감사, visual QA, 잘 생겼어?, design polish | `~/.claude/skills/design-review/SKILL.md` |
-| design-shotgun | 디자인 옵션 보여줘, 시안 여러 개, visual brainstorm | `~/.claude/skills/design-shotgun/SKILL.md` |
-| plan-design-review | 디자인 플랜 리뷰, design critique, UI 계획 검토 | `~/.claude/skills/plan-design-review/SKILL.md` |
-| petitlynn-color | 쁘띠린, Petitlynn, 부동산 자료, 쁘띠린 색상, 부동산 슬라이드 | `~/.claude/skills/petitlynn-color/SKILL.md` |
-| supanova-design-engine | 웹페이지, 랜딩페이지, 프리미엄 HTML, Tailwind, 한글 타이포 | `~/.claude/skills/supanova-design-engine/SKILL.md` |
-| supanova-premium-aesthetic | 고급 디자인 규칙, $150k 에이전시 느낌, AI 패턴 회피 | `~/.claude/skills/supanova-premium-aesthetic/SKILL.md` |
-| supanova-redesign-engine | 기존 랜딩페이지 업그레이드, 리디자인, 디자인 감사 | `~/.claude/skills/supanova-redesign-engine/SKILL.md` |
-| supanova-full-output | HTML 완전 출력 강제, placeholder 금지, 잘림 방지 | `~/.claude/skills/supanova-full-output/SKILL.md` |
-| supanova-report | 보고서, 교육자료, 리포트 (frontend-slides+supanova 결합) | `~/.claude/skills/supanova-report/SKILL.md` |
-| taste-skill | UI/UX 엔지니어링, LLM 바이어스 오버라이드, 메트릭 기반 디자인 규칙 | `~/.claude/skills/taste-skill/SKILL.md` |
-| soft-skill | 고급 에이전시 디자인, 폰트/간격/그림자/카드/애니메이션 세부 규칙 | `~/.claude/skills/soft-skill/SKILL.md` |
-| minimalist-skill | 미니멀 에디토리얼 UI, 모노크롬 팔레트, 벤토 그리드, 뮤트 파스텔 | `~/.claude/skills/minimalist-skill/SKILL.md` |
-
----
-
-## 4. 웹 / 배포
-
-홈페이지, 서버, CI/CD, Railway/Netlify 관련 작업.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| landing-page-deploy | 랜딩페이지, 홈페이지 배포, Netlify, 상담폼 Notion 연동 | `~/.claude/skills/landing-page-deploy/SKILL.md` |
-| haemilsia-bot-deploy | bot 배포, bot 업데이트 | `~/.claude/skills/haemilsia-bot-deploy/SKILL.md` |
-| haemilsia-bot-dev | 해밀봇 기능 추가, 명령어 추가, 조회 개선, Block Kit, 드릴다운 | `~/.claude/skills/haemilsia-bot-dev/SKILL.md` |
-| railway-notion-connect | Railway↔Notion, 503 에러, NOTION_TOKEN, 401, 404 | `~/.claude/skills/railway-notion-connect/SKILL.md` |
-| ship | ship, deploy, push to main, PR 만들어줘, merge and push | `~/.claude/skills/ship/SKILL.md` |
-| land-and-deploy | merge, land, 프로덕션 배포, ship it, 배포 후 확인 | `~/.claude/skills/land-and-deploy/SKILL.md` |
-| setup-deploy | 배포 설정, configure deployment, land-and-deploy 설정 | `~/.claude/skills/setup-deploy/SKILL.md` |
-| canary | monitor deploy, canary, post-deploy check, 배포 후 모니터링 | `~/.claude/skills/canary/SKILL.md` |
-
----
-
-## 5. 자동화
-
-봇, 브리핑, 반복작업, 브라우저 자동화.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| slack-info-briefing-builder | 슬랙 브리핑, 매일 정보 받기, RSS 봇, haemilsia-bot 브리핑 추가 | `~/.claude/skills/slack-info-briefing-builder/SKILL.md` |
-| terminal-runner | 터미널 실행, cmux, 직접 확인, 스크립트 실행 | `~/.claude/skills/terminal-runner/SKILL.md` |
-| browse | 브라우저에서 열어줘, 사이트 테스트, 스크린샷, dogfood | `~/.claude/skills/browse/SKILL.md` |
-| gstack | 사이트 열어서 테스트, 배포 확인, 버그 증거 캡처 | `~/.claude/skills/gstack/SKILL.md` |
-| connect-chrome | Chrome 연결, real browser, 내 브라우저 열어줘, Side Panel | `~/.claude/skills/connect-chrome/SKILL.md` |
-| setup-browser-cookies | 쿠키 임포트, 로그인 상태 유지, 브라우저 인증 | `~/.claude/skills/setup-browser-cookies/SKILL.md` |
-| loop | 반복 실행, polling, 주기적 확인, /loop 5m | 빌트인 슬래시 커맨드 |
-| schedule | 원격 에이전트 cron, 스케줄 작업, 자동 실행 예약 | 빌트인 슬래시 커맨드 |
-
----
-
-## 6. 품질관리
-
-검증, 점검, 테스트, 에러 관리, 보안.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| preflight-check | 검증, 사전검증, 프리플라이트, 배포 전 확인, 이거 돌려도 돼? | `~/.claude/skills/preflight-check/SKILL.md` |
-| qa | qa, QA, 테스트해줘, find bugs, 버그 찾아줘, test and fix | `~/.claude/skills/qa/SKILL.md` |
-| qa-only | qa 리포트만, 수정 말고 확인만, 버그 목록만 | `~/.claude/skills/qa-only/SKILL.md` |
-| review | PR 리뷰, code review, 코드 검토, 머지 전 확인 | `~/.claude/skills/review/SKILL.md` |
-| benchmark | performance, 성능 측정, page speed, lighthouse, web vitals | `~/.claude/skills/benchmark/SKILL.md` |
-| investigate | 디버그, 버그 수정, 왜 안 돼, root cause, 에러 원인 분석 | `~/.claude/skills/investigate/SKILL.md` |
-| cso | 보안 감사, security audit, threat model, OWASP, CSO 리뷰 | `~/.claude/skills/cso/SKILL.md` |
-| codex | codex 리뷰, second opinion, 두 번째 의견, consult codex | `~/.claude/skills/codex/SKILL.md` |
-| simplify | 코드 리뷰, 품질 개선, 리팩토링 검토, reuse 확인 | 빌트인 슬래시 커맨드 |
-
----
-
-## 7. 시스템 / 메타
-
-스킬 관리, 환경설정, 운영 모드, 파일 관리.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| skill-manager | 스킬 목록, 스킬 검색, 스킬 추가/삭제, 스킬 통계, 스킬 추천, 스킬 정리, 어떤 스킬 써야해? | `~/.claude/skills/skill-manager/SKILL.md` |
-| system-docs-sync | CLAUDE.md 수정, session.md 수정, 시스템 문서 수정, 지침 수정, 원칙 추가, 환경 변경, MCP 추가, 체크리스트 수정, 스킬 목록 수정, 팀장지침 동기화 | `~/.claude/skills/system-docs-sync/SKILL.md` |
-| skill-creator | 스킬 만들기, 스킬 수정, 스킬 성능 측정 | `~/.claude/skills/skill-creator/SKILL.md` |
-| product-self-knowledge | Claude 제품 정보, API 가격, 플랜 비교 | `~/.claude/skills/product-self-knowledge/SKILL.md` |
-| file-organizer | 파일 정리, 다운로드 정리, Downloads 정리, 파일 분류 | `~/.claude/skills/file-organizer/SKILL.md` |
-| screenshot-check | 스크린샷 찍었어, 스샷 확인, 캡처 찍었어, 방금 찍은 스크린샷 | `~/.claude/skills/screenshot-check/SKILL.md` |
-| freeze | freeze, 편집 제한, 이 폴더만 수정, lock down edits | `~/.claude/skills/freeze/SKILL.md` |
-| unfreeze | unfreeze, 잠금 해제, 편집 허용, remove freeze | `~/.claude/skills/unfreeze/SKILL.md` |
-| careful | 조심해줘, safety mode, prod mode, careful mode | `~/.claude/skills/careful/SKILL.md` |
-| guard | guard mode, full safety, 최대 안전, lock it down | `~/.claude/skills/guard/SKILL.md` |
-| claude-api | Claude API, Anthropic SDK, Agent SDK, API 빌드 | 빌트인 슬래시 커맨드 |
-| hook-pack | Hook 관리, Hook 테스트, Hook 롤백, hooks 확인 | `~/.claude/hooks/` + `settings.json` |
-| api-key-manager | 키 추가, 키 목록, 키 교체, 키 삭제, 키 만료, Railway 동기화, 키 백업 | `~/.claude/skills/api-key-manager/SKILL.md` |
-
----
-
-## 8. 기획 / 전략
-
-아이디어 검증, 전략 리뷰, 회고, 자동 기획.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| office-hours | 아이디어 있어, 브레인스토밍, 이거 만들 가치 있어? | `~/.claude/skills/office-hours/SKILL.md` |
-| plan-ceo-review | 더 크게 생각해, 전략 리뷰, scope 확장, 이게 충분해? | `~/.claude/skills/plan-ceo-review/SKILL.md` |
-| plan-eng-review | 아키텍처 리뷰, 엔지니어링 검토, 구조 확인, 코딩 시작 전 | `~/.claude/skills/plan-eng-review/SKILL.md` |
-| retro | 주간 회고, weekly retro, 이번 주 뭐 했어, 엔지니어링 회고 | `~/.claude/skills/retro/SKILL.md` |
-| autoplan | auto review, autoplan, 전체 리뷰 자동으로, 결정 대신 해줘 | `~/.claude/skills/autoplan/SKILL.md` |
-| gstack-upgrade | gstack 업그레이드, gstack 최신 버전, update gstack | `~/.claude/skills/gstack-upgrade/SKILL.md` |
-
----
-
-## 9. 마케팅 / 광고
-
-광고 감사, 마케팅 전략, 카피라이팅, 퍼널 분석.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| claude-ads | 광고 감사, 광고 분석, 광고 최적화, PPC 분석, 광고 점수, 광고 예산, ads audit | `~/.claude/skills/claude-ads/ads/SKILL.md` |
-| ai-marketing-claude | 마케팅 전략, 마케팅 계획, 경쟁사 분석, 광고 캠페인, 콘텐츠 캘린더, 퍼널 분석, 카피라이팅, market audit | `~/.claude/skills/ai-marketing-claude/market/SKILL.md` |
-
----
-
-## 10. 커뮤니케이션
-
-슬랙, 텔레그램 등 메신저 연동 작업.
-
-| 스킬명 | 트리거 키워드 | 경로 |
-|--------|-------------|------|
-| slack:find-discussions | 슬랙 토픽 검색, 슬랙에서 찾아줘, 관련 대화 검색 | 빌트인 플러그인 |
-| slack:standup | 슬랙 스탠드업, standup 작성, 오늘 뭐 했는지 | 빌트인 플러그인 |
-| slack:summarize-channel | 채널 요약, 슬랙 채널 정리, 무슨 얘기했어 | 빌트인 플러그인 |
-| slack:draft-announcement | 공지 초안, 슬랙 공지, announcement draft | 빌트인 플러그인 |
-| slack:channel-digest | 다채널 다이제스트, 슬랙 전체 요약, channel digest | 빌트인 플러그인 |
-| slack:slack-messaging | 슬랙 메시지 작성, 포맷팅 가이드, 잘 쓰는 법 | 빌트인 플러그인 |
-| slack:slack-search | 슬랙 검색, 메시지 찾기, 파일 검색 | 빌트인 플러그인 |
-| telegram:configure | 텔레그램 봇 설정, bot token, 텔레그램 연결 | 빌트인 플러그인 |
-| telegram:access | 텔레그램 접근 관리, 허용 목록, pairing, DM 정책 | 빌트인 플러그인 |
+### 10. 커뮤니케이션 (9개)
+- 슬랙 (7): `slack:find-discussions` / `slack:standup` / `slack:summarize-channel` / `slack:draft-announcement` / `slack:channel-digest` / `slack:slack-messaging` / `slack:slack-search`
+- 텔레그램 (2): `telegram:configure` / `telegram:access`
 
 ---
 
@@ -1510,4 +1381,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:55 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 01:58 KST | 원본: `~/.claude/*.md` (Git)*
