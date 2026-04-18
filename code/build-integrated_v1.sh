@@ -96,14 +96,28 @@ if [ "${1:-}" = "--push" ]; then
   # INTEGRATED.md 만 스테이지 (다른 WIP 파일 건드리지 않음)
   git add INTEGRATED.md
 
-  if git diff --cached --quiet -- INTEGRATED.md; then
+  # === B+A 혁신 2026-04-19: CLAUDE-core_v1.md + on-demand/ 추가 스테이지 (ENG C1) ===
+  if [ -f CLAUDE-core_v1.md ]; then
+    git add CLAUDE-core_v1.md
+    echo "[build] CLAUDE-core_v1.md staged ($(wc -c < CLAUDE-core_v1.md) bytes)"
+  fi
+  if [ -d on-demand ]; then
+    git add on-demand/
+    ONDEMAND_COUNT=$(find on-demand -name '*.md' | wc -l | tr -d ' ')
+    echo "[build] on-demand/ staged ($ONDEMAND_COUNT files)"
+  fi
+  # === /B+A 확장 ===
+
+  if git diff --cached --quiet; then
     echo "⏭  변경 없음 — push 생략"
   else
     git commit -m "chore(integrated): rebuild integrated view — ${TIMESTAMP}"
     git push
     echo "✅ GitHub push 완료"
     echo ""
-    echo "📎 GitHub raw URL:"
-    echo "   https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md"
+    echo "📎 GitHub raw URLs:"
+    echo "   • INTEGRATED.md:    https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/INTEGRATED.md"
+    echo "   • CLAUDE-core_v1:   https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/CLAUDE-core_v1.md"
+    echo "   • on-demand/mode*:  https://raw.githubusercontent.com/temptation0924-design/claude-system-docs/main/on-demand/"
   fi
 fi
