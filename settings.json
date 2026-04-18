@@ -55,7 +55,16 @@
       "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v3_v1.md ~/.claude/_archive/memory/)",
       "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v31_v1.md ~/.claude/_archive/memory/)",
       "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v32_v1.md ~/.claude/_archive/memory/)",
-      "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v34_v1.md ~/.claude/_archive/memory/)"
+      "Bash(mv ~/.claude/projects/-Users-ihyeon-u/memory/project_rental_inspection_v34_v1.md ~/.claude/_archive/memory/)",
+      "Bash(python3)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 1 전환 \\(3중 기억시스템 재설계\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 → MODE 2 전환 \\(B8 자동화 실행\\)\")",
+      "Bash(mv /Users/ihyeon-u/.claude/hooks/debounce_sync.sh.bak /Users/ihyeon-u/.claude/hooks/debounce_sync.sh)",
+      "Bash(rmdir /tmp/claude-b8-debounce.lock.d)",
+      "Bash(rmdir /tmp/claude-session-tracker-lock.d)",
+      "Bash(rm -f /tmp/claude-b8-debounce.log /tmp/claude-b8-debounce-trigger)",
+      "Bash(git commit *)",
+      "Bash(rm -f /Users/ihyeon-u/.claude/settings.json.bak.b8)"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -78,7 +87,9 @@
       "/Users/ihyeon-u/.claude/skills",
       "/Users/ihyeon-u/.claude/skills/marketing-design-planner",
       "/Users/ihyeon-u/.claude/skills/haemilsia-D3",
-      "/Users/ihyeon-u/.claude/skills/haemilsia-D3-test"
+      "/Users/ihyeon-u/.claude/skills/haemilsia-D3-test",
+      "/Users/ihyeon-u/.claude/docs/rules",
+      "/Users/ihyeon-u/.claude/docs/superpowers"
     ]
   },
   "hooks": {
@@ -157,6 +168,10 @@
             "type": "command",
             "command": "bash ~/.claude/hooks/session-tracker-log.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "/Users/ihyeon-u/.claude/hooks/debounce_sync.sh"
           }
         ]
       },
@@ -249,6 +264,6 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "max"
+  "effortLevel": "xhigh",
+  "skipDangerousModePermissionPrompt": true
 }
