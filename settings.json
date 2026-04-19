@@ -72,7 +72,22 @@
       "Bash(~/.claude/hooks/drift-detector.sh)",
       "Bash(cp ~/.claude/settings.json ~/.claude/settings.json.backup_20260419)",
       "Bash(jq '.hooks.SessionStart += [ *)",
-      "Bash(mv /tmp/settings.json ~/.claude/settings.json)"
+      "Bash(mv /tmp/settings.json ~/.claude/settings.json)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 2 완료 \\(3중 기억시스템 v2.0 12 Tasks 전부 완료\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: B8 \\(INTEGRATED.md 재빌드 + push 완료\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 → MODE 2 전환 \\(plan_v2 승인, Inline 실행, 이번 세션 Phase 0~3.5\\)\")",
+      "Bash(export SKIP_B8_AUTOSYNC=1)",
+      "Bash(mkdir -p ~/.claude/.diet-backup)",
+      "Bash(cp ~/.claude/skill-guide.md ~/.claude/.diet-backup/skill-guide.md.bak.v2)",
+      "Bash(cp ~/.claude/CLAUDE.md ~/.claude/.diet-backup/CLAUDE.md.bak.v2)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 → MODE 2 전환 \\(방안 B 업로드 착수\\)\")",
+      "Bash(mkdir -p ~/.claude/cache)",
+      "Bash(cat)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 1 재검증 완료 → 세션 종료\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] TASK: news-briefing-v2 v3 재계획 + 3차 Preflight 92.0% PASS\")",
+      "Bash(echo '')",
+      "Bash(echo '# npm global \\(user-prefix, avoids sudo\\) — added 2026-04-19')",
+      "Bash(echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"')"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -143,24 +158,6 @@
             "type": "command",
             "command": "bash ~/.claude/hooks/session-start-worklog.sh",
             "timeout": 5
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/violation-prevention-inject.sh",
-            "timeout": 3
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash ~/.claude/hooks/drift-detector.sh",
-            "timeout": 3
           }
         ]
       }
@@ -291,5 +288,6 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "effortLevel": "xhigh"
 }

@@ -21,7 +21,7 @@
    - → 단순 작업은 Agent spawn 없이 **매니저가 직접** (spawn 오버헤드 0)
    - → Notion 지연 시: 1회 타임아웃 → 즉시 폴백 (캐시 참조)
    - 🆕 **매일 첫 세션**: `[청소원 Sonnet]` Agent dispatch (환경 점검, 복잡 판단)
-   - 🆕 **미싱크 handoffs/ 재시도**: `notion_synced: false`인 파일 발견 시 `[노션기록관 Haiku]` dispatch (최대 3회)
+   - 🆕 **미싱크/drift handoffs 재시도**: `notion_synced: false` 또는 mtime-drift(`mtime > notion_synced_at`) 파일 발견 시 `[노션기록관 Haiku]` dispatch → 사전 체크 로직(CREATE/UPDATE/SKIP) 자동 판정 + queue/ consume (최대 3회)
 
 2. **매니저가 결과 병합 + 통합 응답 출력**:
    - TOP 5 표 (규칙감시관) + 관련 메모리 (기억관리관) + 지침 요약 (지침사서) + 환경 리포트 (청소원, 해당 시) + 환영 한 줄 (분위기메이커)
@@ -84,7 +84,7 @@ echo "[$(date +%H:%M)] ERROR: 노션기록관 큐 재시도 오진단 | MCP,Noti
    - → 예상 소요: **5~8초**
 
 3. **Stage 2 — 매니저가 결과 병합 후 2명 dispatch** (순차, Stage 1 결과 필요):
-   - `[노션기록관 Haiku]` — handoffs/ frontmatter 파싱 → Notion 작업기록 DB 자동 싱크 → `notion_synced: true` 마킹
+   - `[노션기록관 Haiku]` — handoffs/ frontmatter 파싱 → 사전 체크 로직(CREATE/UPDATE/SKIP) → Notion 작업기록 DB 싱크 → `notion_synced: true` + `notion_page_id` + `notion_synced_at` 3필드 갱신
    - `[슬랙배달관 Haiku]` — #general-mode 작업일지 + #claude-study 학습 카드 (해당 시)
    - → 예상 소요: **3~5초**
 

@@ -1,6 +1,6 @@
 # slack.md — 슬랙 운영 허브
 
-**버전**: v1 | **업데이트**: 2026-04-16
+**버전**: v1.1 | **업데이트**: 2026-04-16
 **적용**: Claude Code + Claude.ai + haemilsia-bot (Railway)
 
 > **라우팅 허브**. 슬랙 관련 자산 4곳 + 채널 지도 + 방향성 + 확장 로드맵을 한 눈에.
@@ -21,7 +21,7 @@
 |---|---|---|---|---|---|---|
 | #general-mode | `C0AEM5EJ0ES` | private | 봇→대표 | 작업일지 | slack-courier | 세션 종료 / 에러 해결 |
 | #claude-study | `C0AEM59BCKY` | public | 봇→대표 | 복습 카드 | 복습카드관 → slack-courier | task-routine 트리거 |
-| *(해밀시아)* | *예약* | — | 봇→대표 | rental-inspection 결과 | haemilsia-bot | 일일 cron (외부) |
+| #haemilsia-윤실장 | `C0ARL2QCHGC` | private | 봇→대표 | rental-inspection 결과 | haemilsia-bot | 일일 cron (외부) |
 | #news-realestate | *예약* | — | 봇→대표 | 부동산 뉴스 | *Phase 1 미정* | 매일 cron |
 | #news-tech | *예약* | — | 봇→대표 | IT 뉴스 | *Phase 1 미정* | 매일 cron |
 | #bot-commands | *예약* | — | 양방향 | 원격 명령 I/O | haemilsia-bot | 대표님 명령 시 |
@@ -101,9 +101,8 @@
 - 업무 시간 외 발송 금지 시간대 (초안: 23:00~08:00) — 운영 데이터 누적 후 결정
 - "세션당 5건" 임계치 적정성 — Phase 1 전 조정
 - 세션 경계 측정 주체 (slack-courier 인지 방법) — 제한 구현 시
-- 해밀시아 rental-inspection 알림 현재 채널 — 확인 필요
 - 허브 분할 임계점: **400줄 초과 시** `docs/slack/` 분할 검토
 
 ---
 
-*~/.claude/slack.md | 2026-04-16 | v1 — 신설*
+*~/.claude/slack.md | 2026-04-16 | v1.1 — 해밀시아 채널 확정 (#haemilsia-윤실장 / C0ARL2QCHGC)*
