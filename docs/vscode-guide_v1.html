@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VSCode + Claude Code 초보 가이드</title>
+  <style>
+    /* 전역 리셋 및 기본 타이포 */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'SF Pro Text', 'Segoe UI', sans-serif;
+      background: #f6f8fa;
+      color: #24292e;
+      line-height: 1.6;
+      padding: 0 0 60px;
+    }
+    a { color: #007acc; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: 'SF Mono', Menlo, monospace; background: #f1f3f5; padding: 2px 5px; border-radius: 3px; font-size: 90%; }
+    kbd {
+      background: white; border: 1px solid #ccc; border-bottom-width: 2px;
+      border-radius: 3px; padding: 1px 6px;
+      font-family: 'SF Mono', Menlo, monospace; font-size: 85%; font-weight: 600;
+    }
+
+    /* 헤더 */
+    .site-header {
+      background: linear-gradient(135deg, #007acc 0%, #8b5cf6 100%);
+      color: white; padding: 40px 24px; text-align: center;
+    }
+    .site-header h1 { font-size: 28px; margin-bottom: 6px; }
+    .site-header .meta { opacity: 0.85; font-size: 13px; }
+
+    /* 상단 고정 목차 */
+    .toc-sticky {
+      position: sticky; top: 0; z-index: 100;
+      background: white; border-bottom: 1px solid #e1e4e8;
+      padding: 10px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .toc-sticky .toc-inner { max-width: 1100px; margin: 0 auto; display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; }
+    .toc-sticky strong { color: #007acc; }
+
+    /* 컨테이너 */
+    .container { max-width: 1100px; margin: 24px auto; padding: 0 20px; }
+
+    /* Part 헤딩 */
+    .part-title {
+      font-size: 22px; color: #007acc;
+      margin: 40px 0 16px; padding-bottom: 10px;
+      border-bottom: 3px solid #007acc;
+    }
+
+    /* 섹션 카드 (§5.3 템플릿) */
+    .sec {
+      background: white; border: 1px solid #e1e4e8;
+      border-radius: 10px; padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+    }
+    .sec-head { border-bottom: 2px solid #007acc; padding-bottom: 10px; margin-bottom: 16px; }
+    .sec-num { display: inline-block; background: #007acc; color: white; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+    .sec-title { font-size: 18px; margin: 6px 0 2px; }
+    .sec-sub { font-size: 12px; color: #666; }
+
+    .sec-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 760px) { .sec-grid { grid-template-columns: 1fr; } }
+
+    /* VSCode 모형 공통 */
+    .vscode {
+      background: #1e1e1e; border-radius: 6px; overflow: hidden;
+      color: #ccc; font-size: 10px;
+      position: relative; /* .pin 라벨 absolute의 기준점 — 필수 */
+    }
+    .vs-t { background: #3c3c3c; padding: 5px 10px; font-size: 9px; }
+    .vs-b { display: flex; min-height: 200px; }
+    .vs-a { background: #2a2633; width: 40px; padding: 8px 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .vs-a .ic { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; color: #888; font-size: 12px; position: relative; }
+    .vs-a .ic.on { color: white; }
+    .vs-a .ic.on::before { content: ''; position: absolute; left: -9px; top: 2px; bottom: 2px; width: 2px; background: #8b5cf6; }
+    .vs-a .ic.claude { color: #a78bfa; }
+    .vs-s { background: #f4f1fa; color: #333; width: 140px; padding: 10px; }
+    .vs-s h5 { font-size: 9px; margin: 0 0 6px; color: #666; letter-spacing: 0.5px; }
+    .vs-s .nb { background: #8b5cf6; color: white; padding: 3px 6px; border-radius: 3px; font-size: 9px; text-align: center; margin-bottom: 6px; }
+    .vs-s .tgl { font-size: 8px; color: #888; margin-bottom: 6px; }
+    .vs-s .it { font-size: 9px; padding: 1px 0; color: #555; }
+    .vs-s .it.a { color: #059669; font-weight: 600; }
+    .vs-s .it::before { content: "● "; color: #a78bfa; font-size: 8px; }
+    .vs-s .it.a::before { color: #10b981; }
+    .vs-e { flex: 1; background: white; padding: 10px; color: #333; position: relative; min-height: 160px; }
+    .vs-e-body { font-size: 10px; color: #444; }
+    .vs-e-input { position: absolute; bottom: 8px; left: 8px; right: 8px; background: #f6f6f6; border: 1px solid #ddd; border-radius: 4px; padding: 4px 8px; font-size: 9px; color: #999; }
+    .vs-status { background: #007acc; color: white; padding: 3px 10px; font-size: 9px; }
+
+    /* 라벨 핀 */
+    .pin {
+      position: absolute; background: #ffcc00; color: #000;
+      font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+      border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); z-index: 3;
+    }
+    .pin.purple { background: #a78bfa; color: white; }
+    .pin.green { background: #10b981; color: white; }
+
+    .cap { font-size: 10px; color: #666; margin-top: 8px; line-height: 1.5; }
+
+    /* 해설 영역 */
+    .ex h4 { font-size: 13px; margin: 0 0 6px; }
+    .ex p { font-size: 12px; color: #444; margin: 0 0 12px; }
+    .sc { display: flex; gap: 6px; align-items: center; background: #f6f8fa; border: 1px solid #e1e4e8; padding: 6px 10px; border-radius: 5px; font-size: 11px; margin-bottom: 6px; }
+    .prac { background: #fffbea; border-left: 3px solid #f59e0b; padding: 8px 10px; border-radius: 0 3px 3px 0; font-size: 11px; margin-top: 8px; }
+    .prac h5 { font-size: 11px; color: #92400e; margin: 0 0 4px; }
+    .prac ol { margin: 0; padding-left: 16px; }
+    .check { background: #dcfce7; color: #166534; border-radius: 4px; padding: 5px 8px; font-size: 10px; margin-top: 8px; display: inline-block; }
+
+    /* 단축키 표 (Part 4 전용) */
+    .shortcut-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .shortcut-table th, .shortcut-table td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e1e4e8; }
+    .shortcut-table th { background: #f6f8fa; font-weight: 600; }
+
+    /* 푸터 */
+    .footer { text-align: center; margin-top: 40px; padding: 20px; color: #888; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <h1>VSCode + Claude Code 초보 가이드</h1>
+  <div class="meta">v1 · 2026-04-20 · 이현우 개인 학습용</div>
+</header>
+
+<!-- TOC sticky: Task 2에서 채움 -->
+<nav class="toc-sticky" id="toc">
+  <div class="toc-inner">[목차는 Task 2에서 생성]</div>
+</nav>
+
+<main class="container" id="content">
+  <!-- Part 1~4 섹션들이 Task 4~20에서 이곳에 append됨 -->
+</main>
+
+<footer class="footer">
+  vscode-guide_v1.html · 2026-04-20 · 본 가이드는 대표님 개인 학습용으로 제작되었습니다.
+</footer>
+
+<script>
+  // Task 21에서 smooth scroll 등 추가
+</script>
+
+</body>
+</html>
