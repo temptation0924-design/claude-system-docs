@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 16:18 KST
+> 마지막 빌드: 2026-04-19 16:19 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -121,8 +121,12 @@
 2. `superpowers:subagent-driven-development` — task별 별도 에이전트 (묻지 말고 전부 실행)
 3. `superpowers:test-driven-development` — 코드 작업 시 TDD 강제
 4. 2단계 코드리뷰 — spec 준수 + 코드 품질
-5. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
-6. **🎁 자동 스킬화 제안** — MODE 1 9번에서 매칭 스킬이 없었던 경우 자동 실행
+5. **🤖 /codex review 게이트** (코드 완료 후, 외부 AI 코드 리뷰)
+   - 조건: task 수 **≥ 20 → 자동 실행** / 미만 → opt-in (대표님 요청 시에만)
+   - 동작: `/codex review` → diff/PR 대상 외부 AI 코드 리뷰 → 버그/보안/품질 이슈 → 수정 라운드 (PASS까지 반복)
+   - PASS 기준: Codex GATE PASS
+6. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
+7. **🎁 자동 스킬화 제안** — MODE 1 10번에서 매칭 스킬이 없었던 경우 자동 실행
    - "이 작업을 스킬로 만들까요?" 질문
    - 승인 시 → `skill-manager` 스킬로 자동 생성
    - → `skill-guide.md` 자동 등록 (로컬 + Notion 양쪽)
@@ -1415,4 +1419,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 16:18 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 16:19 KST | 원본: `~/.claude/*.md` (Git)*
