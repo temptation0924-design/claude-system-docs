@@ -67,6 +67,18 @@ cmd_add() {
     esac
   done
 
+  # Drift 재발 방지: --project에 Railway 프로젝트 있으면 --railway 누락 경고
+  local railway_candidate=""
+  case ",$project_csv," in
+    *,해밀시아봇,*) railway_candidate="haemilsia-bot" ;;
+    *,쁘띠린,*)     railway_candidate="쁘띠린" ;;
+  esac
+  if [[ -n "$railway_candidate" && -z "$railway_project" ]]; then
+    util_log "  ⚠️  DRIFT 경고: --project=$project_csv 지정했지만 --railway 누락"
+    util_log "     → Notion엔 railway_sync='없음'으로 저장됨 → railway-sync 대상 제외"
+    util_log "     💡 Railway도 동기화하려면: --railway=$railway_candidate 추가 후 재실행"
+  fi
+
   util_log "add: $name (value=$(util_mask_secret "$value"))"
 
   # 1. Keychain
@@ -86,9 +98,11 @@ cmd_add() {
   local db
   db=$(state_get .notion_db_id)
   if [[ -n "$db" && -n "${NOTION_API_TOKEN:-}" ]]; then
+    # 🔧 BUGFIX: railway_project를 Notion에 전달 (이전엔 항상 '없음'으로 저장되던 버그)
+    local railway_csv="${railway_project:-없음}"
     local page
-    page=$(notion_upsert_row "$db" "$name" "$usage" "$project_csv" "$provider" "active")
-    util_log "  ✅ Notion row: $page"
+    page=$(notion_upsert_row "$db" "$name" "$usage" "$project_csv" "$provider" "active" "$railway_csv")
+    util_log "  ✅ Notion row: $page (railway_sync=$railway_csv)"
   else
     util_log "  ⏭️  Notion skipped (db_id or token missing)"
   fi
@@ -259,9 +273,76 @@ cmd_delete() {
   state_touch_sync
   util_log "✅ delete complete: $name"
 }
+# railway_set_with_retry <name> <value>
+#   rate-limit/transient 에러 시 exponential backoff(2s → 4s → 8s, 최대 3회) 재시도.
+#   auth 에러는 즉시 중단(재시도 무의미). 성공 후 verify 호출로 실제 세팅 확인.
+#   반환: 0=성공+verify PASS, 1=최종 실패(이유 stderr에 출력)
+railway_set_with_retry() {
+  local name="$1" value="$2"
+  local max_attempts=3
+  local delay=2
+  local attempt err_file err_msg reason
+  err_file=$(mktemp)
+
+  for (( attempt=1; attempt<=max_attempts; attempt++ )); do
+    if railway variables set "$name=$value" >/dev/null 2>"$err_file"; then
+      # verify: Railway에 실제로 세팅됐는지 확인 (best-effort)
+      # --kv 플래그 우선 시도 (깔끔한 key=value 출력), 실패 시 기본 출력
+      if (railway variables --kv 2>/dev/null || railway variables 2>/dev/null) \
+           | grep -qE "(^|[[:space:]│])${name}[[:space:]=│]"; then
+        rm -f "$err_file"
+        return 0
+      fi
+      util_err "    ⚠️  $name: set 성공 but verify 실패 (attempt $attempt/$max_attempts)"
+      err_msg="verify_failed: Railway 응답엔 성공이지만 실제 조회 시 변수 없음"
+    else
+      err_msg=$(head -5 "$err_file" 2>/dev/null | tr '\n' ' ' || true)
+    fi
+
+    # 에러 원인 분류
+    reason="unknown"
+    if [[ "$err_msg" =~ ([Rr]ate.?[Ll]imit|429|[Tt]oo [Mm]any|quota) ]]; then
+      reason="rate_limit"
+    elif [[ "$err_msg" =~ ([Uu]nauthoriz|401|[Ff]orbidden|403|[Aa]uthentication|[Ll]ogin) ]]; then
+      reason="auth"
+    elif [[ "$err_msg" =~ ([Tt]imeout|timed out|ECONNRESET|ENETUNREACH|[Nn]etwork) ]]; then
+      reason="network"
+    elif [[ "$err_msg" == verify_failed* ]]; then
+      reason="verify_failed"
+    fi
+
+    util_err "    ⚠️  $name attempt $attempt/$max_attempts failed: $reason"
+    [[ -n "$err_msg" ]] && util_err "       ${err_msg:0:200}"
+
+    # auth 에러는 재시도해도 무의미
+    if [[ "$reason" == "auth" ]]; then
+      util_err "    🛑 auth 에러 — 재시도 중단 ('railway login' 필요)"
+      rm -f "$err_file"
+      return 1
+    fi
+
+    # 마지막 시도가 아니면 backoff 후 재시도
+    if [[ $attempt -lt $max_attempts ]]; then
+      util_log "    ⏳ ${delay}초 후 재시도..."
+      sleep "$delay"
+      delay=$((delay * 2))
+    fi
+  done
+
+  rm -f "$err_file"
+  return 1
+}
+
 cmd_railway_sync() {
-  local project="${1:-}"
-  [[ -z "$project" ]] && { util_err "railway-sync: usage: railway-sync <PROJECT>"; return 1; }
+  local project="" dry_run=0
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --dry-run) dry_run=1; shift ;;
+      -*) util_err "railway-sync: unknown flag: $1"; return 1 ;;
+      *) [[ -z "$project" ]] && project="$1"; shift ;;
+    esac
+  done
+  [[ -z "$project" ]] && { util_err "railway-sync: usage: railway-sync <PROJECT> [--dry-run]"; return 1; }
 
   if ! command -v railway >/dev/null 2>&1; then
     util_err "Railway CLI 미설치."
@@ -269,6 +350,8 @@ cmd_railway_sync() {
     util_log "  설치 후 다시 실행하세요."
     return 1
   fi
+
+  [[ $dry_run -eq 1 ]] && util_log "  🔍 DRY-RUN 모드 — 실제 push 없음"
 
   local db
   db=$(state_get .notion_db_id)
@@ -290,10 +373,11 @@ cmd_railway_sync() {
     return 1
   fi
 
-  # 간이 필터: project CSV 에 "$project" 포함 (null/빈줄 내성)
+  # 필터: Notion "Railway 동기화" 필드(railway_sync CSV)에 "$project" 포함
+  # 예: railway_sync="haemilsia-bot,쁘띠린" 인 키는 두 프로젝트 모두에 sync 대상
   local targets
   targets=$(jq -r --arg p "$project" '
-    select(.project // "" | split(",") | index($p)) | .name // empty
+    select(.railway_sync // "" | split(",") | index($p)) | .name // empty
   ' "$meta_file" 2>/dev/null || true)
 
   if [[ -z "$targets" ]]; then
@@ -305,14 +389,14 @@ cmd_railway_sync() {
   util_log "  대상 키:"
   printf '%s\n' "$targets" | sed 's/^/    - /'
 
-  # railway link 확인
+  # railway link 확인 (dry-run 모드에서도 연결은 확인 — 실제 프로젝트 대상 파악 필요)
   railway status >/dev/null 2>&1 || {
     util_err "Railway 프로젝트 연결 안 됨. 'railway link' 로 연결하세요."
     rm -f "$meta_file"
     return 1
   }
 
-  local ok=0 fail=0
+  local ok=0 fail=0 skipped=0
   while IFS= read -r name; do
     [[ -z "$name" ]] && continue
     local val
@@ -321,18 +405,24 @@ cmd_railway_sync() {
       fail=$((fail+1))
       continue
     fi
-    # Railway set
-    if railway variables set "$name=$val" >/dev/null 2>&1; then
-      util_log "  ✅ $name synced"
+    if [[ $dry_run -eq 1 ]]; then
+      util_log "  🔍 $name: would push (len=${#val})"
+      skipped=$((skipped+1))
+    elif railway_set_with_retry "$name" "$val"; then
+      util_log "  ✅ $name synced (verified)"
       ok=$((ok+1))
     else
-      util_err "  ❌ $name: railway variables set 실패"
+      util_err "  ❌ $name: 최종 실패 (재시도 3회 소진 또는 auth 에러)"
       fail=$((fail+1))
     fi
   done <<< "$targets"
 
   rm -f "$meta_file"
-  util_log "✅ railway-sync complete: $ok OK / $fail FAIL"
+  if [[ $dry_run -eq 1 ]]; then
+    util_log "🔍 DRY-RUN complete: $skipped 개 키가 push 될 예정 (실제 변경 없음)"
+  else
+    util_log "✅ railway-sync complete: $ok OK / $fail FAIL"
+  fi
   [[ $fail -eq 0 ]]
 }
 cmd_health_check() {

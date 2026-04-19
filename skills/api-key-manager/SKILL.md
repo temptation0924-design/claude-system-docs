@@ -33,7 +33,7 @@ description: Haemilsia API 키 관리 시스템. macOS Keychain(haemilsia-api-ke
 - **서브커맨드**: `add` / `list` / `rotate` / `delete` / `railway-sync` / `health-check` / `diagnose`
 - **라이브러리**: `~/.claude/code/api-key-lib_v1.sh`
 - **마이그레이션**: `~/.claude/code/api-key-migrate_v1.sh`
-- **롤백**: `~/.claude/code/api-key-rollback_v1.sh`
+- **롤백**: `~/.claude/code/api-key-rollback_v1.sh` (대화형) / `... --force` (자동화용, 확인 스킵)
 
 ## 절차 (대표님 명령 매핑)
 
@@ -66,6 +66,12 @@ bash ~/.claude/code/api-key-manager_v1.sh list
 1. 어느 프로젝트인지 확인 (haemilsia-bot / 쁘띠린)
 2. Railway CLI 설치 여부 확인 → 미설치면 `brew install railway` 제안 + 승인 후 설치
 3. `bash ~/.claude/code/api-key-manager_v1.sh railway-sync <project>`
+   - 옵션: `--dry-run` — 실제 push 없이 대상 키 목록만 출력
+4. **자동 안전장치** (2026-04-19 추가):
+   - **재시도**: rate limit(429) / timeout / network 에러 → exponential backoff(2→4→8초, 최대 3회)
+   - **auth 에러 즉시 중단**: 401/403 나오면 재시도 무의미 → "railway login" 안내 후 stop
+   - **verify 호출**: set 후 `railway variables` 로 실제 세팅됐는지 확인 → false success 차단
+   - 실패 시 원인 분류 출력: `rate_limit` / `auth` / `network` / `verify_failed` / `unknown`
 
 ### "건강 체크 돌려줘 / 상태 어때"
 ```

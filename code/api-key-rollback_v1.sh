@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 # api-key-rollback_v1.sh — 마이그레이션 이전 상태로 복귀
 #
+# 사용법:
+#   api-key-rollback_v1.sh              # 대화형 (y/N 2회 확인)
+#   api-key-rollback_v1.sh --force      # 묻지 말고 전부 진행 (자동화용)
+#   api-key-rollback_v1.sh --yes        # --force 별칭
+#   api-key-rollback_v1.sh -h|--help    # 사용법
+#
 # 동작:
 #   1. 최근 ~/.zshrc.pre-keyman-* 백업 찾아서 복원
 #   2. Keychain haemilsia-api-keys 네임스페이스 엔트리 제거 (본인 확인 후)
@@ -13,10 +19,36 @@ set -euo pipefail
 LIB="$HOME/.claude/code/api-key-lib_v1.sh"
 source "$LIB"
 
+# ===== 플래그 파싱 =====
+FORCE=0
+for arg in "$@"; do
+  case "$arg" in
+    --force|--yes|-y) FORCE=1 ;;
+    -h|--help)
+      sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
+      exit 0
+      ;;
+    *) echo "ERROR: unknown flag: $arg" >&2; exit 2 ;;
+  esac
+done
+
+# ===== 확인 헬퍼 ===== (FORCE=1 이면 자동 y)
+confirm() {
+  local prompt="$1"
+  if [[ $FORCE -eq 1 ]]; then
+    util_log "  $prompt (--force: y 자동)"
+    return 0
+  fi
+  local ans
+  read -r -p "$prompt " ans
+  [[ "$ans" =~ ^[Yy]$ ]]
+}
+
 banner() {
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "  ⏮️  API Key Manager 롤백"
+  [[ $FORCE -eq 1 ]] && echo "  ⚠️  --force 모드 (확인 프롬프트 스킵)"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo ""
 }
@@ -32,8 +64,7 @@ fi
 util_log "  찾음: $latest_backup"
 
 # 확인
-read -r -p "이 백업으로 ~/.zshrc 를 복원할까요? (y/N) " ans
-[[ "$ans" =~ ^[Yy]$ ]] || { util_log "취소"; exit 0; }
+confirm "이 백업으로 ~/.zshrc 를 복원할까요? (y/N)" || { util_log "취소"; exit 0; }
 
 # 현재 상태도 백업
 pre_rollback="$HOME/.zshrc.pre-rollback-$(date '+%Y%m%d-%H%M%S')"
@@ -51,8 +82,7 @@ if [[ -z "$keys" ]]; then
 else
   util_log "  제거 대상:"
   printf '%s\n' "$keys" | sed 's/^/    - /'
-  read -r -p "  모두 제거할까요? (y/N) " ans
-  if [[ "$ans" =~ ^[Yy]$ ]]; then
+  if confirm "  모두 제거할까요? (y/N)"; then
     while IFS= read -r k; do
       [[ -z "$k" ]] && continue
       kc_delete "$k" && util_log "    ✅ $k"
