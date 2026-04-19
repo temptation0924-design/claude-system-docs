@@ -773,6 +773,57 @@
     </div>
   </div>
 </section>
+
+<section class="sec" id="s3-2">
+  <div class="sec-head">
+    <span class="sec-num">Part 3 · §3.2</span>
+    <h3 class="sec-title">MCP 서버 상태 확인</h3>
+    <div class="sec-sub">Notion·Slack·Google·Playwright 등 외부 서비스 연결 확인</div>
+  </div>
+  <div class="sec-grid">
+    <div>
+      <div class="vscode">
+        <div class="vs-t">● ● ●  &nbsp; Beacon</div>
+        <div class="vs-b">
+          <div class="vs-a"><div class="ic claude on">✦</div></div>
+          <div class="vs-s"><h5>CLAUDE CODE</h5></div>
+          <div class="vs-e">
+            <div class="vs-e-body" style="font-size:9px;">
+              📡 /mcp 실행 결과<br>
+              ✅ Notion — connected<br>
+              ✅ Slack — connected<br>
+              ✅ Google Cal — connected<br>
+              ⚠ Playwright — idle
+            </div>
+            <div class="vs-e-input">/mcp ← 입력 중</div>
+          </div>
+        </div>
+        <div class="vs-status">main ✓</div>
+        <span class="pin" style="bottom:10px; left:160px;">① /mcp 명령</span>
+        <span class="pin green" style="top:50px; left:230px;">② 서버 상태</span>
+      </div>
+      <div class="cap">① 입력창에 <code>/mcp</code> 입력<br>② 연결된 MCP 서버 목록 + 상태</div>
+    </div>
+    <div class="ex">
+      <h4>💡 무엇인가요?</h4>
+      <p>MCP(Model Context Protocol)는 <b>외부 서비스와 Claude를 잇는 다리</b>입니다. Notion에 페이지 만들거나 Slack에 메시지 보내는 것 모두 MCP 서버 경유. 상태가 ❌이면 해당 기능 사용 불가.</p>
+
+      <h4>⌨️ 단축키</h4>
+      <div class="sc"><kbd>⌘</kbd><kbd>L</kbd> <span style="color:#666;">→ 입력창 포커스</span></div>
+      <div class="sc"><kbd>/</kbd><kbd>m</kbd><kbd>c</kbd><kbd>p</kbd> <span style="color:#666;">→ /mcp 명령</span></div>
+
+      <div class="prac">
+        <h5>🧪 실습 1분</h5>
+        <ol>
+          <li>Claude 입력창에 <code>/mcp</code> 입력 후 엔터</li>
+          <li>연결된 MCP 서버 목록 읽기</li>
+          <li>하나 선택해 상세 상태 조회</li>
+        </ol>
+      </div>
+      <div class="check">✅ 성공 기준: 연결된 MCP 서버 3개 이상 이름 말하기</div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer class="footer">
