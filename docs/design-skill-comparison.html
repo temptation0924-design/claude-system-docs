@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Skill Comparison — D2 vs D3 vs New</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232734;
+    --border: #2a2e3d;
+    --text: #e4e6ed;
+    --text-dim: #8b8fa3;
+    --accent: #6c7cff;
+    --accent-soft: rgba(108,124,255,0.12);
+    --green: #34d399;
+    --green-soft: rgba(52,211,153,0.12);
+    --red: #f87171;
+    --red-soft: rgba(248,113,113,0.12);
+    --yellow: #fbbf24;
+    --yellow-soft: rgba(251,191,36,0.12);
+    --blue: #60a5fa;
+    --blue-soft: rgba(96,165,250,0.12);
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 40px 20px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+    padding: 48px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .header h1 span { color: var(--accent); }
+  .header p {
+    color: var(--text-dim);
+    font-size: 16px;
+  }
+
+  /* Section */
+  .section {
+    margin-bottom: 56px;
+  }
+  .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title .num {
+    background: var(--accent);
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Cards */
+  .cards-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 768px) {
+    .cards-3 { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    position: relative;
+    transition: transform 0.2s;
+  }
+  .card:hover { transform: translateY(-2px); }
+  .card.winner { border-color: var(--accent); }
+
+  .card-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-old { background: var(--red-soft); color: var(--red); }
+  .badge-mid { background: var(--yellow-soft); color: var(--yellow); }
+  .badge-new { background: var(--green-soft); color: var(--green); }
+  .badge-final { background: var(--accent-soft); color: var(--accent); }
+
+  .card h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .card .subtitle {
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .card ul li {
+    font-size: 14px;
+    padding: 5px 0;
+    padding-left: 20px;
+    position: relative;
+    color: var(--text);
+  }
+  .card ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+  }
+
+  /* Comparison Table */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--surface2);
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  thead th:first-child { border-radius: 16px 0 0 0; }
+  thead th:last-child { border-radius: 0 16px 0 0; }
+  tbody td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+  .win { color: var(--green); font-weight: 600; }
+  .lose { color: var(--text-dim); }
+  .neutral { color: var(--yellow); }
+
+  /* Tag */
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin: 1px 2px;
+  }
+  .tag-green { background: var(--green-soft); color: var(--green); }
+  .tag-red { background: var(--red-soft); color: var(--red); }
+  .tag-yellow { background: var(--yellow-soft); color: var(--yellow); }
+  .tag-blue { background: var(--blue-soft); color: var(--blue); }
+
+  /* Flow Diagram */
+  .flow-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .flow-row:last-child { margin-bottom: 0; }
+
+  .flow-box {
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .flow-box.input { background: var(--accent-soft); color: var(--accent); border: 1px solid rgba(108,124,255,0.3); }
+  .flow-box.decide { background: var(--yellow-soft); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); border-radius: 10px; }
+  .flow-box.engine { background: var(--green-soft); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+  .flow-box.output { background: var(--blue-soft); color: var(--blue); border: 1px solid rgba(96,165,250,0.3); }
+  .flow-box.check { background: var(--red-soft); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+  .flow-arrow {
+    color: var(--text-dim);
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .flow-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  /* Pro/Con Grid */
+  .procon {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 600px) {
+    .procon { grid-template-columns: 1fr; }
+  }
+  .procon-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .procon-card h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .procon-card ul li::before {
+    background: var(--green);
+  }
+  .procon-card.con ul li::before {
+    background: var(--red);
+  }
+
+  /* Merge visual */
+  .merge-visual {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0;
+    align-items: center;
+    margin: 32px 0;
+  }
+  @media (max-width: 600px) {
+    .merge-visual {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .merge-arrow-col { transform: rotate(90deg); }
+  }
+  .merge-left, .merge-right {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .merge-left { border-right: none; border-radius: 14px 0 0 14px; }
+  .merge-right { border-left: none; border-radius: 0 14px 14px 0; }
+  .merge-arrow-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--accent);
+  }
+
+  .merge-left h4, .merge-right h4 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--text-dim);
+  }
+  .merge-item {
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .merge-item:last-child { border-bottom: none; }
+
+  /* Final result card */
+  .final-card {
+    background: linear-gradient(135deg, rgba(108,124,255,0.08), rgba(52,211,153,0.08));
+    border: 1px solid var(--accent);
+    border-radius: 20px;
+    padding: 36px 32px;
+    text-align: center;
+  }
+  .final-card h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .final-card p {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+  .final-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .final-feat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  /* Callout */
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 20px 24px;
+    margin: 24px 0;
+    font-size: 14px;
+    color: var(--text-dim);
+  }
+  .callout strong { color: var(--text); }
+
+  /* Verdict row */
+  .verdict-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+  .verdict-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  .verdict-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<div class="header">
+  <h1>Marketing Design Planner <span>Skill</span> 비교 분석</h1>
+  <p>D2-test vs D3-test vs 새 설계안 — 좋은 점은 살리고, 약한 점은 고친다</p>
+</div>
+
+<!-- ==================== 1. 3개 파일 한눈에 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">1</div>
+    3개 파일, 한눈에 보기
+  </div>
+
+  <div class="cards-3">
+    <!-- D2 -->
+    <div class="card">
+      <span class="card-badge badge-old">D2-test</span>
+      <h3>초기 버전</h3>
+      <div class="subtitle">348줄 | 기본 4-엔진 구조</div>
+      <ul>
+        <li>감지 → 질문 → 4엔진 → 패키지</li>
+        <li>문서/랜딩/블로그 3종 패키지</li>
+        <li>실행 스킬 연결 (7종)</li>
+        <li>Common Mistakes 가이드</li>
+      </ul>
+    </div>
+
+    <!-- D3 -->
+    <div class="card">
+      <span class="card-badge badge-mid">D3-test</span>
+      <h3>GAP 패치 버전</h3>
+      <div class="subtitle">348줄 | D2 + 대표님 직접 추가 규칙</div>
+      <ul>
+        <li>D2의 모든 것 +</li>
+        <li><strong>G1</strong> 참고자료 적응 (질문 자동 축소)</li>
+        <li><strong>G2</strong> 비주얼 엔진 필수 실행</li>
+        <li><strong>G5</strong> 원라이너 생략 금지</li>
+        <li>톤→비주얼 자동 매핑표</li>
+        <li>SNS/카드뉴스 패키지 추가</li>
+      </ul>
+    </div>
+
+    <!-- New -->
+    <div class="card winner">
+      <span class="card-badge badge-new">새 설계안</span>
+      <h3>워크플로우 재설계</h3>
+      <div class="subtitle">~250줄 | 완전히 다른 접근</div>
+      <ul>
+        <li><strong>3경로 분기</strong> (신규/수정/핸드오프)</li>
+        <li>복잡도 게이트 (Fast/Standard/Extended)</li>
+        <li>역할별 핸드오프 4종</li>
+        <li>Quality Gate 8항목</li>
+        <li>도메인 라우팅 (부동산/뷰티 등)</li>
+        <li>Failure Recovery 4패턴</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <strong>핵심 차이:</strong> D2/D3는 "매번 처음부터 기획"하는 일방향 파이프라인.
+    새 설계안은 "상황에 따라 다른 경로"로 진입하는 라우터.
+  </div>
+</div>
+
+<!-- ==================== 2. 상세 비교표 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">2</div>
+    10개 차원 상세 비교
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:20%">비교 차원</th>
+          <th style="width:25%">D3 (현재)</th>
+          <th style="width:25%">새 설계안</th>
+          <th style="width:15%">승자</th>
+          <th style="width:15%">이유</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>워크플로우 분기</strong></td>
+          <td class="lose">없음 — 항상 같은 경로</td>
+          <td class="win">신규 / 수정 / 핸드오프 3경로</td>
+          <td><span class="tag tag-green">새 설계안</span></td>
+          <td>"고쳐줘"에도 처음부터 시작하면 비효율</td>
+        </tr>
+        <tr>
+          <td><strong>복잡도 적응</strong></td>
+          <td class="lose">G1 참고자료 축소만</td>
+          <td class="win">Fast / Standard / Extended 3단계</td>
+          <td><span class="tag tag-green">새 설계안</span></td>
+          <td>간단한 건 빠르게, 복잡한 건 깊게</td>
+        </tr>
+        <tr>
+          <td><strong>수정 요청 대응</strong></td>
+          <td class="lose">없음 (처음부터 재시작)</td>
+          <td class="win">진단 → 유지/수정/전환 3분류</td>
+          <td><span class="tag tag-green">새 설계안</span></td>
+          <td>실무에서 "수정"이 "신규"보다 더 자주 발생</td>
+        </tr>
+        <tr>
+          <td><strong>핸드오프</strong></td>
+          <td class="lose">스킬 연결만</td>
+          <td class="win">역할별 분리 (기획/디자인/카피/이미지)</td>
+          <td><span class="tag tag-green">새 설계안</span></td>
+          <td>협업자에게 바로 전달 가능</td>
+        </tr>
+        <tr>
+          <td><strong>품질 검증</strong></td>
+          <td class="lose">없음</td>
+          <td class="win">Quality Gate 8항목 체크리스트</td>
+          <td><span class="tag tag-green">새 설계안</span></td>
+          <td>빠뜨린 게 없는지 자동 점검</td>
+        </tr>
+        <tr>
+          <td><strong>메시지 엔진</strong></td>
+          <td class="win">StoryBrand + 원라이너 + 헤드라인3종 + CTA + Objection</td>
+          <td class="lose">planning core만 (간략)</td>
+          <td><span class="tag tag-yellow">D3</span></td>
+          <td>카피 품질의 핵심. 구체적 프레임이 필수</td>
+        </tr>
+        <tr>
+          <td><strong>비주얼 엔진</strong></td>
+          <td class="win">톤→컬러/레이아웃/서체 매핑표 + 프롬프트 생성</td>
+          <td class="lose">"visual cues" 한 줄만</td>
+          <td><span class="tag tag-yellow">D3</span></td>
+          <td>실제 디자인 결정에 매핑표가 필수</td>
+        </tr>
+        <tr>
+          <td><strong>패키지 템플릿</strong></td>
+          <td class="win">4종 (문서/랜딩/블로그/SNS) 구체적 마크다운</td>
+          <td class="lose">테이블 구조만 (복붙 불가)</td>
+          <td><span class="tag tag-yellow">D3</span></td>
+          <td>템플릿이 있어야 일관된 출력</td>
+        </tr>
+        <tr>
+          <td><strong>실행 스킬 연결</strong></td>
+          <td class="win">/frontend-design, /pptx 등 7종 매핑</td>
+          <td class="lose">없음</td>
+          <td><span class="tag tag-yellow">D3</span></td>
+          <td>해밀시아 생태계와의 연결이 핵심 가치</td>
+        </tr>
+        <tr>
+          <td><strong>대표님 G규칙</strong></td>
+          <td class="win">G1 / G2 / G5 명시</td>
+          <td class="lose">없음</td>
+          <td><span class="tag tag-yellow">D3</span></td>
+          <td>실전 피드백에서 나온 규칙 — 반드시 유지</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="verdict-row">
+    <div class="verdict-chip">
+      <div class="verdict-dot" style="background:var(--green)"></div>
+      새 설계안 5승 — <strong>구조/분기/적응력</strong>
+    </div>
+    <div class="verdict-chip">
+      <div class="verdict-dot" style="background:var(--yellow)"></div>
+      D3 5승 — <strong>실행 디테일/카피 품질</strong>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 3. D3 장단점 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">3</div>
+    D3 (현재 스킬) 장점/단점
+  </div>
+
+  <div class="procon">
+    <div class="procon-card">
+      <h4><span style="color:var(--green)">+</span> 장점 — 유지할 것</h4>
+      <ul>
+        <li><strong>4엔진 시스템</strong> — 메시지/구조/콘텐츠/비주얼이 항상 세트로 나옴</li>
+        <li><strong>StoryBrand 원라이너</strong> — 모든 카피의 방향타 역할</li>
+        <li><strong>톤→비주얼 매핑표</strong> — "신뢰감"만 골라도 컬러+서체+레이아웃이 자동 결정</li>
+        <li><strong>4종 패키지 템플릿</strong> — 문서/랜딩/블로그/SNS별 구체적 출력 포맷</li>
+        <li><strong>G1/G2/G5 규칙</strong> — 대표님 직접 피드백에서 나온 실전 규칙</li>
+        <li><strong>실행 스킬 연결 7종</strong> — 기획→실행 자연스러운 핸드오프</li>
+        <li><strong>질문 형식 규칙</strong> — "한 번에 하나씩, 선택지 중심" 명확</li>
+      </ul>
+    </div>
+    <div class="procon-card con">
+      <h4><span style="color:var(--red)">-</span> 단점 — 고칠 것</h4>
+      <ul>
+        <li><strong>일방향 파이프라인</strong> — "수정해줘"에도 처음부터 전체 재실행</li>
+        <li><strong>복잡도 무시</strong> — 간단한 썸네일이나 복잡한 규제 산업이나 같은 흐름</li>
+        <li><strong>수정 워크플로우 부재</strong> — 기존 초안 개선 요청에 대응 불가</li>
+        <li><strong>품질 검증 없음</strong> — 패키지 완성 후 빠뜨린 게 있는지 체크 안 함</li>
+        <li><strong>실패 복구 없음</strong> — 애매한 요청에 대한 탈출 전략 부재</li>
+        <li><strong>역할별 핸드오프 없음</strong> — 디자이너/카피라이터별 분리 출력 불가</li>
+        <li><strong>도메인 특화 없음</strong> — 부동산과 뷰티가 같은 방식으로 처리됨</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 4. 새 설계안 장단점 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">4</div>
+    새 설계안 장점/단점
+  </div>
+
+  <div class="procon">
+    <div class="procon-card">
+      <h4><span style="color:var(--green)">+</span> 장점 — 가져올 것</h4>
+      <ul>
+        <li><strong>3경로 워크플로우</strong> — 신규/수정/핸드오프 상황별 최적 경로</li>
+        <li><strong>Complexity Gate</strong> — Fast(3~5) / Standard(4~6) / Extended(6~8) 적응</li>
+        <li><strong>Revision Workflow</strong> — 진단 → 유지/수정/방향전환 체계적 수정</li>
+        <li><strong>역할별 핸드오프</strong> — Planner/Designer/Copywriter/Image gen 분리</li>
+        <li><strong>Quality Gate</strong> — 8항목 완성도 체크리스트</li>
+        <li><strong>Failure Recovery</strong> — 애매/급한/모순/불안정 4가지 탈출 패턴</li>
+        <li><strong>Domain Routing</strong> — 도메인별 설득 논리 차이 반영</li>
+        <li><strong>Essentials 체크</strong> — 6가지 필수 요소 중 몇 개가 이미 있는지 판단</li>
+      </ul>
+    </div>
+    <div class="procon-card con">
+      <h4><span style="color:var(--red)">-</span> 단점 — 보완할 것</h4>
+      <ul>
+        <li><strong>메시지 엔진 약함</strong> — StoryBrand/원라이너 같은 구체적 프레임 없음</li>
+        <li><strong>비주얼 디테일 없음</strong> — 톤→컬러/서체 매핑이 없어서 추상적</li>
+        <li><strong>패키지 템플릿 부재</strong> — 출력 포맷이 테이블뿐, 복붙 불가</li>
+        <li><strong>스킬 연결 없음</strong> — /frontend-design 등 해밀시아 생태계 연결 끊김</li>
+        <li><strong>G규칙 없음</strong> — 대표님 실전 피드백 규칙 미반영</li>
+        <li><strong>외부 파일 참조</strong> — references/ 폴더 의존 (단일 파일이 더 안전)</li>
+        <li><strong>한글화 부족</strong> — 영어 위주 서술 → 대표님 확인 시 불편</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 5. 합체 전략 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">5</div>
+    합체 전략 — "뼈대는 새 것, 살은 D3"
+  </div>
+
+  <div class="merge-visual">
+    <div class="merge-left">
+      <h4 style="color:var(--green)">새 설계안에서 가져올 뼈대</h4>
+      <div class="merge-item">3경로 워크플로우 분기</div>
+      <div class="merge-item">Complexity Gate (3단계)</div>
+      <div class="merge-item">Revision Workflow</div>
+      <div class="merge-item">역할별 핸드오프 4종</div>
+      <div class="merge-item">Quality Gate 8항목</div>
+      <div class="merge-item">Failure Recovery 4패턴</div>
+      <div class="merge-item">Essentials 6가지 체크</div>
+    </div>
+    <div class="merge-arrow-col">+</div>
+    <div class="merge-right">
+      <h4 style="color:var(--yellow)">D3에서 유지할 살</h4>
+      <div class="merge-item">4엔진 시스템 (메시지/구조/콘텐츠/비주얼)</div>
+      <div class="merge-item">StoryBrand 원라이너 (G5)</div>
+      <div class="merge-item">톤→비주얼 자동 매핑표</div>
+      <div class="merge-item">4종 패키지 템플릿</div>
+      <div class="merge-item">G1/G2 규칙</div>
+      <div class="merge-item">실행 스킬 연결 7종</div>
+      <div class="merge-item">Common Mistakes 가이드</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 6. 합체 후 플로우 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">6</div>
+    합체 후 최종 플로우 (예상)
+  </div>
+
+  <div class="flow-wrap">
+    <!-- Row 1: Entry -->
+    <div class="flow-label">입력 & 분기</div>
+    <div class="flow-row">
+      <div class="flow-box input">사용자 입력</div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box decide">워크플로우 분기<br><small>신규 / 수정 / 핸드오프</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box decide">복잡도 게이트<br><small>Fast / Standard / Extended</small></div>
+    </div>
+
+    <!-- Row 2: Discovery -->
+    <div class="flow-label">탐색 (Essentials 체크 + 선별 질문)</div>
+    <div class="flow-row">
+      <div class="flow-box decide">유형 감지<br><small>문서/랜딩/블로그/SNS</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box decide">Essentials 6개 체크<br><small>이미 아는 정보 스킵 (G1)</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box input">선별 질문<br><small>한 번에 하나씩, 선택지 중심</small></div>
+    </div>
+
+    <!-- Row 3: Engines -->
+    <div class="flow-label">4엔진 실행 (G2: 전부 필수)</div>
+    <div class="flow-row">
+      <div class="flow-box engine">메시지 엔진<br><small>원라이너(G5) + 헤드라인 + CTA</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box engine">구조 엔진<br><small>CRO 기반 섹션 설계</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box engine">콘텐츠 엔진<br><small>아웃라인 + 초안 + 톤</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box engine">비주얼 엔진<br><small>톤매핑 + 컬러 + 프롬프트</small></div>
+    </div>
+
+    <!-- Row 4: Output -->
+    <div class="flow-label">패키지 조립 & 검증</div>
+    <div class="flow-row">
+      <div class="flow-box output">유형별 패키지<br><small>문서/랜딩/블로그/SNS 4종</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box check">Quality Gate<br><small>8항목 자동 점검</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box output">역할별 핸드오프<br><small>기획/디자인/카피/이미지</small></div>
+      <span class="flow-arrow">&rarr;</span>
+      <div class="flow-box input">실행 스킬 연결<br><small>7종 자동 매핑</small></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 7. 최종 결과물 카드 ==================== -->
+<div class="section">
+  <div class="section-title">
+    <div class="num">7</div>
+    최종 결과물 예상
+  </div>
+
+  <div class="final-card">
+    <span class="card-badge badge-final">D4 — FINAL</span>
+    <h3>Marketing Design Planner v1.0</h3>
+    <p>D3의 실행 디테일 + 새 설계안의 구조적 유연성 = 해밀시아 전용 디자인 기획 에이전트</p>
+    <div class="final-features">
+      <div class="final-feat">3경로 분기</div>
+      <div class="final-feat">복잡도 게이트</div>
+      <div class="final-feat">4엔진 시스템</div>
+      <div class="final-feat">StoryBrand</div>
+      <div class="final-feat">톤→비주얼 매핑</div>
+      <div class="final-feat">4종 패키지</div>
+      <div class="final-feat">Quality Gate</div>
+      <div class="final-feat">Revision Flow</div>
+      <div class="final-feat">역할별 핸드오프</div>
+      <div class="final-feat">G1/G2/G5</div>
+      <div class="final-feat">7종 스킬 연결</div>
+      <div class="final-feat">Failure Recovery</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top: 24px;">
+    <strong>다음 단계:</strong> 대표님 확인 후 → D3-test 파일을 D4로 합체 작업 → 테스트 → -test 제거 → skill-guide.md 등록
+  </div>
+</div>
+
+</body>
+</html>

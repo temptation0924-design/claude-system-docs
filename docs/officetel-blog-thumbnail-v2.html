@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog Thumbnail — 오피스텔, 지금이 갈아탈 타이밍</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+    gap: 24px;
+  }
+
+  .label {
+    color: #555;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  /* ===== THUMBNAIL ===== */
+  .thumbnail {
+    width: 1200px;
+    height: 630px;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+  }
+
+  /* --- 배경: 오피스텔 실사 이미지 --- */
+  .bg {
+    position: absolute;
+    inset: 0;
+    background: url('officetel.jpg') center/cover no-repeat;
+    background-color: #2a2520;
+  }
+
+  /* 배경 위 따뜻한 톤 보정 */
+  .bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 70% 40%, rgba(180, 120, 60, 0.1) 0%, transparent 60%);
+  }
+
+  /* 왼쪽 그라데이션 오버레이 — 텍스트 가독성 (이미지 톤에 맞춰 다크 브라운) */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(20, 16, 12, 0.93) 0%,
+      rgba(20, 16, 12, 0.78) 40%,
+      rgba(20, 16, 12, 0.35) 65%,
+      rgba(20, 16, 12, 0.05) 100%
+    );
+  }
+
+  /* --- 콘텐츠 --- */
+  .content {
+    position: absolute;
+    inset: 0;
+    padding: 56px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* 상단 영역 */
+  .top {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* 뱃지 */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #E11D30;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    width: fit-content;
+    text-transform: uppercase;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* 메인 카피 */
+  .main-copy {
+    font-size: 58px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+    text-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.5),
+      0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .main-copy .accent {
+    color: #E11D30;
+  }
+
+  /* 서브 카피 */
+  .sub-copy {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(200, 200, 210, 0.85);
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  .sub-copy .dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: #E11D30;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin: 0 10px;
+  }
+
+  /* 하단 영역 */
+  .bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* 구분선 */
+  .divider {
+    width: 480px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 100%);
+  }
+
+  /* 데이터 블록 */
+  .data-row {
+    display: flex;
+    gap: 56px;
+  }
+
+  .data-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .data-value {
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .data-value.red {
+    color: #E11D30;
+    text-shadow: 0 0 20px rgba(225, 29, 48, 0.3);
+  }
+
+  .data-value.gold {
+    color: #FFC207;
+    text-shadow: 0 0 20px rgba(255, 194, 7, 0.25);
+  }
+
+  .data-label {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(160, 160, 170, 0.7);
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+
+<div class="label">STAGE 3 — 1200 × 630 블로그 썸네일</div>
+
+<div class="thumbnail">
+  <!-- 배경 -->
+  <div class="bg"></div>
+  <div class="overlay"></div>
+
+  <!-- 콘텐츠 -->
+  <div class="content">
+    <div class="top">
+      <div class="badge">2026 투자 트렌드</div>
+      <h1 class="main-copy">
+        오피스텔,<br>
+        지금이 <span class="accent">갈아탈</span><br>
+        타이밍
+      </h1>
+      <p class="sub-copy">
+        공실률 하락 <span class="dot"></span> 수익률 반등 — 4050 실수요자가 움직이기 전에
+      </p>
+    </div>
+
+    <div class="bottom">
+      <div class="divider"></div>
+      <div class="data-row">
+        <div class="data-item">
+          <span class="data-value red">5.2%</span>
+          <span class="data-label">평균 수익률</span>
+        </div>
+        <div class="data-item">
+          <span class="data-value gold">↓ 2.1%</span>
+          <span class="data-label">공실률 하락</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

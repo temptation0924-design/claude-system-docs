@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Font Compare — Black Han Sans vs Gmarket Sans</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap');
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  @font-face {
+    font-family: 'Gmarket Sans';
+    font-weight: 700;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+  }
+  @font-face {
+    font-family: 'Gmarket Sans';
+    font-weight: 500;
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff') format('woff');
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    gap: 20px;
+  }
+
+  .page-title {
+    color: #888;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .compare-label {
+    color: #E11D30;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-top: 16px;
+  }
+
+  /* ===== THUMBNAIL ===== */
+  .thumbnail {
+    width: 1200px;
+    height: 630px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  .bg {
+    position: absolute;
+    inset: 0;
+    background: url('officetel.jpg') center/cover no-repeat;
+    background-color: #2a2520;
+  }
+
+  .bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 40%, rgba(180, 120, 60, 0.1) 0%, transparent 60%);
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(20, 16, 12, 0.93) 0%,
+      rgba(20, 16, 12, 0.78) 40%,
+      rgba(20, 16, 12, 0.35) 65%,
+      rgba(20, 16, 12, 0.05) 100%
+    );
+  }
+
+  .content {
+    position: absolute;
+    inset: 0;
+    padding: 56px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .top { display: flex; flex-direction: column; gap: 20px; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #E11D30;
+    color: #fff;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 6px 14px;
+    border-radius: 3px;
+    width: fit-content;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+  }
+
+  /* --- Font A: Black Han Sans --- */
+  .font-a .main-copy {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 62px;
+    font-weight: 400; /* Black Han Sans는 단일 웨이트 */
+    color: #ffffff;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    text-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.6),
+      0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .font-a .main-copy .accent {
+    color: #E11D30;
+  }
+
+  .font-a .sub-copy {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(200, 200, 210, 0.85);
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  /* --- Font B: Gmarket Sans --- */
+  .font-b .main-copy {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    text-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.6),
+      0 4px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .font-b .main-copy .accent {
+    color: #E11D30;
+  }
+
+  .font-b .sub-copy {
+    font-family: 'Gmarket Sans', sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: rgba(200, 200, 210, 0.85);
+    letter-spacing: -0.01em;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+
+  /* 공통 하단 */
+  .bottom { display: flex; flex-direction: column; gap: 16px; }
+
+  .divider {
+    width: 480px;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 100%);
+  }
+
+  .data-row { display: flex; gap: 56px; }
+  .data-item { display: flex; flex-direction: column; gap: 4px; }
+
+  .data-value {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .data-value.red {
+    color: #E11D30;
+    text-shadow: 0 0 20px rgba(225, 29, 48, 0.3);
+  }
+
+  .data-value.gold {
+    color: #FFC207;
+    text-shadow: 0 0 20px rgba(255, 194, 7, 0.25);
+  }
+
+  .data-label {
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(160, 160, 170, 0.7);
+    letter-spacing: 0.02em;
+  }
+
+  .sub-copy .dot {
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background: #E11D30;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin: 0 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-title">Font Compare — 메인 카피 서체 비교</div>
+
+<!-- ===== A: Black Han Sans ===== -->
+<div class="compare-label">A. Black Han Sans — 강렬 임팩트</div>
+<div class="thumbnail font-a">
+  <div class="bg"></div>
+  <div class="overlay"></div>
+  <div class="content">
+    <div class="top">
+      <div class="badge">2026 투자 트렌드</div>
+      <h1 class="main-copy">
+        오피스텔,<br>
+        지금이 <span class="accent">갈아탈</span><br>
+        타이밍
+      </h1>
+      <p class="sub-copy">
+        공실률 하락 <span class="dot"></span> 수익률 반등 — 4050 실수요자가 움직이기 전에
+      </p>
+    </div>
+    <div class="bottom">
+      <div class="divider"></div>
+      <div class="data-row">
+        <div class="data-item">
+          <span class="data-value red">5.2%</span>
+          <span class="data-label">평균 수익률</span>
+        </div>
+        <div class="data-item">
+          <span class="data-value gold">↓ 2.1%</span>
+          <span class="data-label">공실률 하락</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== B: Gmarket Sans ===== -->
+<div class="compare-label">B. Gmarket Sans Bold — 세련된 프리미엄</div>
+<div class="thumbnail font-b">
+  <div class="bg"></div>
+  <div class="overlay"></div>
+  <div class="content">
+    <div class="top">
+      <div class="badge">2026 투자 트렌드</div>
+      <h1 class="main-copy">
+        오피스텔,<br>
+        지금이 <span class="accent">갈아탈</span><br>
+        타이밍
+      </h1>
+      <p class="sub-copy">
+        공실률 하락 <span class="dot"></span> 수익률 반등 — 4050 실수요자가 움직이기 전에
+      </p>
+    </div>
+    <div class="bottom">
+      <div class="divider"></div>
+      <div class="data-row">
+        <div class="data-item">
+          <span class="data-value red">5.2%</span>
+          <span class="data-label">평균 수익률</span>
+        </div>
+        <div class="data-item">
+          <span class="data-value gold">↓ 2.1%</span>
+          <span class="data-label">공실률 하락</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

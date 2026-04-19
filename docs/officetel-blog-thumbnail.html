@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog Thumbnail — 오피스텔을 지금 사야 하는 이유</title>
+<style>
+  @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px;
+    gap: 32px;
+  }
+
+  .label {
+    color: #666;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* ===== THUMBNAIL FRAME ===== */
+  .thumbnail {
+    width: 1200px;
+    height: 630px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+  }
+
+  /* ===== BACKGROUND ===== */
+  .bg {
+    position: absolute;
+    inset: 0;
+    /* Midjourney 이미지로 교체할 레이어 */
+    background:
+      linear-gradient(135deg, #0a0e1a 0%, #111827 40%, #1a1030 100%);
+  }
+
+  /* 도시 느낌 패턴 오버레이 */
+  .bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 58px,
+        rgba(255,255,255,0.015) 58px,
+        rgba(255,255,255,0.015) 60px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 78px,
+        rgba(255,255,255,0.01) 78px,
+        rgba(255,255,255,0.01) 80px
+      );
+  }
+
+  /* 하단 레드 그라데이션 */
+  .bg::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 260px;
+    background: linear-gradient(to top, rgba(225,29,72,0.15) 0%, transparent 100%);
+  }
+
+  /* 우측 하단 글로우 */
+  .glow {
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(225,29,72,0.2) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* 좌측 상단 글로우 */
+  .glow-top {
+    position: absolute;
+    top: -60px;
+    left: -60px;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ===== CONTENT ===== */
+  .content {
+    position: absolute;
+    inset: 0;
+    padding: 56px 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    z-index: 2;
+  }
+
+  /* TOP SECTION */
+  .top {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(225,29,72,0.15);
+    border: 1px solid rgba(225,29,72,0.4);
+    color: #E11D48;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    width: fit-content;
+    letter-spacing: 0.5px;
+  }
+  .badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #E11D48;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .main-title {
+    font-size: 52px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.25;
+    letter-spacing: -1.5px;
+    max-width: 700px;
+  }
+  .main-title .highlight {
+    background: linear-gradient(135deg, #E11D48, #FBBF24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: -0.3px;
+    max-width: 500px;
+    line-height: 1.5;
+  }
+
+  /* BOTTOM SECTION — 숫자 데이터 */
+  .bottom {
+    display: flex;
+    gap: 0;
+  }
+
+  .stat {
+    flex: 1;
+    padding: 20px 28px;
+    border-left: 1px solid rgba(255,255,255,0.08);
+    position: relative;
+  }
+  .stat:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .stat-number {
+    font-size: 36px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat:nth-child(1) .stat-number { color: #E11D48; }
+  .stat:nth-child(2) .stat-number { color: #FBBF24; }
+  .stat:nth-child(3) .stat-number { color: #34D399; }
+
+  .stat-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: -0.2px;
+  }
+
+  /* 우측 장식 — 추상적 건물 실루엣 */
+  .deco {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    height: 280px;
+    z-index: 1;
+    opacity: 0.12;
+  }
+  .bar {
+    width: 24px;
+    background: linear-gradient(to top, rgba(225,29,72,0.6), rgba(255,255,255,0.3));
+    border-radius: 3px 3px 0 0;
+  }
+  .bar:nth-child(1) { height: 45%; }
+  .bar:nth-child(2) { height: 70%; }
+  .bar:nth-child(3) { height: 100%; }
+  .bar:nth-child(4) { height: 85%; }
+  .bar:nth-child(5) { height: 55%; }
+  .bar:nth-child(6) { height: 90%; }
+  .bar:nth-child(7) { height: 60%; }
+
+  /* ===== VARIANT B — 비교형 ===== */
+  .thumbnail-b {
+    width: 1200px;
+    height: 630px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    display: flex;
+  }
+
+  .split-left {
+    flex: 1;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  .split-left::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(225,29,72,0.4), transparent);
+  }
+
+  .split-right {
+    flex: 1;
+    background: linear-gradient(135deg, #111827 0%, #0a0e1a 100%);
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .split-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .split-left .split-label { color: rgba(255,255,255,0.3); }
+  .split-right .split-label { color: #E11D48; }
+
+  .split-title {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -0.8px;
+    margin-bottom: 20px;
+  }
+  .split-left .split-title { color: rgba(255,255,255,0.5); }
+  .split-right .split-title { color: #ffffff; }
+
+  .split-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .split-list li {
+    font-size: 15px;
+    font-weight: 500;
+    padding-left: 20px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .split-list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+  .split-left .split-list li {
+    color: rgba(255,255,255,0.35);
+  }
+  .split-left .split-list li::before {
+    background: rgba(255,255,255,0.15);
+  }
+  .split-right .split-list li {
+    color: rgba(255,255,255,0.8);
+  }
+  .split-right .split-list li::before {
+    background: #E11D48;
+  }
+
+  .vs-badge {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px;
+    height: 52px;
+    background: #E11D48;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    z-index: 10;
+    box-shadow: 0 0 30px rgba(225,29,72,0.4);
+  }
+
+  .b-bottom-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    z-index: 5;
+  }
+  .b-bottom-bar span {
+    font-size: 15px;
+    font-weight: 700;
+    color: #FBBF24;
+    letter-spacing: -0.3px;
+  }
+  .b-bottom-bar .arrow {
+    color: rgba(255,255,255,0.3);
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== VERSION A: 임팩트형 ===== -->
+<div class="label">Version A — 임팩트형 (Midjourney 배경 교체 가능)</div>
+
+<div class="thumbnail">
+  <div class="bg"></div>
+  <div class="glow"></div>
+  <div class="glow-top"></div>
+
+  <div class="deco">
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+    <div class="bar"></div>
+  </div>
+
+  <div class="content">
+    <div class="top">
+      <div class="badge">2025 부동산 트렌드</div>
+      <div class="main-title">
+        오피스텔,<br>
+        <span class="highlight">10년 만의 저점</span>입니다
+      </div>
+      <div class="subtitle">
+        아파트만 고집하다 놓친 기회,<br>반복하시겠습니까?
+      </div>
+    </div>
+
+    <div class="bottom">
+      <div class="stat">
+        <div class="stat-number">-23%</div>
+        <div class="stat-label">매매가 고점 대비</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">+38%</div>
+        <div class="stat-label">거래량 전년 대비</div>
+      </div>
+      <div class="stat">
+        <div class="stat-number">3.8%</div>
+        <div class="stat-label">역세권 평균 수익률</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VERSION B: 비교형 ===== -->
+<div class="label" style="margin-top:24px;">Version B — 비교형</div>
+
+<div class="thumbnail-b">
+  <div class="split-left">
+    <div class="split-label">Before — 외곽 아파트</div>
+    <div class="split-title">같은 3억으로<br>외곽 구축 아파트</div>
+    <ul class="split-list">
+      <li>출퇴근 1시간 30분</li>
+      <li>노후 시설, 추가 수리비</li>
+      <li>수익률 1.2%</li>
+      <li>환금성 낮음</li>
+    </ul>
+  </div>
+
+  <div class="vs-badge">VS</div>
+
+  <div class="split-right">
+    <div class="split-label">After — 역세권 오피스텔</div>
+    <div class="split-title">같은 3억으로<br>역세권 신축 오피스텔</div>
+    <ul class="split-list">
+      <li>출퇴근 30분 이내</li>
+      <li>신축 풀옵션, 유지비 최소</li>
+      <li>수익률 3.8%</li>
+      <li>거래량 38% 증가 중</li>
+    </ul>
+  </div>
+
+  <div class="b-bottom-bar">
+    <span>같은 돈, 더 좋은 입지</span>
+    <span class="arrow">|</span>
+    <span>지금이 전환점입니다</span>
+  </div>
+</div>
+
+</body>
+</html>

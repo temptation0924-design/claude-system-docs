@@ -1,21 +1,24 @@
 ---
-session: "2026-04-18_api-key-manager-정비"
+session: 2026-04-18_api-key-manager-정비
 date: 2026-04-18
 duration_min: 0
 mode:
-  - MODE 1
+- MODE 1
 projects:
-  - api-key-manager
+- api-key-manager
 commits: 0
 work_type:
-  - 기획
-  - 버그수정
-phase_completed: "정비 전"
+- 기획
+- 버그수정
+phase_completed: 정비 전
 tests_passing: null
 status: 대기중
 notion_synced: true
 violations: []
+notion_page_id: 3477f080-9621-819f-bd28-f131c6cfec3c
+notion_synced_at: '2026-04-19T04:43:11.769195Z'
 ---
+
 
 # 세션 인수인계 — api-key-manager 정비 계획
 
