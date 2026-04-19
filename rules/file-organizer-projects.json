@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "updated": "2026-04-19",
+  "description": "file-organizer 스킬의 프로젝트 매핑 테이블. 새 프로젝트 감지 시 대표님 확인 후 자동 등록.",
+  "projects": {
+    "haemilsia": {
+      "keywords": ["haemilsia", "해밀시아", "단기임대", "남양", "마도", "라임", "아이리스", "퇴거정산", "물건현황", "대환대출"],
+      "root": "~/Haemilsia",
+      "subfolders": ["설계서", "지시서", "보고서", "리소스"]
+    },
+    "petitlynn": {
+      "keywords": ["petitlynn", "쁘띠린", "공인중개사", "동탄", "석우동"],
+      "root": "~/Petitlynn",
+      "subfolders": ["설계서", "지시서", "보고서", "리소스"]
+    },
+    "taeheung": {
+      "keywords": ["태흥", "taeheung", "태흥스펀지", "매트리스", "전단지", "mattress"],
+      "root": "~/Taeheung",
+      "subfolders": ["설계서", "지시서", "보고서", "리소스"]
+    },
+    "research": {
+      "keywords": ["research", "자료조사", "에이전트", "agent"],
+      "root": "~/Haemilsia",
+      "subfolders": ["설계서", "보고서"]
+    },
+    "claude": {
+      "keywords": ["claude", "CLAUDE", "팀장", "스킬", "skill", "MCP"],
+      "root": "~/.claude",
+      "subfolders": ["skills", "code"]
+    },
+    "interior": {
+      "keywords": ["interior", "인테리어", "collov", "staging", "가상", "bedroom", "침실"],
+      "root": "~/Haemilsia",
+      "subfolders": ["리소스"]
+    },
+    "bot": {
+      "keywords": ["bot", "봇", "slack", "슬랙", "브리핑"],
+      "root": "~/Haemilsia",
+      "subfolders": ["지시서", "리소스"]
+    },
+    "travel": {
+      "keywords": ["가평여행", "효도여행", "travel", "맛집플랜", "kakaomap"],
+      "root": "~/Haemilsia/리소스/가평여행",
+      "subfolders": []
+    }
+  },
+  "doc_type_keywords": {
+    "설계서": ["설계서", "설계", "design", "architecture", "구조", "DB구조"],
+    "지시서": ["지시서", "지시", "지침", "instruction", "deploy", "setup", "guide"],
+    "보고서": ["보고서", "보고", "리포트", "report", "분석", "업무기록", "기록", "시행착오", "활용사례"],
+    "리소스": []
+  },
+  "data_vs_code_rules": {
+    "data_extensions": [".json", ".xlsx", ".csv", ".png", ".jpg", ".jpeg", ".pdf", ".html"],
+    "code_extensions": [".py", ".sh", ".mjs", ".js", ".ts"],
+    "code_destination": "~/.claude/code",
+    "note": "같은 프로젝트에서도 .py/.sh/.mjs는 ~/.claude/code/{project}/ 하위로 분리"
+  }
+}
