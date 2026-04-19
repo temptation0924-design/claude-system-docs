@@ -719,6 +719,60 @@
   </div>
   <div class="check">✅ 성공 기준: 터미널을 키보드만으로 여닫을 수 있음</div>
 </section>
+
+<h2 class="part-title" id="part3">Part 3 · 설정·도구</h2>
+
+<section class="sec" id="s3-1">
+  <div class="sec-head">
+    <span class="sec-num">Part 3 · §3.1</span>
+    <h3 class="sec-title">settings.json 찾기·편집</h3>
+    <div class="sec-sub">Claude Code의 핵심 설정 파일 — hooks, permissions, MCP</div>
+  </div>
+  <div class="sec-grid">
+    <div>
+      <div class="vscode">
+        <div class="vs-t">● ● ●  &nbsp; Beacon</div>
+        <div class="vs-b">
+          <div class="vs-a"><div class="ic on">⚙</div></div>
+          <div class="vs-s">
+            <h5>SETTINGS</h5>
+            <div style="background:white; border:1px solid #ddd; padding:3px 5px; border-radius:3px; font-size:9px;">🔍 Open Settings</div>
+          </div>
+          <div class="vs-e" style="background:#1e1e1e; color:#ccc; padding:8px; font-family:monospace; font-size:9px;">
+            { <br>
+            &nbsp; "hooks": { <br>
+            &nbsp;&nbsp;"SessionStart": [...] <br>
+            &nbsp; }, <br>
+            &nbsp; "permissions": [...] <br>
+            }
+          </div>
+        </div>
+        <div class="vs-status">settings.json</div>
+        <span class="pin purple" style="top:26px; left:55px;">① 명령 팔레트</span>
+        <span class="pin green" style="top:80px; left:240px;">② settings.json</span>
+      </div>
+      <div class="cap">① ⌘⇧P → "Open User Settings (JSON)"<br>② ~/.claude/settings.json 파일 열림</div>
+    </div>
+    <div class="ex">
+      <h4>💡 무엇인가요?</h4>
+      <p><code>~/.claude/settings.json</code>은 Claude Code의 <b>모든 자동화 규칙</b>을 담습니다. 훅 등록, 허용된 명령 목록, MCP 서버 연결 등을 여기서 관리. 수정하면 Claude Code 재시작 시 반영됩니다.</p>
+
+      <h4>⌨️ 단축키</h4>
+      <div class="sc"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>P</kbd> <span style="color:#666;">→ 명령 팔레트</span></div>
+      <div class="sc"><span style="color:#666;">→ "Open User Settings (JSON)" 입력</span></div>
+
+      <div class="prac">
+        <h5>🧪 실습 1분</h5>
+        <ol>
+          <li><kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd> 명령 팔레트</li>
+          <li>"settings json" 입력 → "Open User Settings (JSON)" 클릭</li>
+          <li>열린 파일 경로(하단 상태바)가 <code>~/.claude/settings.json</code>인지 확인</li>
+        </ol>
+      </div>
+      <div class="check">✅ 성공 기준: settings.json 파일 경로를 말할 수 있음</div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer class="footer">
