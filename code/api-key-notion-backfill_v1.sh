@@ -30,29 +30,31 @@ if [[ $# -gt 0 ]]; then
   esac
 fi
 
-# 메타데이터 테이블: NAME|USAGE|PROJECT_CSV|PROVIDER
+# 메타데이터 테이블: NAME|USAGE|PROJECT_CSV|PROVIDER|RAILWAY_SYNC_CSV
+# RAILWAY_SYNC_CSV 값: "없음" / "쁘띠린" / "haemilsia-bot" (Notion multi_select 옵션과 일치)
+# 기본은 보수적으로 "없음" — 대표님이 Notion UI에서 세밀 조정 가능
 META_TABLE=(
-  "ANTHROPIC_API_KEY|Anthropic Claude API (메인)|전역|Anthropic"
-  "ANTHROPIC_API_KEY_ANTIGRAVITY|Anthropic Antigravity 실험용|전역|Anthropic"
-  "CLAUDE_CODE_SLACK_TOKEN|Claude Code Agent 슬랙 봇|해밀시아봇|Slack"
-  "FIGMA_ACCESS_TOKEN|Figma MCP 디자인 연동|전역|Figma"
-  "GEMINI_API_KEY|Gemini AI API|전역|Google"
-  "GITHUB_TOKEN_HAEMILSIA_BOT|해밀시아봇 GitHub push/배포|해밀시아봇|기타"
-  "HAEMILSIA_SLACK_WEBHOOK|해밀시아봇 Slack 알림|해밀시아봇|Slack"
-  "NOTION_API_TOKEN|자료조사 에이전트 전용 Notion API|자료조사|Notion"
-  "NOTION_API_TOKEN_CLAUDE|Claude 전용 Notion integration|전역|Notion"
-  "NOTION_API_TOKEN_HOMEPAGE|홈페이지 전용 Notion integration|쁘띠린|Notion"
-  "REF_NOTION_TOKEN|REF 규칙 위반 기록 DB|REF|Notion"
-  "SLACK_APP_TOKEN_CLAUDE_CODE_AGENT|Claude Code Agent Slack App|해밀시아봇|Slack"
-  "SLACK_BOT_TOKEN_AIGIS|AIGIS Slack bot|해밀시아봇|Slack"
-  "SLACK_BOT_TOKEN_CLAUDE|Claude Slack bot|해밀시아봇|Slack"
-  "SLACK_BOT_TOKEN_EMPATHY|Empathy Slack bot|해밀시아봇|Slack"
-  "SLACK_BOT_TOKEN_GEMINI|Gemini Slack bot|해밀시아봇|Slack"
-  "SLACK_BOT_TOKEN_HAEMIL|해밀 Slack bot|해밀시아봇|Slack"
-  "SLACK_BOT_TOKEN_MANUS|Manus Slack bot|해밀시아봇|Slack"
-  "SLACK_CHANNEL_ID_AI_DISCUSSION|AI Discussion 채널 ID|해밀시아봇|Slack"
-  "SLACK_SIGNING_SECRET|Slack signing secret|해밀시아봇|Slack"
-  "YOUTUBE_API_KEY|슬랙브리핑 YouTube 검색|슬랙브리핑|Google"
+  "ANTHROPIC_API_KEY|Anthropic Claude API (메인)|전역|Anthropic|없음"
+  "ANTHROPIC_API_KEY_ANTIGRAVITY|Anthropic Antigravity 실험용|전역|Anthropic|없음"
+  "CLAUDE_CODE_SLACK_TOKEN|Claude Code Agent 슬랙 봇|해밀시아봇|Slack|haemilsia-bot"
+  "FIGMA_ACCESS_TOKEN|Figma MCP 디자인 연동|전역|Figma|없음"
+  "GEMINI_API_KEY|Gemini AI API|전역|Google|없음"
+  "GITHUB_TOKEN_HAEMILSIA_BOT|해밀시아봇 GitHub push/배포|해밀시아봇|기타|없음"
+  "HAEMILSIA_SLACK_WEBHOOK|해밀시아봇 Slack 알림|해밀시아봇|Slack|haemilsia-bot"
+  "NOTION_API_TOKEN|자료조사 에이전트 전용 Notion API|자료조사|Notion|haemilsia-bot"
+  "NOTION_API_TOKEN_CLAUDE|Claude 전용 Notion integration|전역|Notion|없음"
+  "NOTION_API_TOKEN_HOMEPAGE|홈페이지 전용 Notion integration|쁘띠린|Notion|쁘띠린"
+  "REF_NOTION_TOKEN|REF 규칙 위반 기록 DB|REF|Notion|없음"
+  "SLACK_APP_TOKEN_CLAUDE_CODE_AGENT|Claude Code Agent Slack App|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_BOT_TOKEN_AIGIS|AIGIS Slack bot|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_BOT_TOKEN_CLAUDE|Claude Slack bot|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_BOT_TOKEN_EMPATHY|Empathy Slack bot|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_BOT_TOKEN_GEMINI|Gemini Slack bot|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_BOT_TOKEN_HAEMIL|해밀 Slack bot|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_BOT_TOKEN_MANUS|Manus Slack bot|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_CHANNEL_ID_AI_DISCUSSION|AI Discussion 채널 ID|해밀시아봇|Slack|haemilsia-bot"
+  "SLACK_SIGNING_SECRET|Slack signing secret|해밀시아봇|Slack|haemilsia-bot"
+  "YOUTUBE_API_KEY|슬랙브리핑 YouTube 검색|슬랙브리핑|Google|haemilsia-bot"
 )
 
 # Pre-flight
@@ -67,7 +69,9 @@ kc_keys=$(kc_list)
 
 ok=0 fail=0 missing=0
 for row in "${META_TABLE[@]}"; do
-  IFS='|' read -r name usage project provider <<< "$row"
+  IFS='|' read -r name usage project provider railway_sync <<< "$row"
+  # 하위 호환: railway_sync 누락 행은 "없음"으로 간주
+  railway_sync="${railway_sync:-없음}"
 
   # Keychain에 없는 키는 경고 후 건너뜀
   if ! printf '%s\n' "$kc_keys" | grep -qx "$name"; then
@@ -77,14 +81,15 @@ for row in "${META_TABLE[@]}"; do
   fi
 
   if [[ "$MODE" == "dry-run" ]]; then
-    printf '  [DRY] %s → usage="%s" project=%s provider=%s\n' "$name" "$usage" "$project" "$provider"
+    printf '  [DRY] %s → usage="%s" project=%s provider=%s railway=%s\n' \
+      "$name" "$usage" "$project" "$provider" "$railway_sync"
     ok=$((ok+1))
     continue
   fi
 
   # 실제 upsert
-  if notion_upsert_row "$db" "$name" "$usage" "$project" "$provider" "active" >/dev/null 2>&1; then
-    util_log "  ✅ $name"
+  if notion_upsert_row "$db" "$name" "$usage" "$project" "$provider" "active" "$railway_sync" >/dev/null 2>&1; then
+    util_log "  ✅ $name (railway=$railway_sync)"
     ok=$((ok+1))
   else
     util_err "  ❌ $name: upsert 실패"

@@ -251,10 +251,12 @@ notion_query_db_by_name() {
   | jq -r '.results[0].id // empty'
 }
 
-# notion_upsert_row <db_id> <name> <usage> <project_csv> <provider> <status>
+# notion_upsert_row <db_id> <name> <usage> <project_csv> <provider> <status> [railway_sync_csv]
 # 존재하면 update, 없으면 create. 반환: page_id
+# railway_sync_csv: "없음" / "쁘띠린" / "haemilsia-bot" (CSV로 복수 가능, 기본 "없음")
 notion_upsert_row() {
   local db="$1" name="$2" usage="$3" project_csv="$4" provider="$5" status="${6:-active}"
+  local railway_sync_csv="${7:-없음}"
   local today
   today=$(date '+%Y-%m-%d')
   local existing
@@ -268,12 +270,21 @@ notion_upsert_row() {
     | jq -R '{name: .}' \
     | jq -s .)
 
+  # Railway 동기화 CSV → multi_select array
+  local railway_json
+  railway_json=$(printf '%s' "$railway_sync_csv" \
+    | tr ',' '\n' \
+    | sed '/^$/d' \
+    | jq -R '{name: .}' \
+    | jq -s .)
+
   if [[ -n "$existing" ]]; then
     # UPDATE (교체일만 갱신)
     local payload
     payload=$(jq -n \
       --arg usage "$usage" \
       --argjson projs "$projects_json" \
+      --argjson rail "$railway_json" \
       --arg provider "$provider" \
       --arg status "$status" \
       --arg today "$today" \
@@ -281,6 +292,7 @@ notion_upsert_row() {
         properties: {
           "용도": { rich_text: [{ text: { content: $usage } }] },
           "프로젝트": { multi_select: $projs },
+          "Railway 동기화": { multi_select: $rail },
           "서비스 제공자": { select: { name: $provider } },
           "상태": { select: { name: $status } },
           "마지막 교체일": { date: { start: $today } },
@@ -302,6 +314,7 @@ notion_upsert_row() {
       --arg name "$name" \
       --arg usage "$usage" \
       --argjson projs "$projects_json" \
+      --argjson rail "$railway_json" \
       --arg provider "$provider" \
       --arg status "$status" \
       --arg today "$today" \
@@ -311,6 +324,7 @@ notion_upsert_row() {
           "이름": { title: [{ text: { content: $name } }] },
           "용도": { rich_text: [{ text: { content: $usage } }] },
           "프로젝트": { multi_select: $projs },
+          "Railway 동기화": { multi_select: $rail },
           "서비스 제공자": { select: { name: $provider } },
           "상태": { select: { name: $status } },
           "Keychain 서비스명": { rich_text: [{ text: { content: "haemilsia-api-keys" } }] },
@@ -343,7 +357,7 @@ notion_archive_row() {
     --data "$payload" >/dev/null
 }
 
-# notion_list_active_keys <db_id>  →  stdout: 각 줄 JSON {name, usage, project, provider, status}
+# notion_list_active_keys <db_id>  →  stdout: 각 줄 JSON {name, usage, project, railway_sync, provider, status}
 # 에러 시 stderr에 사유 출력하고 exit 1
 notion_list_active_keys() {
   local db="$1"
@@ -372,6 +386,7 @@ notion_list_active_keys() {
       name:   (.properties["이름"].title[0].plain_text // ""),
       usage:  (.properties["용도"].rich_text[0].plain_text // ""),
       project: ([.properties["프로젝트"].multi_select[]?.name] | join(",")),
+      railway_sync: ([.properties["Railway 동기화"].multi_select[]?.name] | join(",")),
       provider: (.properties["서비스 제공자"].select.name // ""),
       status: (.properties["상태"].select.name // "")
     }'
