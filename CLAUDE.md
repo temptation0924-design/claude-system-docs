@@ -1,6 +1,6 @@
 # CLAUDE.md — Haemilsia AI operations
 
-**버전**: v4.2.2 | **업데이트**: 2026-04-11
+**버전**: v4.3.0 | **업데이트**: 2026-04-19
 **적용**: Claude.ai (웹) + Claude Code (터미널) 통합
 
 > **CLAUDE.md = 라우팅 허브**. 모든 실행 원칙은 모드/스킬/루틴으로 이관 완료.
@@ -79,12 +79,16 @@
    - 3 Agent 사전검증 → 90% 이상 PASS → 7번으로
    - 90% 미만 FAIL → 자동 수정 → 재검증 반복 (PASS까지)
 7. **📘 계획 이해 브리핑** — Preflight PASS 직후 자동 실행 → `briefing.md` §2-3 풀버전 포맷 적용 (큰 그림 1줄 / 비유 / 결과물·시간·의존성 / "궁금한 거 있으세요?")
-8. 대표님 승인
-9. **🎯 도구 추천 + 스킬 매칭** — 승인된 계획 기반 자동 실행
-   - 도구 추천: "기본은 Code입니다. 이 작업은 **[도구명]**이 더 편합니다. (이유: ~)"
-   - 스킬 매칭: `skill-guide.md` 키워드 매칭 → 1%라도 맞으면 invoke
-   - 매칭 스킬 없음 → MODE 2 완료 후 자동 스킬화 대상으로 플래그
-   - → MODE 2로 전환
+8. **🤖 /codex consult 게이트** (기획 승인 직전, 외부 AI 세컨드 오피니언)
+   - 조건: task 수 **≥ 20 → 자동 실행** / 미만 → opt-in (대표님 요청 시에만)
+   - 동작: `/codex consult` → Codex가 계획 검토 → P1 Critical / P2 Warnings 피드백 → 수정 라운드 (PASS까지 반복)
+   - PASS 기준: Codex GATE PASS 또는 대표님 "무시 진행" 판단
+9. 대표님 승인
+10. **🎯 도구 추천 + 스킬 매칭** — 승인된 계획 기반 자동 실행
+    - 도구 추천: "기본은 Code입니다. 이 작업은 **[도구명]**이 더 편합니다. (이유: ~)"
+    - 스킬 매칭: `skill-guide.md` 키워드 매칭 → 1%라도 맞으면 invoke
+    - 매칭 스킬 없음 → MODE 2 완료 후 자동 스킬화 대상으로 플래그
+    - → MODE 2로 전환
 
 > 간단한 기획: `/gsd-quick` → full 워크플로우 스킵
 
@@ -96,8 +100,12 @@
 2. `superpowers:subagent-driven-development` — task별 별도 에이전트 (묻지 말고 전부 실행)
 3. `superpowers:test-driven-development` — 코드 작업 시 TDD 강제
 4. 2단계 코드리뷰 — spec 준수 + 코드 품질
-5. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
-6. **🎁 자동 스킬화 제안** — MODE 1 9번에서 매칭 스킬이 없었던 경우 자동 실행
+5. **🤖 /codex review 게이트** (코드 완료 후, 외부 AI 코드 리뷰)
+   - 조건: task 수 **≥ 20 → 자동 실행** / 미만 → opt-in (대표님 요청 시에만)
+   - 동작: `/codex review` → diff/PR 대상 외부 AI 코드 리뷰 → 버그/보안/품질 이슈 → 수정 라운드 (PASS까지 반복)
+   - PASS 기준: Codex GATE PASS
+6. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
+7. **🎁 자동 스킬화 제안** — MODE 1 10번에서 매칭 스킬이 없었던 경우 자동 실행
    - "이 작업을 스킬로 만들까요?" 질문
    - 승인 시 → `skill-manager` 스킬로 자동 생성
    - → `skill-guide.md` 자동 등록 (로컬 + Notion 양쪽)
@@ -140,4 +148,4 @@
 
 ---
 
-*Haemilsia AI operations | 2026.04.19 | v4.2.3 — B8 자동화 v2 (debounce_sync.sh + 시크릿 게이트 + SKIP_B8_AUTOSYNC kill-switch)*
+*Haemilsia AI operations | 2026.04.19 | v4.3.0 — Codex A+C 워크플로우 (MODE 1 8번 consult + MODE 2 5번 review 게이트, task ≥20 자동)*
