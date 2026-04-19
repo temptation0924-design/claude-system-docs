@@ -824,6 +824,59 @@
     </div>
   </div>
 </section>
+
+<section class="sec" id="s3-3">
+  <div class="sec-head">
+    <span class="sec-num">Part 3 · §3.3</span>
+    <h3 class="sec-title">훅(hooks) 위치와 역할</h3>
+    <div class="sec-sub">세션 시작·종료 등 특정 순간에 자동 실행되는 쉘 스크립트</div>
+  </div>
+  <div class="sec-grid">
+    <div>
+      <div class="vscode">
+        <div class="vs-t">● ● ●  &nbsp; Beacon</div>
+        <div class="vs-b">
+          <div class="vs-a"><div class="ic on">📁</div></div>
+          <div class="vs-s">
+            <h5>EXPLORER</h5>
+            <div class="it">📁 .claude</div>
+            <div class="it" style="padding-left:10px;">📁 hooks</div>
+            <div class="it a" style="padding-left:20px;">📄 session-start.sh</div>
+            <div class="it" style="padding-left:20px;">📄 drift-detector.sh</div>
+          </div>
+          <div class="vs-e">
+            <div class="vs-e-body" style="font-size:9px; font-family:monospace;">
+              #!/bin/bash<br>
+              # SessionStart hook<br>
+              echo "세션 시작 $(date)"
+            </div>
+          </div>
+        </div>
+        <div class="vs-status">main ✓</div>
+        <span class="pin purple" style="top:70px; left:55px;">① hooks 폴더</span>
+        <span class="pin green" style="top:100px; left:60px;">② .sh 파일들</span>
+      </div>
+      <div class="cap">① ~/.claude/hooks/ 디렉토리<br>② 각 이벤트별 쉘 스크립트 (session-start, drift 등)</div>
+    </div>
+    <div class="ex">
+      <h4>💡 무엇인가요?</h4>
+      <p>훅은 <b>Claude가 특정 행동을 할 때 자동으로 끼어드는 스크립트</b>입니다. 예: 세션 시작하면 TOP 5 규칙 주입, 도구 호출 전 보안 체크. <code>settings.json</code>에 어떤 훅이 어느 이벤트에 걸릴지 선언되어 있습니다.</p>
+
+      <h4>⌨️ 단축키</h4>
+      <div class="sc"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>E</kbd> <span style="color:#666;">→ 탐색기 열기</span></div>
+
+      <div class="prac">
+        <h5>🧪 실습 1분</h5>
+        <ol>
+          <li><kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd>로 탐색기</li>
+          <li><code>~/.claude/hooks/</code> 폴더 찾아 열기</li>
+          <li>파일 하나 클릭해서 내용 훑어보기</li>
+        </ol>
+      </div>
+      <div class="check">✅ 성공 기준: SessionStart 훅이 하는 일을 한 문장으로 설명</div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer class="footer">
