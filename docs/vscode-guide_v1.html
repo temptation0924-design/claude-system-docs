@@ -877,6 +877,56 @@
     </div>
   </div>
 </section>
+
+<section class="sec" id="s3-4">
+  <div class="sec-head">
+    <span class="sec-num">Part 3 · §3.4</span>
+    <h3 class="sec-title">에이전트·스킬 파일 구조</h3>
+    <div class="sec-sub">~/.claude/agents/ 와 ~/.claude/skills/ 디렉토리 이해</div>
+  </div>
+  <div class="sec-grid">
+    <div>
+      <div class="vscode">
+        <div class="vs-t">● ● ●  &nbsp; Beacon</div>
+        <div class="vs-b">
+          <div class="vs-a"><div class="ic on">📁</div></div>
+          <div class="vs-s">
+            <h5>EXPLORER</h5>
+            <div class="it a">📁 agents</div>
+            <div class="it" style="padding-left:10px;">📄 rule-watcher.md</div>
+            <div class="it" style="padding-left:10px;">📄 janitor.md</div>
+            <div class="it a" style="margin-top:4px;">📁 skills</div>
+            <div class="it" style="padding-left:10px;">📁 skill-manager</div>
+            <div class="it" style="padding-left:20px;">📄 SKILL.md</div>
+          </div>
+          <div class="vs-e"><div class="vs-e-body">💬</div></div>
+        </div>
+        <div class="vs-status">main ✓</div>
+        <span class="pin purple" style="top:40px; left:55px;">① agents/</span>
+        <span class="pin green" style="top:90px; left:55px;">② skills/</span>
+      </div>
+      <div class="cap">① agents/ — 19명 팀원 (각자 .md 1개)<br>② skills/ — 재사용 가능한 작업 번들 (폴더 + SKILL.md)</div>
+    </div>
+    <div class="ex">
+      <h4>💡 무엇인가요?</h4>
+      <p><b>에이전트</b>는 특정 역할을 맡는 AI 팀원(예: 규칙감시관, 청소원). <b>스킬</b>은 반복 작업을 자동화하는 "명령어 + 문서" 번들. 에이전트가 스킬을 호출하며 업무를 처리합니다.</p>
+
+      <h4>⌨️ 단축키</h4>
+      <div class="sc"><kbd>⌘</kbd><kbd>P</kbd> <span style="color:#666;">→ 파일 이름으로 찾기</span></div>
+      <div class="sc"><span style="color:#666;">→ "rule-watcher" 입력</span></div>
+
+      <div class="prac">
+        <h5>🧪 실습 1분</h5>
+        <ol>
+          <li>탐색기에서 <code>agents/</code> 폴더 열기</li>
+          <li>에이전트 파일 하나 클릭해 frontmatter(맨 위 ---) 훑기</li>
+          <li><code>skills/</code> 폴더 열어 스킬 하나의 SKILL.md 열기</li>
+        </ol>
+      </div>
+      <div class="check">✅ 성공 기준: 에이전트와 스킬의 차이를 한 문장으로 설명</div>
+    </div>
+  </div>
+</section>
 </main>
 
 <footer class="footer">
