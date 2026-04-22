@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-19 16:43 KST
+> 마지막 빌드: 2026-04-22 10:10 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -1120,8 +1120,9 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 7. Notion 읽기 실패 → 에스컬레이션 없이 폴백 (캐시 참조)
 8. 대표님 대기시간 최소화 — 1명 지연 시 부분 응답 가능
 9. 에이전트 프로필은 dispatch 시에만 읽고, 매니저 context에 캐시하지 않음
+10. **Haiku + Write/Edit tool 조합 에이전트는 프로필에 「권한 자체 판단 금지」 강제 규칙 박제 필수** (2026-04-22 추가) — Haiku 모델이 VSCode 세션 등에서 "권한 없을 것 같다"고 자체 추론으로 Write 호출을 포기하는 오류 반복. 신규 Haiku+Write 에이전트 추가 시 `notion-writer.md` 「권한 자체 판단 절대 금지」 섹션 그대로 복사. 실증 근거: 2026-04-22 A/B/C 테스트에서 general-purpose 에이전트는 동일 경로 쓰기 100% 성공, notion-writer(Haiku)만 실패 → 실제 권한 차단 아닌 모델 인지 오류 확정.
 
-*agent.md v2.2 | C+ Agent System | 2026-04-12 | plan-agent/task-planner 폐기, 자문전문가 신설, preflight-trio 계획품질 점검 추가*
+*agent.md v2.3 | C+ Agent System | 2026-04-22 | 원칙 10번 추가 (Haiku+Write 권한 자체 판단 금지 박제 강제)*
 
 
 ---
@@ -1419,4 +1420,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-19 16:43 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-22 10:10 KST | 원본: `~/.claude/*.md` (Git)*
