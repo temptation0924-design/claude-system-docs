@@ -135,6 +135,7 @@
 
 **워크플로우**:
 <!-- id:C-17 -->
+<!-- id:C-17 -->
 1. fresh context 확보 (GSD 원칙 — 긴 작업 시 task별 새 context)
 <!-- id:C-18 -->
 2. `superpowers:subagent-driven-development` — task별 별도 에이전트 (묻지 말고 전부 실행)
