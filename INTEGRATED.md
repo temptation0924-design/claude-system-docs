@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-23 09:02 KST
+> 마지막 빌드: 2026-04-23 09:07 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -29,6 +29,24 @@
 > - 세션 시작/종료 루틴 → [`session.md`](session.md)
 > - 스킬 관련 규칙 (1% 룰 포함) → [`skill-guide.md`](skill-guide.md)
 > - 상세 실행 절차 → 각 MODE 워크플로우
+
+---
+
+## 0. ID 체계 (2026-04-22 신설)
+
+시스템 지침 조항에 고유 ID가 박제되어 있음. 대표님·AI·DB가 같은 주소로 같은 규칙을 지칭 가능.
+
+- **CLAUDE.md**: `C-01 ~ C-35` (이 파일)
+- **rules.md A섹션**: `R-A1 ~ R-A20` (하위원칙)
+- **rules.md B섹션**: `R-B1 ~ R-B18` (위반 코드, Notion DB 단일 원본)
+
+**사용 예시**:
+- 대표님: "그 **C-14** 수정해줘" → AI가 정확히 MODE 1 9번(대표님 승인) 지칭
+- AI: "**R-B4** 위반 1회 기록합니다" → 규칙위반 DB에 정식 ID 박제
+- 조회: `~/.claude/code/id-lookup_v1.sh R-A4` → 해당 항목 전문 출력
+- 레지스트리: `env-info.md ## 📇 ID 레지스트리`
+
+**과도기**: "B4", "MODE 1-7" 자연어 참조도 계속 유효. ID는 정밀도 보완재.
 
 ---
 
@@ -129,33 +147,25 @@
 > 간단한 기획: `/gsd-quick` → full 워크플로우 스킵
 
 <!-- id:C-16 -->
-<!-- id:C-16 -->
 ### MODE 2: 실행 모드 (Execution)
 **트리거**: "OK!", "진행해", "끝까지 해줘"
 
 **워크플로우**:
 <!-- id:C-17 -->
-<!-- id:C-17 -->
 1. fresh context 확보 (GSD 원칙 — 긴 작업 시 task별 새 context)
-<!-- id:C-18 -->
 <!-- id:C-18 -->
 2. `superpowers:subagent-driven-development` — task별 별도 에이전트 (묻지 말고 전부 실행)
 <!-- id:C-19 -->
-<!-- id:C-19 -->
 3. `superpowers:test-driven-development` — 코드 작업 시 TDD 강제
 <!-- id:C-20 -->
-<!-- id:C-20 -->
 4. 2단계 코드리뷰 — spec 준수 + 코드 품질
-<!-- id:C-21 -->
 <!-- id:C-21 -->
 5. **🤖 /codex review 게이트** (코드 완료 후, 외부 AI 코드 리뷰)
    - 조건: task 수 **≥ 20 → 자동 실행** / 미만 → opt-in (대표님 요청 시에만)
    - 동작: `/codex review` → diff/PR 대상 외부 AI 코드 리뷰 → 버그/보안/품질 이슈 → 수정 라운드 (PASS까지 반복)
    - PASS 기준: Codex GATE PASS
 <!-- id:C-22 -->
-<!-- id:C-22 -->
 6. `/ship` 또는 `/land-and-deploy` — 배포 (해당 시)
-<!-- id:C-23 -->
 <!-- id:C-23 -->
 7. **🎁 자동 스킬화 제안** — MODE 1 10번에서 매칭 스킬이 없었던 경우 자동 실행
    - "이 작업을 스킬로 만들까요?" 질문
@@ -176,9 +186,12 @@
 2. `/review` — 코드 리뷰
 <!-- id:C-27 -->
 3. `/canary` — 배포 후 모니터링
+<!-- id:C-28 -->
 4. `/cso` — 보안 감사 (필요 시)
+<!-- id:C-29 -->
 5. `/retro` — 프로젝트 완료 후 회고 (필수)
 
+<!-- id:C-30 -->
 ### MODE 4: 운영 모드 (Operations)
 **트리거**: 세션 시작/종료, 일상 업무
 
@@ -187,6 +200,7 @@
 - 일상 업무 → `skill-guide.md` 키워드 매칭
 - 세션 종료 → `session.md` "세션 종료" 루틴 (핸드오프작성관 → `handoffs/세션인수인계_YYYYMMDD_N차_v1.md` 자동 생성 + Notion 기록)
 
+<!-- id:C-31 -->
 ### 전역 브리핑 레이어 (Easy Briefing)
 
 모든 MODE 공통 — 대표님 요청당 1회 착수 전 쉬운 설명 자동 발동. 복잡도 적응형(원라이너 / 3줄 / 풀버전). 연속 작업·마이크로 요청은 스킵. 상세는 `briefing.md` 참조.
@@ -197,9 +211,13 @@
 - 대화형 질문도 **스킵하지 않음** — 원라이너로 찍고 답변
 
 ### 모드 전환 규칙
+<!-- id:C-32 -->
 - **"업무하자"**: MODE 1~4 중 어떤 모드로 진행할지 질문 → 대표님 선택 후 해당 모드 진입
+<!-- id:C-33 -->
 - **기획 → 실행**: 대표님 "OK!" 또는 90% 검증 통과
+<!-- id:C-34 -->
 - **실행 → 검증**: 작업 완료 또는 배포 후 자동
+<!-- id:C-35 -->
 - **어디서든 → 기획**: 대표님 "계획 세워보자", "기획해줘" 트리거
 
 ---
@@ -222,6 +240,7 @@
 
 운영 지침의 세부 실행 규칙 (모드/스킬/루틴으로 이관된 원칙들의 하위 규정).
 
+<!-- id:R-A1 -->
 ### A1. 파일명 규칙
 
 **적용 대상**: 문서/설정 파일 중 **작업 산출물** (기획서, 보고서, 인수인계, 설계 문서 등)
@@ -238,6 +257,7 @@
 - 형식: `세션인수인계_YYYYMMDD_N차_v1.md`
 - 저장 위치: `~/.claude/handoffs/` (2026-04-11 v4.2.2부터 전용 디렉토리)
 
+<!-- id:R-A10 -->
 **🚫 대상에서 제외 (버전/날짜 불필요)**
 1. **코드 파일**: `.py`, `.sh`, `.js`, `.ts`, `.html`, `.css`, `.tsx`, `.go` 등 실행 파일
 2. **시스템/고정 이름 파일** (이름이 고정이어야 작동):
@@ -246,14 +266,17 @@
    - `README.md`, `SKILL.md`, `MEMORY.md`, `CHANGELOG.md`
 3. **자동 생성/스키마 고정 파일**: 메모리 파일(`~/.claude/projects/.../memory/*.md`), 로그 파일
 
+<!-- id:R-A2 -->
 ### A2. Notion 저장 규칙
 
+<!-- id:R-A12 -->
 **정해진 루틴 (바로 저장 — 묻지 말 것)**
 - 세션 종료 시 작업기록 DB 저장
 - 에러 발생 시 에러로그 DB 저장 — **L1~L3는 의무, L4는 선택** (아래 정의 참조)
 - 규칙 위반 시 규칙위반 DB 기록 (반복횟수 +1)
 - → 이미 라우팅 맵이 정해진 DB는 확인 없이 바로 기록
 
+<!-- id:R-A11 -->
 **에러 4단계 정의** (2026-04-19 v1.8 명문화 — 누락 방지)
 - **L1 Exception/Crash**: tool 호출 실패, script 비정상 종료, hook block — **즉시 worklog ERROR append + 세션 종료 시 에러로그 DB 등록 의무**
 - **L2 진단 오류**: 표면 에러를 잘못된 원인으로 결론 비약 (예: 404 → "환경 문제" 단정) — **인지 즉시 worklog + 등록 의무**
@@ -269,18 +292,21 @@
 
 **DB 생성 전 중복 확인**: `notion-search`로 유사 DB 존재 여부 반드시 확인
 
+<!-- id:R-A13 -->
 **Notion MCP 알려진 버그 2종 회피** (2026-04-18 v1.7 매뉴얼화)
 - Bug 1: `replace_content` 동일 8글자 URL prefix 중복 파싱 → `update_content` 우회
 - Bug 2: `update_properties` relation single-value 거부 → 전체 null → 재입력
 - **사전 차단 패턴 + 즉시 우회 절차**: [`docs/rules/notion-mcp-bugs.md`](docs/rules/notion-mcp-bugs.md) 참조
 - 근거: `feedback_notion_mcp_parser_bug_v1.md`, `feedback_notion_relation_validation_bug_v1.md`
 
+<!-- id:R-A3 -->
 ### A3. 스킬 적용 규칙
 
 - **스킬 확인 순서**
   - **1차 매칭**: `skill-guide.md` 키워드 검색 → 명확한 매칭이면 즉시 invoke
   - **매칭 애매/없음**: → 아래 3단 종합 체크 진입
 
+<!-- id:R-A14 -->
 - **추천 우선순위 (3단 종합 체크)**: 아래 3가지를 모두 확인한 후 최적안 추천
   1. **기존 설치 스킬**: `skill-guide.md`에서 해당 작업에 쓸 수 있는 스킬 검색
   2. **GitHub 유사 스킬**: 기존 설치된 것 외에 GitHub에서 더 나은 유사 스킬이 있는지 탐색
@@ -297,13 +323,16 @@
 
 - **단순 운영 업무 (MODE 4)**: **1차 매칭만** 수행 (`skill-guide.md` 키워드 검색) — 3단 종합 체크는 MODE 1/2 본격 업무에만 적용 (단순 업무 효율 우선)
 
+<!-- id:R-A4 -->
 ### A4. 세션 루틴 규칙
 
+<!-- id:R-A15 -->
 - **시작 루틴 (반드시 순서대로)**:
   1. 자주 실수 패턴 TOP 5 상기 — **Notion DB 동적 조회** (`⚠️ 규칙 위반 기록`, `해결여부=false` + `반복횟수 DESC` + `limit 5`) → 한 줄 다짐 출력
   2. **고정 인사 문구 출력**: "어떤 업무를 진행하세요? ☺️ 기획-실행-검증-운영모드 대기중입니다!"
   3. 대표님 답변 → **모드 라우팅 (MODE 1~4 판별)** + 도구 추천 + 스킬 매칭
 
+<!-- id:R-A16 -->
 - **종료 루틴 (반드시 전부 실행, 순서대로)**:
   1. 작업기록 DB 저장
   2. 에러로그 기록 (에러 있을 때)
@@ -316,6 +345,7 @@
      - ⏰ **맨 마지막에 점검**: 1~6 진행 중 드러난 위반까지 반영하기 위함
   8. Slack 알림 (Claude Code Agent → #general-mode `C0AEM5EJ0ES` private_channel) — 상세 작업일지 포맷은 [`docs/rules/slack-worklog.md`](docs/rules/slack-worklog.md) 참조
 
+<!-- id:R-A5 -->
 ### A5. 도구 추천 규칙
 
 - **기본값**: Claude Code (마스터 도구)
@@ -330,6 +360,7 @@
   - **MODE 2 실행 / MODE 3 검증**: MODE 1에서 결정된 도구 계승 (재추천 불필요)
   - **MODE 4 운영 (단순 업무)**: `session.md` 세션 시작 3번 — task 단위 즉시 추천
 
+<!-- id:R-A17 -->
 - **추천 형식 (2가지 케이스)**
   - **Code가 최적**: `"기본은 Code입니다. 이 작업도 Code가 최적입니다. (이유: ~)"`
   - **다른 도구가 최적**: `"기본은 Code입니다. 이 작업은 [도구명]이 더 편합니다. (이유: ~)"`
@@ -338,6 +369,7 @@
 
 - **대표님 선택 존중**: "OK" 또는 "아니, [다른 도구]로 해줘"
 
+<!-- id:R-A6 -->
 ### A6. 배포/설치 경로 규칙
 
 **배포 경로**
@@ -353,6 +385,7 @@
 - **규칙**: `~/.claude/rules/`
 - **시스템 문서**: `~/.claude/` (루트)
 
+<!-- id:R-A18 -->
 **배포 전 체크리스트**
 - **90% 룰**: preflight-check 종합 점수 90% 이상 ([`docs/rules/preflight-check.md`](docs/rules/preflight-check.md) 참조)
   - 공식: `100% - (CRITICAL × 15%) - (WARNING × 3%)`
@@ -366,6 +399,7 @@
 
 > **TODO** (별도 세션): 위 배포 스킬 4개 이름이 직관적이지 않아 재명명 예정. 변경 완료 후 A6 재수정.
 
+<!-- id:R-A7 -->
 ### A7. Git → GitHub 동기화 규칙 (2026-04-12 v1.7 — Notion 개별 동기화 폐기)
 
 **원칙**
@@ -383,6 +417,7 @@
 1. Git 파일 수정 (`~/.claude/*.md`)
 2. `build-integrated_v1.sh --push` → GitHub `INTEGRATED.md` 재빌드 (~10초)
 
+<!-- id:R-A19 -->
 **B8 체크리스트 (자동화됨 v2 — 2026-04-19)**
 - ✅ `debounce_sync.sh`가 수정 30초 후 자동 빌드+push
 - ✅ 시크릿 스캔 게이트 (토큰 패턴 발견 시 push 차단)
@@ -391,6 +426,7 @@
 - ⚡ 긴급 우회: `SKIP_B8_AUTOSYNC=1` 환경변수 (로그 필수 기록)
 - ⚠️ 실패 시만 수동: `bash ~/.claude/code/build-integrated_v1.sh --push`
 
+<!-- id:R-A8 -->
 ### A8. 에이전트 디스패치 원칙 (2026-04-12 C+ 시스템 신설)
 
 - **병렬이 가능하면 무조건 병렬** — 순차는 데이터 의존 시에만
@@ -403,8 +439,10 @@
 - **에이전트 레지스트리**: `agent.md` v2.0 참조
 - **에이전트 프로필**: `~/.claude/agents/*.md` (19개)
 
+<!-- id:R-A9 -->
 ### A9. MEMORY.md 줄 수 한도 (2026-04-19 v1.8 신설)
 
+<!-- id:R-A20 -->
 - **한도**: MEMORY.md 80줄 이하 유지
 - **근거**: 시스템 truncation 한도 200줄의 40% 마진 + 한 화면 가독성
 - **초과 시 archive 절차**:
@@ -879,6 +917,109 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 
 *Haemilsia AI operations | 2026-04-12 | env-info v5.0 — REF v2.0 + C+ 에이전트 + 6개 시스템 문서 체계 반영*
 
+---
+
+## 📇 ID 레지스트리 (시스템 공용 주소 체계 v1, 2026-04-22)
+
+> CLAUDE.md + rules.md 조항에 박제된 고유 ID 매핑. `<!-- id:X-NN -->` HTML 주석이 항목 바로 위에 삽입됨. 조회: `~/.claude/code/id-lookup_v1.sh <ID>`
+
+### CLAUDE.md — `C-NN` (35개)
+
+| ID | 섹션 | 항목 |
+|---|---|---|
+| C-01 | §1 개요 | ### 사람 역할 |
+| C-02 | §1 개요 | ### 도구 계층 |
+| C-03 | §1 개요 | ### 지침 읽기 체계 |
+| C-04 | §2 | ## 2. 파일 라우팅 맵 |
+| C-05 | §3 MODE 1 | ### MODE 1: 기획 모드 (Planning) |
+| C-06 | MODE 1 워크플로우 | step 1. `/office-hours` |
+| C-07 | MODE 1 워크플로우 | step 2. `brainstorming` |
+| C-08 | MODE 1 워크플로우 | step 3. `/plan-ceo-review` |
+| C-09 | MODE 1 워크플로우 | step 4. `/plan-eng-review` |
+| C-10 | MODE 1 워크플로우 | step 5. `writing-plans` |
+| C-11 | MODE 1 워크플로우 | step 6. Preflight Gate |
+| C-12 | MODE 1 워크플로우 | step 7. 📘 계획 이해 브리핑 |
+| C-13 | MODE 1 워크플로우 | step 8. 🤖 /codex consult 게이트 |
+| C-14 | MODE 1 워크플로우 | step 9. 대표님 승인 |
+| C-15 | MODE 1 워크플로우 | step 10. 🎯 도구 추천 + 스킬 매칭 |
+| C-16 | §3 MODE 2 | ### MODE 2: 실행 모드 (Execution) |
+| C-17 | MODE 2 워크플로우 | step 1. fresh context |
+| C-18 | MODE 2 워크플로우 | step 2. subagent-driven-development |
+| C-19 | MODE 2 워크플로우 | step 3. test-driven-development |
+| C-20 | MODE 2 워크플로우 | step 4. 2단계 코드리뷰 |
+| C-21 | MODE 2 워크플로우 | step 5. 🤖 /codex review 게이트 |
+| C-22 | MODE 2 워크플로우 | step 6. /ship 또는 /land-and-deploy |
+| C-23 | MODE 2 워크플로우 | step 7. 🎁 자동 스킬화 제안 |
+| C-24 | §3 MODE 3 | ### MODE 3: 검증 모드 (Quality) |
+| C-25 | MODE 3 워크플로우 | step 1. /qa |
+| C-26 | MODE 3 워크플로우 | step 2. /review |
+| C-27 | MODE 3 워크플로우 | step 3. /canary |
+| C-28 | MODE 3 워크플로우 | step 4. /cso |
+| C-29 | MODE 3 워크플로우 | step 5. /retro |
+| C-30 | §3 MODE 4 | ### MODE 4: 운영 모드 (Operations) |
+| C-31 | §3 | ### 전역 브리핑 레이어 (Easy Briefing) |
+| C-32 | 모드 전환 규칙 | "업무하자" 트리거 |
+| C-33 | 모드 전환 규칙 | 기획 → 실행 |
+| C-34 | 모드 전환 규칙 | 실행 → 검증 |
+| C-35 | 모드 전환 규칙 | 어디서든 → 기획 |
+
+### rules.md A섹션 — `R-AN` (20개, 하위원칙)
+
+| ID | 항목 |
+|---|---|
+| R-A1 | ### A1. 파일명 규칙 |
+| R-A2 | ### A2. Notion 저장 규칙 |
+| R-A3 | ### A3. 스킬 적용 규칙 |
+| R-A4 | ### A4. 세션 루틴 규칙 |
+| R-A5 | ### A5. 도구 추천 규칙 |
+| R-A6 | ### A6. 배포/설치 경로 규칙 |
+| R-A7 | ### A7. Git → GitHub 동기화 규칙 |
+| R-A8 | ### A8. 에이전트 디스패치 원칙 |
+| R-A9 | ### A9. MEMORY.md 줄 수 한도 |
+| R-A10 | A1: 🚫 대상에서 제외 (버전/날짜 불필요) |
+| R-A11 | A2: 에러 4단계 정의 (L1~L4) |
+| R-A12 | A2: 정해진 루틴 (바로 저장 — 묻지 말 것) |
+| R-A13 | A2: Notion MCP 알려진 버그 2종 회피 |
+| R-A14 | A3: 추천 우선순위 (3단 종합 체크) |
+| R-A15 | A4: 시작 루틴 (반드시 순서대로) |
+| R-A16 | A4: 종료 루틴 (반드시 전부 실행, 순서대로) |
+| R-A17 | A5: 추천 형식 (2가지 케이스) |
+| R-A18 | A6: 배포 전 체크리스트 (90% 룰) |
+| R-A19 | A7: B8 체크리스트 (자동화됨 v2) |
+| R-A20 | A9: 한도 (MEMORY.md 80줄 이하) |
+
+### rules.md B섹션 — `R-BN` = 기존 Bn 위반 코드 (18개)
+
+> B섹션은 테이블 렌더 보존 위해 주석 삽입 생략. 기존 B1~B18 코드가 그대로 ID로 작동.
+> Notion DB 단일 원본: `27c13aa7-9e91-49d3-bb30-0e81b38189e4`
+
+| ID | 기존 코드 | 이름 | 강도 |
+|---|---|---|---|
+| R-B1 | B1 | 파일명 버전 누락 | hard_block |
+| R-B2 | B2 | 세션 인수인계 미생성 | hard_block |
+| R-B3 | B3 | 세션 시작 루틴 미실시 | hard_block |
+| R-B4 | B4 | 도구 추천 누락 | soft_warn |
+| R-B5 | B5 | 스킬 설치 경로 오류 | hard_block |
+| R-B6 | B6 | Notion 임의 저장 | soft_warn |
+| R-B7 | B7 | 다운로드 파일명 패턴 | soft_warn |
+| R-B8 | B8 | INTEGRATED.md 재빌드 누락 | hard_block |
+| R-B9 | B9 | 스킬 설치 후 skill-guide 미등록 | hard_block |
+| R-B10 | B10 | 메모리 상태 반영 누락 | hard_block |
+| R-B11 | B11 | 환경변수 토큰 채팅 노출 | soft_warn |
+| R-B12 | B12 | 복습카드 미생성 | hard_block |
+| R-B13 | B13 | 에이전트 미dispatch | soft_warn |
+| R-B14 | B14 | Preflight Gate 미실시 | hard_block |
+| R-B15 | B15 | CEO/ENG 리뷰 미실시 | hard_block |
+| R-B16 | B16 | 세션 시작 에이전트 미dispatch | soft_warn |
+| R-B17 | B17 | 세션 종료 에이전트 미dispatch | hard_block |
+| R-B18 | B18 | Agent dispatch 파일 경로 누락 | 수동 감시 |
+
+### 규약 (id-system-spec_v1.md 참조)
+- 형식: `<!-- id:X-NN -->` HTML 주석, 항목 바로 위 줄
+- 렌더링 영향: 0
+- 번호 재사용 금지 (삭제 시 retired)
+- 조회: `~/.claude/code/id-lookup_v1.sh <ID>`
+
 
 ---
 
@@ -1157,7 +1298,9 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 9. 에이전트 프로필은 dispatch 시에만 읽고, 매니저 context에 캐시하지 않음
 10. **Haiku + Write/Edit tool 조합 에이전트는 프로필에 「권한 자체 판단 금지」 강제 규칙 박제 필수** (2026-04-22 추가) — Haiku 모델이 VSCode 세션 등에서 "권한 없을 것 같다"고 자체 추론으로 Write 호출을 포기하는 오류 반복. 신규 Haiku+Write 에이전트 추가 시 `notion-writer.md` 「권한 자체 판단 절대 금지」 섹션 그대로 복사. 실증 근거: 2026-04-22 A/B/C 테스트에서 general-purpose 에이전트는 동일 경로 쓰기 100% 성공, notion-writer(Haiku)만 실패 → 실제 권한 차단 아닌 모델 인지 오류 확정.
 
-*agent.md v2.3 | C+ Agent System | 2026-04-22 | 원칙 10번 추가 (Haiku+Write 권한 자체 판단 금지 박제 강제)*
+11. **에이전트 프롬프트 내 ID 참조 우선** (2026-04-22 추가) — 에이전트가 규칙·워크플로우 참조 시 자연어("B4 규칙") 대신 정식 ID("R-B4")를 사용. 오해석 방지 + 규칙위반 DB 자동 집계와 정합. ID 레지스트리: `env-info.md ## 📇 ID 레지스트리`. 조회 도구: `~/.claude/code/id-lookup_v1.sh <ID>`. 규약: `plans/id-system-spec_v1.md`.
+
+*agent.md v2.4 | C+ Agent System | 2026-04-22 | 원칙 11번 추가 (에이전트 ID 참조 우선)*
 
 
 ---
@@ -1455,4 +1598,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-23 09:02 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-23 09:07 KST | 원본: `~/.claude/*.md` (Git)*
