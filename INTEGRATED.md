@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-24 23:43 KST
+> 마지막 빌드: 2026-04-24 23:53 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -1117,10 +1117,11 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 ### 2. 문서 읽기 (2개)
 `file-reading` / `pdf-reading` — 업로드 파일 / PDF 텍스트·OCR
 
-### 3. 디자인 (14개)
+### 3. 디자인 (15개)
 - 기본: `frontend-design` / `design-consultation` / `design-review` / `design-shotgun` / `plan-design-review`
 - 컬러·스타일: `petitlynn-color` / `taste-skill` / `soft-skill` / `minimalist-skill`
 - Supanova 랜딩 패키지 (5): `supanova-design-engine` / `supanova-premium-aesthetic` / `supanova-redesign-engine` / `supanova-full-output` / `supanova-report`
+- 이미지 리디자인: `japandi-interior-redesign` — 방 사진 → Japandi 스타일 이미지 생성
 
 ### 4. 웹 / 배포 (8개)
 `landing-page-deploy` / `haemilsia-bot-deploy` / `haemilsia-bot-dev` / `railway-notion-connect` / `ship` / `land-and-deploy` / `setup-deploy` / `canary`
@@ -1600,4 +1601,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-24 23:43 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-24 23:53 KST | 원본: `~/.claude/*.md` (Git)*
