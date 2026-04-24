@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-24 23:20 KST
+> 마지막 빌드: 2026-04-24 23:39 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -1097,12 +1097,13 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 - `skill-manager` — 스킬 관리 (목록/검색/추가/삭제)
 - `file-organizer` — 파일 정리, 다운로드 정돈
 
-### 🎨 개인화 (3개)
+### 🎨 개인화 (4개)
 - `screenshot-check` — 스크린샷 확인
 - `petitlynn-color` — 쁘띠린 색상 시스템
+- `petitlynn-envelope` — 쁘띠린 사무소 우편봉투 인쇄용 이미지 (버건디+명조체, A5 가로 300dpi)
 - `travel-meal-planner` — 여행 맛집 기획
 
-**총 14개** | 트리거 상세 검색은 `skill-manager` 스킬 호출.
+**총 15개** | 트리거 상세 검색은 `skill-manager` 스킬 호출.
 
 ---
 
@@ -1599,4 +1600,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-24 23:20 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-24 23:39 KST | 원본: `~/.claude/*.md` (Git)*
