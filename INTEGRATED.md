@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-24 23:53 KST
+> 마지막 빌드: 2026-04-24 23:54 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -1141,8 +1141,10 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 ### 8. 기획 / 전략 (6개)
 `office-hours` / `plan-ceo-review` / `plan-eng-review` / `retro` / `autoplan` / `gstack-upgrade`
 
-### 9. 마케팅 / 광고 (2개)
-`claude-ads` / `ai-marketing-claude` — 광고 감사 / 마케팅 전략·카피·퍼널
+### 9. 마케팅 / 광고 (4개)
+- `claude-ads` / `ai-marketing-claude` — 광고 감사 / 마케팅 전략·카피·퍼널
+- `marketing-strategy-advisor` — 실전 마케팅 전략가 (랜딩/상세/캠페인/카피 진단·브리프)
+- `naver-powerlink-advisor` — 네이버 파워링크 검색광고 기획·진단 (캠페인 구조, 키워드 클러스터, CTR/CVR)
 
 ### 10. 커뮤니케이션 (9개)
 - 슬랙 (7): `slack:find-discussions` / `slack:standup` / `slack:summarize-channel` / `slack:draft-announcement` / `slack:channel-digest` / `slack:slack-messaging` / `slack:slack-search`
@@ -1601,4 +1603,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-24 23:53 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-24 23:54 KST | 원본: `~/.claude/*.md` (Git)*
