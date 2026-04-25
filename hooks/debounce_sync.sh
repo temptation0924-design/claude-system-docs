@@ -93,6 +93,9 @@ echo "[$(date '+%H:%M:%S')] TRIGGER ${BASENAME} ts=${MY_TS} session=${SESSION_ID
     fi
   else
     echo "[$(date '+%H:%M:%S')] BUILD_FAILED — Stop 훅이 재시도" >> "$LOG_FILE"
+    # P4 보강 (2026-04-25): SessionStart 훅이 픽업할 errors.log 기록
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] BUILD_FAILED ${BASENAME} session=${SESSION_ID}" \
+      >> ~/.claude/.integrated-rebuild-errors.log
   fi
 ) &
 
