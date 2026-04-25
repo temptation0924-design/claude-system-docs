@@ -1,6 +1,15 @@
 # Claude System Upgrade v2 — Design Spec
 
-**작성**: 2026-04-25 | **버전**: v0.1 | **작성자**: 매니저 (대표님 승인 후 진행)
+**작성**: 2026-04-25 | **버전**: v0.2 | **작성자**: 매니저
+**v0.2 변경**: ENG 리뷰 발견 — P4 기존 인프라(`debounce_sync.sh`) 가동 중 → P4 신규 훅 제거, 대신 self-check 규칙 박제로 전환. CEO 제안 P2 사전검증 추가. P1 false positive Python 전처리 보강.
+
+## 0-pre. v0.2 결정적 발견
+
+ENG 리뷰 + 12일치 `/tmp/claude-b8-debounce.log` 분석 결과:
+- `~/.claude/hooks/debounce_sync.sh` (167L, 2026-04-19 운영)이 8개 시스템 문서에 대해 30초 디바운스 + 시크릿 스캔 + INTEGRATED 자동 재빌드/푸시를 **이미 완벽 수행 중** (TRIGGER 57 = BUILD_SUCCESS 57, 실패 0).
+- **B8 45회 위반은 거짓 양성** — 매니저가 handoff frontmatter `violations`에 self-check로 기록했지만 실제로는 자동 빌드 작동 중.
+
+→ **P4 (PostToolUse 신규 훅) 통째 제거**. 대신 매니저 self-check 규칙을 "debounce 로그 확인 후 B8 판정" 으로 박제 (P3 가드 맵에 명시).
 
 ## 0. 배경
 
@@ -19,7 +28,7 @@
 ## 1. 목적 (Goals)
 
 - **B4**: 50회 → **<5회** (자동 reminder inject)
-- **B8**: 45회 → **<5회** (PostToolUse 자동 재빌드)
+- **B8**: 45회 → **<5회** (거짓 양성 박제 + 매니저 self-check 규칙 박제 — debounce 로그 확인)
 - **B2**: 38회 → **<10회** (Sonnet 승급으로 권한 거부 박멸)
 - **B3**: 30회 → **<10회** (Sonnet 승급으로 dispatch 안정화)
 - **5초 진단**: B코드 위반 발생 시 책임자 5초 내 식별 (rules.md 가드 맵)
@@ -36,20 +45,21 @@
 ┌─────────────────────────────────────────────────────────────┐
 │  대표님 입력                                                 │
 │      ↓                                                       │
-│  [P1] UserPromptSubmit 훅 → MODE 키워드 감지 시              │
-│         system-reminder inject:                              │
-│         "B4 가드: 도구 추천 1줄 명시 필수"                    │
+│  [P1] UserPromptSubmit 훅 (Python 전처리, timeout 3s) →       │
+│         MODE 키워드 감지 (코드펜스/인용 제외) →               │
+│         system-reminder inject: "B4 가드: 도구 추천 1줄 필수"   │
 │      ↓                                                       │
 │  매니저 (MODE 1~4 처리)                                      │
 │      ↓                                                       │
 │  [P2] notion-writer / handoff-scribe (Sonnet 기본)           │
-│         권한 거부 사고 박멸                                  │
+│         + Sonnet 5xx → Haiku 폴백 1회 정책                   │
 │      ↓                                                       │
-│  [P4] 시스템 문서 8개 Edit/Write → PostToolUse 훅 →          │
-│         INTEGRATED.md 자동 재빌드 + GitHub push (5분 디바운스)│
+│  [기존] debounce_sync.sh (이미 가동) →                        │
+│         시스템 문서 8개 → 30초 디바운스 → INTEGRATED 자동 빌드 │
 │                                                              │
 │  [P3] rules.md 섹션 D — 가드 맵 (5초 진단)                    │
-│  [P4-bonus] SessionStart — 어제 메트릭 1줄                   │
+│         + B8 self-check 규칙: debounce 로그 확인 후 판정       │
+│  [P4-bonus] session-start-worklog.sh — 어제 메트릭 1줄        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,12 +67,21 @@
 
 ### 4.1 P1 — UserPromptSubmit 훅 (B4 가드)
 
-**파일**: `~/.claude/hooks/userpromptsubmit-tool-recommendation.sh` (신규)
+**파일**:
+- 메인 훅: `~/.claude/hooks/userpromptsubmit-tool-recommendation.sh` (신규, ~15L — wrapper)
+- 매처 로직: `~/.claude/hooks/check_mode_keyword.py` (신규, ~50L — Python으로 코드펜스/인용 안전 매칭)
 
-**트리거 키워드** (정규식 OR):
-- 기획 트리거: `기획해줘|계획.*세워|만들자|아이디어 있|plan|기획하자`
-- 실행 트리거: `진행해|실행|OK!|끝까지`
+**왜 Python?**: ENG 리뷰 — bash 정규식은 backtick 코드블록/인용 차단 불가. Python `markdown_it` 또는 정규식 + 코드펜스 사전 제거로 false positive 박멸.
+
+**트리거 키워드** (Python 매처 내부):
+- 기획 트리거: `기획해줘|계획.*세워|만들자|아이디어 있|기획하자|^plan$`
+- 실행 트리거: `진행해|실행해|OK!|끝까지`
 - 검증 트리거: `검증해줘|점검해줘|체크해줘|QA|테스트해줘|배포 확인`
+
+**False positive 방어 (Python 전처리)**:
+1. 입력에서 ` ``` ... ``` ` 코드블록 + ` ` 인라인 코드 제거
+2. `>` 인용 블록 제거
+3. 남은 본문에서 정규식 매칭 → 매칭 시에만 reminder inject
 
 **출력 (system-reminder)**:
 ```
@@ -71,29 +90,37 @@
 선택지: Code(마스터) / Claude.ai(보조) / Cowork(보조)
 ```
 
-**False positive 방어**: 키워드가 코드/문서 인용("plan parameter", "execute() 함수") 안에 있으면 발동하지 않도록 영문 단어 경계(`\b`) + 한국어 어미 패턴 매칭.
-
 **Settings 등록**:
 ```json
 {
   "hooks": {
     "UserPromptSubmit": [{
       "matcher": "*",
-      "hooks": [{"type": "command", "command": "~/.claude/hooks/userpromptsubmit-tool-recommendation.sh"}]
+      "hooks": [{
+        "type": "command",
+        "command": "bash ~/.claude/hooks/userpromptsubmit-tool-recommendation.sh",
+        "timeout": 3
+      }]
     }]
   }
 }
 ```
 
+**성능 목표**: <30ms (Python 매처). 3s timeout 안전망.
+
 ### 4.2 P2 — Sonnet 승급 (notion-writer + handoff-scribe)
+
+**🆕 사전 검증 (CEO 권고)**: notion-writer를 임시 Sonnet으로 승급 → Edit/Write 호출 3회 연속 테스트 → 모두 통과 시에만 영구 승급. 1회라도 실패 시 deferred tools 우회 패턴이 진짜 원인이므로 P2 보류 + feedback 메모리 박제.
 
 **대상 파일**:
 - `~/.claude/agents/notion-writer.md` — frontmatter `model: haiku` → `sonnet`
 - `~/.claude/agents/handoff-scribe.md` — frontmatter `model: haiku` → `sonnet`
 
-**agent.md 섹션 5 정책 추가** (1줄):
+**agent.md 섹션 5 정책 추가** (3줄):
 ```
 | Write/Edit 권한 필요 에이전트 | **Sonnet 기본** | Haiku 권한 거부 12회 재발 → 2026-04-25 정책 전환 |
+| Sonnet 5xx (rate limit, model unavailable) | Haiku 폴백 1회 자동 | 매니저에게 fallback 알림 inject |
+| Haiku 폴백 후에도 권한 거부 시 | 매니저 직접 처리로 에스컬레이션 | (현재 패턴 유지) |
 ```
 
 **비용 영향**: ~$0.5/일 추가 (~$15/월). 7일 후 회고에서 비용/효과 검증.
@@ -115,33 +142,42 @@
 
 **갱신 주기**: 매주 또는 사고 발생 시.
 
-### 4.4 P4 — INTEGRATED 자동 재빌드 (B8 가드)
+### 4.4 ~~P4 (제거)~~ — 기존 `debounce_sync.sh` 활용
 
-**파일**: `~/.claude/hooks/posttooluse-integrated-rebuild.sh` (신규)
+**❌ 신규 훅 추가 폐기** (ENG 리뷰 발견):
 
-**트리거**: PostToolUse(Edit, Write) on 8 시스템 문서:
-- `CLAUDE.md`, `rules.md`, `session.md`, `env-info.md`
-- `skill-guide.md`, `agent.md`, `briefing.md`, `slack.md`
+기존 인프라 가동 중:
+- `~/.claude/hooks/debounce_sync.sh` (167L, 2026-04-19부터)
+- 8 시스템 문서 매처 동일 (`CLAUDE.md rules.md session.md env-info.md skill-guide.md agent.md briefing.md slack.md`)
+- 30초 디바운스 + 시크릿 스캔 + tracker 연동 + kill-switch
+- 12일치 로그: TRIGGER 57 = BUILD_SUCCESS 57 (실패 0)
 
-**디바운스**: 5분 (lock 파일 `~/.claude/.integrated-rebuild.lock` mtime 체크). 5분 내 추가 변경 시 한 번만 실행.
+**B8 45회 위반의 진짜 원인**: 매니저가 self-check로 "INTEGRATED 재빌드 누락"을 잘못 판정. 실제로는 이미 자동 빌드 완료된 상태.
 
-**실행**:
+**대신 추가**: `debounce_sync.sh` 보강 1건 — BUILD_FAILED 분기에 `errors.log` 기록 추가 (기존 LOG_FILE에는 기록되지만 SessionStart에서 픽업 안 됨).
+
 ```bash
-~/.claude/code/build-integrated_v1.sh --push  # background, 10초 내 완료
+# debounce_sync.sh 내부, BUILD_FAILED 분기 (~140L 부근):
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] BUILD_FAILED ${BASENAME} session=${SESSION_ID}" \
+  >> ~/.claude/.integrated-rebuild-errors.log
 ```
 
-**실패 시**: stderr → `~/.claude/.integrated-rebuild-errors.log`. 다음 SessionStart 훅이 errors.log 존재 시 매니저에게 reminder.
+**SessionStart 훅 보강**: `~/.claude/.integrated-rebuild-errors.log` mtime > last_session_start 시 매니저에게 reminder.
 
 ### 4.5 P4-bonus — SessionStart 메트릭 1줄
 
-**위치**: 기존 `~/.claude/hooks/session-start-*.sh` 확장
+**위치**: `~/.claude/hooks/session-start-worklog.sh` (ENG 리뷰 권고 — 가장 자연스러움, +~15L)
 
 **포맷** (1줄):
 ```
 📊 어제: 5세션 / 6시간 / 23 commits / TOP B코드: B4 ×3, B8 ×2
 ```
 
-**데이터 소스**: 어제 날짜 handoffs/세션인수인계_*.md frontmatter 파싱 (commits, violations, duration_min).
+**데이터 소스 (다중 폴백)**:
+1. 1차: `~/.claude/handoffs/세션인수인계_<어제>_*.md` frontmatter (commits, violations, duration_min)
+2. 2차: `~/.claude/.session_worklog`의 어제 항목 (handoff 미생성 시 폴백)
+
+**P3(가드 맵)에 통합 가능성** (CEO 제안 P5 — 다음 사이클): 메트릭 1줄을 self-diagnosing loop의 일부로 격상 — 매주 일요일 자동 PR로 가드 맵 갱신.
 
 ## 5. 데이터 흐름
 
@@ -159,20 +195,21 @@ system-reminder inject: "🛡️ B4 가드: 도구 추천 1줄 명시 필수"
 B4 위반 0
 ```
 
-### 5.2 B8 시나리오
+### 5.2 B8 시나리오 (기존 debounce_sync.sh 활용 — v0.2)
 
 ```
 매니저: rules.md Edit (가드 맵 1줄 추가)
    ↓
-PostToolUse 훅: 매칭 (path == rules.md)
+PostToolUse 훅: debounce_sync.sh 트리거 (이미 가동 중)
    ↓
-디바운스 체크 → 통과 → background 실행
+30초 디바운스 → 시크릿 스캔 → background 실행
    ↓
 build-integrated_v1.sh --push (10초)
    ↓
 GitHub raw URL 자동 갱신
    ↓
-매니저: 작업 계속 진행
+매니저 self-check 규칙 (P3 가드 맵):
+  "B8 판정 전 /tmp/claude-b8-debounce.log 확인 — BUILD_SUCCESS 있으면 위반 아님"
 ```
 
 ## 6. 에러 처리
@@ -180,20 +217,28 @@ GitHub raw URL 자동 갱신
 | 시나리오 | 폴백 |
 |---------|------|
 | P1 훅 실패 (matcher 오류, 권한 등) | 매니저 그대로 진행, B4 자체점검 (현재 방식 유지) |
-| P4 빌드 실패 (네트워크, git auth 등) | errors.log 기록 → 다음 SessionStart 시 매니저에게 reminder |
+| P1 timeout 초과 (3s) | 훅 무시, 매니저 진행 |
+| P1 false positive (코드펜스/인용) | Python 전처리에서 사전 제거 — 1차 방어. 누수 시 매니저 무시 가능 |
+| P2 Sonnet spawn 실패 (5xx, rate limit) | Haiku 폴백 1회 자동 (agent.md 정책) |
+| P2 사전 검증 3회 중 1회라도 실패 | P2 영구 승급 보류 + deferred tools 패턴 박제 |
 | Sonnet 비용 7일 후 임계 초과 | 회고에서 한 명만 다시 Haiku로 재검토 |
-| P1 false positive ("plan parameter" 같은 인용) | 매니저가 컨텍스트 무시 가능 (system-reminder는 강제 아님) |
-| P4 동시성 (5분 내 여러 파일 수정) | 디바운스로 마지막 1회만 빌드 |
+| 기존 debounce_sync.sh 빌드 실패 | errors.log 기록 → SessionStart에 reminder |
+| 기존 debounce 동시성 | 30초 디바운스 + mkdir-lock으로 처리 (변경 없음) |
 
 ## 7. 검증 (Acceptance)
 
 | Pillar | 검증 방법 | 합격 기준 |
 |--------|----------|----------|
-| P1 | "기획해줘" 등 4개 트리거 키워드 입력 | 매니저 응답 4건 모두 도구 추천 1줄 포함 |
-| P2 | notion-writer dispatch + Edit 호출 | 권한 거부 0회 (3회 연속 테스트) |
+| P1 (정상) | "기획해줘" 등 4개 트리거 키워드 입력 | 매니저 응답 4건 모두 도구 추천 1줄 포함 |
+| P1 (false positive) | 코드블록/인용 안에 `plan` 단어 입력 (예: `` `plan` parameter ``) | reminder inject **안 됨** |
+| P1 (성능) | 100회 prompt | 평균 <30ms, 최대 <100ms |
+| P2 (사전검증) | notion-writer 임시 Sonnet으로 3회 Edit/Write 테스트 | 3/3 성공 시에만 영구 승급 |
+| P2 (폴백) | Sonnet 5xx 시뮬레이션 | Haiku 자동 폴백 + 알림 inject 확인 |
 | P3 | "B4 위반 발생" → rules.md 섹션 D 조회 | 5초 내 책임자 식별 가능 |
-| P4 | rules.md 1줄 수정 → 6분 대기 | GitHub raw URL 자동 갱신 확인 |
-| P4-bonus | SessionStart 출력 | "어제 N세션 / TOP B코드" 1줄 포함 |
+| 기존 P4 | rules.md 1줄 수정 → 30초 후 GitHub raw 확인 | 자동 갱신 (이미 가동 중, 회귀 테스트만) |
+| 기존 P4 (실패) | 인위적 빌드 실패 (예: 시크릿 detected) | errors.log 기록 + 다음 SessionStart에 reminder |
+| 기존 P4 (동시성) | 5분 내 8 파일 동시 Edit | 디바운스로 마지막 1회만 빌드 (LOCK_BUSY 0건) |
+| P4-bonus | SessionStart 출력 (handoff 있을 때 + 없을 때 둘 다) | "어제 N세션 / TOP B코드" 1줄 포함 (폴백 검증) |
 | 통합 | 7일 후 위반 통계 재집계 | B4+B8+B2+B3 합계 163회 → **<30회** (-80%) |
 
 ## 8. Out of Scope
@@ -216,28 +261,30 @@ GitHub raw URL 자동 갱신
 
 | 파일 | 변경 유형 | 라인 수 (대략) |
 |------|----------|--------------|
-| `~/.claude/hooks/userpromptsubmit-tool-recommendation.sh` | 신규 | ~30 |
-| `~/.claude/hooks/posttooluse-integrated-rebuild.sh` | 신규 | ~40 |
-| `~/.claude/hooks/session-start-*.sh` | 메트릭 추가 | +~15 |
-| `~/.claude/settings.json` | 훅 2개 등록 | +~10 |
-| `~/.claude/agents/notion-writer.md` | model 변경 | 1줄 |
-| `~/.claude/agents/handoff-scribe.md` | model 변경 | 1줄 |
-| `~/.claude/agent.md` 섹션 5 | 정책 1줄 추가 | +~3 |
-| `~/.claude/rules.md` | 신규 섹션 D | +~25 |
-| `INTEGRATED.md` | 자동 재빌드 1회 | 자동 |
+| `~/.claude/hooks/userpromptsubmit-tool-recommendation.sh` | 신규 (wrapper) | ~15 |
+| `~/.claude/hooks/check_mode_keyword.py` | 신규 (Python 매처) | ~50 |
+| `~/.claude/hooks/debounce_sync.sh` | BUILD_FAILED 분기에 errors.log 기록 추가 | +~3 |
+| `~/.claude/hooks/session-start-worklog.sh` | 메트릭 1줄 + errors.log 픽업 | +~20 |
+| `~/.claude/settings.json` | UserPromptSubmit 훅 1개 등록 | +~7 |
+| `~/.claude/agents/notion-writer.md` | model: haiku → sonnet | 1줄 |
+| `~/.claude/agents/handoff-scribe.md` | model: haiku → sonnet | 1줄 |
+| `~/.claude/agent.md` 섹션 5 | 정책 3줄 추가 (정책 + 폴백 + 에스컬레이션) | +~5 |
+| `~/.claude/rules.md` | 신규 섹션 D 가드 맵 (B코드 18행) + B8 self-check 규칙 | +~30 |
+| `INTEGRATED.md` | 자동 재빌드 1회 (기존 debounce_sync.sh가 처리) | 자동 |
 
-**총 변경**: 9개 파일, ~125 라인 추가/변경.
+**총 변경**: 10개 파일, ~130 라인 추가/변경. (P4 신규 훅 제거로 단순화)
 
 ## 11. 일정 (예상)
 
-- **Phase 1 (P2 — Sonnet 승급)**: 5분. 가장 안전, 즉시 효과.
-- **Phase 2 (P3 — 가드 맵)**: 15분. 표 작성 + rules.md 통합.
-- **Phase 3 (P1 — UserPromptSubmit 훅)**: 20분. 정규식 + 테스트.
-- **Phase 4 (P4 — PostToolUse 훅)**: 25분. 디바운스 + bg 실행.
-- **Phase 5 (P4-bonus — 메트릭)**: 10분. SessionStart 확장.
-- **Phase 6 (검증 + INTEGRATED 빌드)**: 15분.
+- **Phase 1 (P2 사전검증)**: 10분. notion-writer 임시 Sonnet 3회 Edit 테스트 + 결과 박제.
+- **Phase 2 (P2 영구 승급)**: 5분. 사전검증 PASS 시 frontmatter 2건 + agent.md 정책 3줄.
+- **Phase 3 (P3 — 가드 맵)**: 15분. rules.md 섹션 D 18행 + B8 self-check 규칙.
+- **Phase 4 (P1 — UserPromptSubmit 훅)**: 25분. Python 매처 + bash wrapper + settings.json + 6개 케이스 테스트.
+- **Phase 5 (debounce_sync.sh 보강)**: 5분. BUILD_FAILED 분기 1줄.
+- **Phase 6 (P4-bonus — 메트릭)**: 15분. session-start-worklog.sh 확장 + 폴백 + errors.log 픽업.
+- **Phase 7 (검증 + INTEGRATED 빌드)**: 15분. 7장 검증 시나리오 자동 실행.
 
-**합계**: ~90분.
+**합계**: ~90분 (변동 없음).
 
 ---
 
