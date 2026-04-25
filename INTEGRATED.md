@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-25 14:04 KST
+> 마지막 빌드: 2026-04-25 14:07 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -496,7 +496,48 @@
 
 ---
 
-*Haemilsia AI operations | 2026.04.12 | v1.7 — A7 Notion 개별 동기화 폐기, GitHub INTEGRATED.md 단일 경로*
+## D. 자동화 가드 맵 (B코드 ↔ 책임자)
+
+> **목적**: B코드 위반 발생 시 5초 내 책임자 식별. 매주 또는 사고 시 갱신.
+> **출처**: `docs/superpowers/specs/2026-04-25-claude-system-upgrade-v2-design.md` §4.3 (v0.2)
+
+| B코드 | 위반 내용 | 1차 가드 (자동) | 폴백 (수동) | 7일 위반 |
+|------|----------|----------------|-------------|---------|
+| R-B1 | 파일명 버전 누락 | PreToolUse:Write `check_filename_version.py` | 매니저 self-check | 26 |
+| R-B2 | 세션 인수인계 미생성 | Stop `session-end-check.sh` + handoff-scribe (Sonnet) | 다음 SessionStart 미싱크 재시도 | 38 |
+| R-B3 | 세션 시작 루틴 미실시 | Stop tracker `top5_queried` (SessionStart 훅) | 매니저 직접 호출 | 30 |
+| R-B4 | 도구 추천 누락 | **🆕 UserPromptSubmit 훅 (P1)** + Stop tracker `tool_recommended` | 매니저 self-check | 50 |
+| R-B5 | 스킬 설치 경로 오류 | PreToolUse:Write `check_skill_path.py` | 매니저 self-check | - |
+| R-B6 | Notion 임의 저장 | Stop tracker `notion_unauthorized` | 매니저 사전 컨펌 | - |
+| R-B7 | 다운로드 파일명 패턴 | PreToolUse:Write `check_filename_version.py --mode=B7` | 매니저 self-check | - |
+| R-B8 | INTEGRATED 재빌드 누락 | **`debounce_sync.sh`** (30s 디바운스, v0.2 보강) | errors.log → SessionStart reminder | 45* |
+| R-B9 | 스킬 등록 누락 | Stop tracker `skills_dir + skill_guide` | 매니저 self-check | 7 |
+| R-B10 | 메모리 상태 반영 누락 | Stop tracker `memory_updated` | `memory_patcher.py` 폴백 | 16 |
+| R-B11 | 환경변수 토큰 노출 | PreToolUse `check_token_exposure.py` | git-secrets pre-commit | 26 |
+| R-B12 | 복습카드 미생성 | Stop tracker `review_card_sent` (study-coach 자동) | 매니저 직접 호출 | 24 |
+| R-B13 | 에이전트 미dispatch | Stop tracker `agent_dispatched` | 매니저 직접 dispatch | 10 |
+| R-B14 | Preflight Gate 미실시 | Stop tracker `preflight_executed` (MODE 1) | 매니저 직접 (MODE 1 7번) | 9 |
+| R-B15 | CEO/ENG 리뷰 미실시 | Stop tracker `ceo_eng_review_executed` (MODE 1) | 매니저 직접 dispatch (MODE 1 4번) | 10 |
+| R-B16 | 세션 시작 에이전트 미dispatch | Stop tracker `session_start_agents` | 매니저 직접 호출 | 18 |
+| R-B17 | 세션 종료 에이전트 미dispatch | Stop tracker `session_end_agents` (handoff-scribe + notion-writer) | 매니저 명시 호출 | 18 |
+| R-B18 | Agent dispatch 파일 경로 누락 | docs/agents.md SELF-CHECK 템플릿 | 매니저 review (수동 감시) | 13 |
+
+> **\* B8 표기 주의**: 45회는 **거짓 양성** — `debounce_sync.sh`가 12일치 TRIGGER 57회 = BUILD_SUCCESS 57회 (실패 0)로 작동 중. 매니저 self-check 오기록(아래 규칙 적용 후 박멸 예정).
+
+### B8 self-check 규칙 (오기록 방지)
+
+매니저가 handoff frontmatter `violations:` 작성 시 B8 판정 전 다음 체크:
+
+```bash
+# 마지막 시스템 문서 변경 후 30초 내 BUILD_SUCCESS 있는지 확인
+tail -30 /tmp/claude-b8-debounce.log | grep BUILD_SUCCESS
+```
+
+→ BUILD_SUCCESS 항목 있으면 **B8 위반 아님** (debounce_sync.sh가 자동 처리). 매니저는 violations에서 B8 제외.
+
+---
+
+*Haemilsia AI operations | 2026.04.25 | v1.8 — D 자동화 가드 맵 신설 (B코드 18행 ↔ 책임자 ↔ 폴백)*
 
 ---
 
@@ -1613,4 +1654,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-25 14:04 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-25 14:07 KST | 원본: `~/.claude/*.md` (Git)*
