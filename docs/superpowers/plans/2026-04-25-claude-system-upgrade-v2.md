@@ -768,7 +768,8 @@ cat > ~/.claude/.upgrade-v2-baseline-20260425.json <<EOF
   "baseline_date": "2026-04-25",
   "violations_7day": {
     "B4": 50, "B8": 45, "B2": 38, "B3": 30, "B1": 26,
-    "total_top4": 163
+    "total_top4": 163,
+    "_note_B8": "45회는 거짓 양성 — debounce_sync.sh가 정상 작동 (TRIGGER 57=BUILD_SUCCESS 57). 실 위반 ≈ 0. self-check 규칙 적용 후 회고 시 재집계."
   },
   "target_7day_after": {"total_top4_max": 30, "reduction_pct_min": 80}
 }

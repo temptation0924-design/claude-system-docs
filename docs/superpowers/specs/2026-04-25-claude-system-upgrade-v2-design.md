@@ -137,7 +137,7 @@ ENG 리뷰 + 12일치 `/tmp/claude-b8-debounce.log` 분석 결과:
 | R-B2 | 인수인계/DB 미저장 | handoff-scribe + notion-writer (Sonnet) | 다음 세션 SessionStart 미싱크 재시도 | 38 |
 | R-B3 | 세션 시작 루틴 미실시 | SessionStart 훅 (TOP 5 + 메모리 + 환영) | 매니저 직접 호출 | 30 |
 | R-B4 | 도구 추천 누락 | **🆕 UserPromptSubmit 훅 (P1)** | 매니저 self-check | 50 |
-| R-B8 | INTEGRATED 재빌드 누락 | **🆕 PostToolUse 훅 (P4)** | 다음 세션 reminder | 45 |
+| R-B8 | INTEGRATED 재빌드 누락 | **debounce_sync.sh** (기존 30s 디바운스, v0.2 보강) | errors.log → SessionStart reminder | 45* (거짓 양성) |
 | ... | (R-B5 ~ R-B18 전부 매핑) | ... | ... | ... |
 
 **갱신 주기**: 매주 또는 사고 발생 시.
