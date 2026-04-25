@@ -87,7 +87,19 @@
       "Bash(echo \"[$\\(date +%H:%M\\)] TASK: news-briefing-v2 v3 재계획 + 3차 Preflight 92.0% PASS\")",
       "Bash(echo '')",
       "Bash(echo '# npm global \\(user-prefix, avoids sudo\\) — added 2026-04-19')",
-      "Bash(echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"')"
+      "Bash(echo 'export PATH=\"$HOME/.npm-global/bin:$PATH\"')",
+      "Bash(echo \"{\\\\\"epoch\\\\\": $\\(date +%s\\), \\\\\"human\\\\\": \\\\\"$\\(date '+%Y-%m-%d %H:%M:%S'\\)\\\\\"}\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] SESSION_START: Phase 3 news-briefing v2\")",
+      "Bash(cp ~/.claude/.session_worklog ~/.claude/.session_worklog.12차.bak)",
+      "Bash(rm -f ~/.claude/.session_worklog)",
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR: signing_secret 교체 시 8앱 중 7앱 먹통 발견 | Slack,Railway,signing_secret\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR_RESOLVED: 원래 값으로 즉시 롤백 완료, 해결책 메모리 저장 \\(옵션 D 권장\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: 세션 종료 준비 - 대표님 피곤함 표시\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] MODE: MODE 4 운영모드 \\(세션시작\\) → MODE 3 검증모드 \\(빡센점검\\)\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] ERROR: Wave 2 미납리스크 category 오분류 — D4a/b/c 15건을 errors[]에 포함 \\(심각도 분류를 오류로 오판\\) | L2진단오류,규칙해석\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] SESSION_END: 빡센점검 Wave 2 중단, 다음 세션 인수인계 \\(Wave 3/4 미실행\\)\")",
+      "Bash(echo \"{\\\\\"epoch\\\\\":$\\(date +%s\\),\\\\\"time\\\\\":\\\\\"$\\(date +'%Y-%m-%d %H:%M %Z'\\)\\\\\"}\")",
+      "Bash(echo \"[$\\(date +%H:%M\\)] SESSION_START: 2026-04-21 1차 \\(daily first\\)\")"
     ],
     "deny": [
       "Bash(rm -rf /)",
@@ -96,7 +108,15 @@
       "Bash(rm -rf .*)",
       "Bash(git reset --hard *)",
       "Bash(git push --force *)",
-      "Bash(git push -f *)"
+      "Bash(git push -f *)",
+      "Write(/Users/ihyeon-u/**/.env)",
+      "Write(/Users/ihyeon-u/**/.env.*)",
+      "Write(/Users/ihyeon-u/**/credentials*)",
+      "Write(/Users/ihyeon-u/**/secrets*)",
+      "Write(/Users/ihyeon-u/**/.git/**)",
+      "Edit(/Users/ihyeon-u/**/.env)",
+      "Edit(/Users/ihyeon-u/**/.env.*)",
+      "Edit(/Users/ihyeon-u/**/.git/**)"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
@@ -113,7 +133,8 @@
       "/Users/ihyeon-u/.claude/skills/haemilsia-D3-test",
       "/Users/ihyeon-u/.claude/docs/rules",
       "/Users/ihyeon-u/.claude/docs/superpowers",
-      "/Users/ihyeon-u/.claude/plans"
+      "/Users/ihyeon-u/.claude/plans",
+      "/Users/ihyeon-u/.claude/memory"
     ]
   },
   "hooks": {
@@ -269,6 +290,18 @@
           }
         ]
       }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/userpromptsubmit-tool-recommendation.sh",
+            "timeout": 3
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -288,6 +321,5 @@
       }
     }
   },
-  "skipDangerousModePermissionPrompt": true,
-  "effortLevel": "xhigh"
+  "skipDangerousModePermissionPrompt": true
 }
