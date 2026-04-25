@@ -116,21 +116,25 @@ rm /tmp/p2-validation-test.md
 
 ## Phase 2 — P2 영구 승급 (사전검증 PASS 시에만)
 
-### Task 3: handoff-scribe Sonnet 승급
+### Task 3: handoff-scribe Sonnet 확인 (사전 점검)
 
 **Files:**
-- Modify: `~/.claude/agents/handoff-scribe.md` frontmatter `model: haiku` → `sonnet`
+- Modify (조건부): `~/.claude/agents/handoff-scribe.md`
 
-- [ ] **Step 1: 변경 + 확인**
+> ⚠️ Preflight 발견: handoff-scribe는 **이미 `model: sonnet`** (2026-04-21 _2차 세션에서 변경됨). 이 Task는 사전 확인만 수행.
 
-`~/.claude/agents/handoff-scribe.md`의 `model: haiku` → `model: sonnet` (Edit)
+- [ ] **Step 1: 현재 model 확인**
 
 ```bash
 grep "^model:" ~/.claude/agents/handoff-scribe.md
-# 기대: model: sonnet
 ```
 
-- [ ] **Step 2: 변경 없음 (Task 4와 통합 커밋)**
+- [ ] **Step 2: 분기 처리**
+
+- 결과가 `model: sonnet` → 변경 불필요, 다음 Task로 진행
+- 결과가 `model: haiku` → Edit으로 `sonnet`으로 변경
+
+- [ ] **Step 3: 변경 없음 (Task 4와 통합 커밋)**
 
 ### Task 4: agent.md 섹션 5 Sonnet 정책 박제
 
@@ -208,7 +212,7 @@ grep -n "^## " ~/.claude/rules.md | tail -5
 | R-B5 | (TBD — rules.md B5 정의 참조) | 해당 훅/에이전트 명시 | 매니저 | - |
 | R-B6 | (TBD) | 해당 훅/에이전트 | 매니저 | - |
 | R-B7 | (TBD) | - | - | - |
-| R-B8 | INTEGRATED 재빌드 누락 | **debounce_sync.sh** (30s 디바운스) | errors.log → SessionStart reminder | 45 |
+| R-B8 | INTEGRATED 재빌드 누락 | **debounce_sync.sh** (30s 디바운스) | errors.log → SessionStart reminder | 45* |
 | R-B9 | 스킬 등록 누락 | skill-manager 자동 등록 | 매니저 self-check | 7 |
 | R-B10 | (TBD) | - | - | - |
 | R-B11 | 환경변수 토큰 노출 | PreToolUse `check_token_exposure.py` | git-secrets pre-commit | 21 |
@@ -219,6 +223,8 @@ grep -n "^## " ~/.claude/rules.md | tail -5
 | R-B16 | 세션 시작 에이전트 미dispatch | SessionStart 훅 Stage 1 | session-tracker 검증 | 18 |
 | R-B17 | 세션 종료 에이전트 미dispatch | SessionEnd 훅 Stage 1+2 | 매니저 명시 호출 | 18 |
 | R-B18 | (TBD) | - | - | 13 |
+
+> **\* B8 표기 주의**: 45회는 **거짓 양성** — `debounce_sync.sh`가 12일치 TRIGGER 57회 = BUILD_SUCCESS 57회 (실패 0)로 작동 중. 매니저 self-check 오기록(아래 규칙 적용 후 박멸 예정).
 
 ### B8 self-check 규칙 (오기록 방지)
 
@@ -300,13 +306,14 @@ def run(stdin_text):
 
 cases = [
     # (입력, 기대 exit code, 설명)
-    ("기획해줘", 0, "기획 트리거"),
+    ("기획해줘", 0, "기획 트리거 (한국어)"),
+    ("이거 만들자", 0, "기획 트리거 (만들자)"),
     ("진행해", 0, "실행 트리거"),
     ("QA 테스트해줘", 0, "검증 트리거"),
-    ("plan parameter는 옵션입니다", 1, "코드 인용 — 매칭 안 됨"),
-    ("`plan` 명령어", 1, "인라인 코드 — 매칭 안 됨"),
-    ("```\nplan\n```", 1, "코드블록 — 매칭 안 됨"),
-    ("> plan은 잘못된 인용", 1, "인용 블록 — 매칭 안 됨"),
+    ("plan parameter는 옵션입니다", 1, "영문 'plan' 일반 텍스트 — 매칭 안 됨 (한국어 트리거만 사용)"),
+    ("`기획해줘` 같은 인라인 코드", 1, "인라인 코드 — strip 후 매칭 안 됨"),
+    ("```\n기획해줘\n```", 1, "코드블록 — strip 후 매칭 안 됨"),
+    ("> 기획해줘는 잘못된 인용", 1, "인용 블록 — strip 후 매칭 안 됨"),
     ("일반 대화입니다", 1, "비-MODE 일반 텍스트"),
 ]
 
@@ -345,9 +352,8 @@ import re
 import sys
 
 PATTERNS = [
-    # 기획 트리거
-    r"기획해줘", r"계획.*세워", r"만들자", r"아이디어 있", r"기획하자",
-    r"\bplan\b",  # 영문 단어 경계
+    # 기획 트리거 (한국어만 — 영문 'plan'은 false positive 너무 잦음, Preflight 발견)
+    r"기획해줘", r"계획.*세워", r"만들자", r"아이디어 있", r"기획하자", r"기획해주",
     # 실행 트리거
     r"진행해", r"실행해", r"OK!", r"끝까지",
     # 검증 트리거
@@ -464,19 +470,26 @@ cp ~/.claude/settings.json ~/.claude/settings.json.bak.$(date +%Y%m%d_%H%M%S)
 jq '.hooks.UserPromptSubmit' ~/.claude/settings.json
 ```
 
-- [ ] **Step 3: jq로 훅 추가**
+- [ ] **Step 3: jq로 훅 추가 (멱등성 보장 — Preflight 권고)**
 
 ```bash
 TMP=$(mktemp)
-jq '.hooks.UserPromptSubmit = ((.hooks.UserPromptSubmit // []) + [{
-  "matcher": "*",
-  "hooks": [{
-    "type": "command",
-    "command": "bash ~/.claude/hooks/userpromptsubmit-tool-recommendation.sh",
-    "timeout": 3
-  }]
-}])' ~/.claude/settings.json > "$TMP" && mv "$TMP" ~/.claude/settings.json
+jq '
+  if (.hooks.UserPromptSubmit // [] | [.[].hooks[].command] | any(test("userpromptsubmit-tool-recommendation")))
+  then .  # 이미 등록됨 → no-op
+  else .hooks.UserPromptSubmit = ((.hooks.UserPromptSubmit // []) + [{
+    "matcher": "*",
+    "hooks": [{
+      "type": "command",
+      "command": "bash ~/.claude/hooks/userpromptsubmit-tool-recommendation.sh",
+      "timeout": 3
+    }]
+  }])
+  end
+' ~/.claude/settings.json > "$TMP" && mv "$TMP" ~/.claude/settings.json
 ```
+
+→ 재실행해도 중복 등록 안 됨 (idempotent).
 
 - [ ] **Step 4: 검증**
 
@@ -534,23 +547,27 @@ echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] BUILD_FAILED ${BASENAME} session=${SESSIO
 
 (정확한 위치는 Step 1 grep 결과로 확인 후 결정)
 
-- [ ] **Step 3: 인위적 실패 시뮬 (시크릿 detected 패턴)**
+- [ ] **Step 3: 수동 검증 (시크릿 시뮬 안전화 — Preflight 권고)**
+
+> ⚠️ 시스템 문서에 시크릿 패턴 직접 주입은 인터럽트 시 git 노출 위험. **시뮬 생략, errors.log 기록 코드만 직접 검증**.
 
 ```bash
-# 임시 시크릿 패턴이 든 시스템 문서 만들고 PostToolUse 트리거 시도
-# (단, 실제 git commit 안 되도록 주의)
-echo "test sk-ant-1234567890abcdef" >> ~/.claude/agent.md
-sleep 35  # debounce 30s + 빌드 시간
-grep "BUILD_FAILED" ~/.claude/.integrated-rebuild-errors.log
-git checkout ~/.claude/agent.md  # 원복
+# 1) 보강된 라인이 정확히 들어갔는지 grep
+grep -n "integrated-rebuild-errors.log" ~/.claude/hooks/debounce_sync.sh
+# 기대: 신규 추가 1줄 (BUILD_FAILED 분기 내부)
+
+# 2) errors.log 파일 권한/위치 사전 확인
+touch ~/.claude/.integrated-rebuild-errors.log
+ls -la ~/.claude/.integrated-rebuild-errors.log
+# 기대: 파일 존재, ihyeon-u 소유
+
+# 3) bash -n 문법 검증 (시뮬 대신)
+bash -n ~/.claude/hooks/debounce_sync.sh && echo "✅ syntax OK"
 ```
 
-- [ ] **Step 4: errors.log 항목 1줄 이상 확인**
+- [ ] **Step 4: 실제 BUILD_FAILED 케이스는 운영 중 발생 시 자연 검증**
 
-```bash
-wc -l ~/.claude/.integrated-rebuild-errors.log
-# 기대: ≥1
-```
+errors.log에 항목 쌓이는지는 7일 회고에서 점검. 이번 검증에서는 코드 정확성만 확인.
 
 - [ ] **Step 5: 커밋**
 
@@ -688,16 +705,16 @@ check "P1 정상 (기획해줘)" "true" "$([ -n "$out" ] && echo true || echo fa
 out=$(echo '{"prompt":"```\nplan\n```"}' | bash ~/.claude/hooks/userpromptsubmit-tool-recommendation.sh)
 check "P1 false positive (코드블록)" "" "$out"
 
-# P1 성능 (10회 평균 <30ms)
+# P1 성능 (100회 평균 <30ms — spec §7 일치)
 total_ns=0
-for i in $(seq 1 10); do
+for i in $(seq 1 100); do
     start=$(python3 -c 'import time; print(int(time.time()*1e9))')
     echo "기획해줘" | python3 ~/.claude/hooks/check_mode_keyword.py > /dev/null
     end=$(python3 -c 'import time; print(int(time.time()*1e9))')
     total_ns=$((total_ns + end - start))
 done
-avg_ms=$((total_ns / 10 / 1000000))
-check "P1 성능 (<30ms 평균)" "true" "$([ "$avg_ms" -lt 30 ] && echo true || echo false)"
+avg_ms=$((total_ns / 100 / 1000000))
+check "P1 성능 (100회 평균 <30ms)" "true" "$([ "$avg_ms" -lt 30 ] && echo true || echo false)"
 
 # P2 frontmatter 변경
 m=$(grep "^model:" ~/.claude/agents/notion-writer.md | awk '{print $2}')
@@ -717,6 +734,17 @@ check "debounce 회귀 (TRIGGER==BUILD_SUCCESS)" "true" "$([ "$trig" = "$succ" ]
 # P4-bonus SessionStart 메트릭 출력
 out=$(bash ~/.claude/hooks/session-start-worklog.sh 2>&1 | grep "📊")
 check "P4-bonus 메트릭 1줄" "true" "$([ -n "$out" ] && echo true || echo false)"
+
+# P4-bonus 폴백 검증 (어제 handoff 없을 때 — Preflight 권고)
+out=$(yesterday="99999999" bash -c 'export yesterday=99999999; bash ~/.claude/hooks/session-start-worklog.sh 2>&1' | grep -E "데이터 없음|폴백 사용")
+check "P4-bonus 폴백 (handoff 없을 때)" "true" "$([ -n "$out" ] && echo true || echo false)"
+
+# errors.log reminder (Preflight 권고)
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] BUILD_FAILED test_dummy session=preflight" >> ~/.claude/.integrated-rebuild-errors.log
+out=$(bash ~/.claude/hooks/session-start-worklog.sh 2>&1 | grep "INTEGRATED 빌드 실패")
+check "errors.log reminder 픽업" "true" "$([ -n "$out" ] && echo true || echo false)"
+# 정리
+sed -i.bak '/test_dummy session=preflight/d' ~/.claude/.integrated-rebuild-errors.log && rm -f ~/.claude/.integrated-rebuild-errors.log.bak
 
 echo ""
 echo "=== 결과: ${PASS} PASS / ${FAIL} FAIL ==="
