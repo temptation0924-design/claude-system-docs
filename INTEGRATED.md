@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-25 14:07 KST
+> 마지막 빌드: 2026-04-27 14:10 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -1325,7 +1325,10 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 | Write/Edit 권한 필요 에이전트 (notion-writer, handoff-scribe 등) | **Sonnet 기본** | Haiku 권한 거부 12회 재발 → 2026-04-25 정책 전환 (P2 사전검증 3/3 PASS) |
 | Sonnet 5xx (rate limit, model unavailable) | Haiku 폴백 1회 자동 | 매니저에게 fallback 알림 inject |
 | Haiku 폴백 후에도 권한 거부 시 | 매니저 직접 처리로 에스컬레이션 | (현재 패턴 유지) |
+| EXEMPT 경로(handoffs/queue/memory 등)에서 Edit/Write 거부 | **즉시 매니저 직접 처리** (재시도 금지) | 2026-04-27 박제: bypassPermissions 자동 상속 실패 케이스 발견 |
 
+> **Agent 호출 권장 패턴** (2026-04-27 박제): Edit/Write 필요한 에이전트 dispatch 시 **`mode: "bypassPermissions"` 파라미터 명시** (보험). 그래도 거부 발생 → 즉시 매니저 직접 처리. 진단 절차 상세: `feedback_agent_dispatch_mode_v1.md` (v3)
+>
 > **거짓 보고 가드** (2026-04-25 박제): 서브에이전트가 hook 차단을 "권한 정상"으로 거짓 성공 보고하는 패턴 발견. 검증 작업 후 매니저는 **반드시 실제 결과(파일 변경, DB row 등)로 교차 확인**. 상세: `feedback_subagent_false_report_v1.md`
 
 ---
@@ -1654,4 +1657,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-25 14:07 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-27 14:10 KST | 원본: `~/.claude/*.md` (Git)*
