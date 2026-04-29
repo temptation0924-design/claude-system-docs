@@ -3,7 +3,7 @@
 > **이 파일은 8개 시스템 문서의 자동 빌드 통합본입니다.**
 > 원본: `~/.claude/*.md` (Git 리포지토리 = Single Source of Truth)
 > 수정은 **원본에서만**. 이 파일은 `build-integrated_v1.sh`가 자동 재생성합니다.
-> 마지막 빌드: 2026-04-27 14:13 KST
+> 마지막 빌드: 2026-04-29 11:16 KST
 
 ## 📑 목차
 1. **CLAUDE.md** — 라우팅 허브 (역할 + 도구 계층 + 파일 라우팅 + 모드 시스템)
@@ -1106,9 +1106,10 @@ https://www.notion.so/8259bedb061e4dc59ce17d6df200dfd9?v=14499653d3d64ed285bc3db
 - `canary` / `benchmark` — 배포 후 모니터링/성능
 - `cso` / `retro` — 보안 감사 / 회고
 
-### MODE 4: 운영 (6개)
+### MODE 4: 운영 (7개)
 - `system-docs-sync` / `skill-manager` — 시스템 문서/스킬 관리
 - `haemilsia-rental-inspection` — 임대점검 (간편/빡센)
+- `iris-excel-sync` — 아이리스공실 엑셀 → Notion DB 동기화
 - `gsd-pause-work` / `gsd-resume-work` — 세션 종료/재개
 - `careful` / `freeze` / `guard` — 프로덕션 보호
 
@@ -1657,4 +1658,4 @@ Opus 실패 → 자문 스킵 → 매니저가 대표님께 수동 개입 요청
 
 ---
 
-*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-27 14:13 KST | 원본: `~/.claude/*.md` (Git)*
+*자동 빌드: `build-integrated_v1.sh` v1.0 | 빌드 시각: 2026-04-29 11:16 KST | 원본: `~/.claude/*.md` (Git)*
